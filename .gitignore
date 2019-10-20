@@ -1,0 +1,17 @@
+*jar
+.lein-deps-sum
+.lein-plugins/
+.lein-repl-history
+.nrepl-port
+.repl
+/*.iml
+/.idea/
+/classes/
+/lib/
+/out/
+/resources/public/css/
+/resources/public/images/
+/resources/public/js/
+/target/
+figwheel_server.log
+pom.xml
