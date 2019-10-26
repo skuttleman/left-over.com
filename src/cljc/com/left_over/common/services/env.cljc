@@ -8,4 +8,6 @@
   #?(:clj  env*/env
      :cljs (let [dev? (boolean (re-find #"localhost" (.-host (.-location js/window))))]
              {:dev? dev?
-              :api-base-url (if dev? "http://localhost:3000")})))
+              :api-base-url (if dev?
+                              "http://localhost:3000"
+                              "https://left-over-api.herokuapp.com")})))

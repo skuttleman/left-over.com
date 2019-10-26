@@ -24,5 +24,9 @@ $ heroku deploy:jar target/website-0.1.0-SNAPSHOT-standalone.jar --app left-over
 
 ### UI
 
-The UI is automatically deployed with Netlify.
-[![Netlify Status](https://api.netlify.com/api/v1/badges/54e3151e-a0cd-4b95-b8dc-39186253e134/deploy-status)](https://app.netlify.com/sites/left-over-band/deploys)
+The UI is deployed with Netlify.
+
+```bash
+$ lein do clean, sass once, cljsbuild once min
+$ netlify deploy --dir=dist --prod
+```

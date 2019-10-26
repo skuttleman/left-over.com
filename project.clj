@@ -25,7 +25,6 @@
                  [ring/ring-devel "1.6.3" :exclusions [[ring/ring-core]]]]
   :plugins [[lein-figwheel "0.5.19"]
             [lein-sass "0.5.0"]
-            [lein-sassc "0.10.5"]
             [lein-cooper "1.2.2"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]
   :source-paths ["src/clj" "src/cljs" "src/cljc"]
@@ -48,10 +47,6 @@
   :cooper {"cljs" ["lein" "figwheel"]
            "sass" ["lein" "sass" "auto"]
            "server" ["lein" "run"]}
-  :sassc [{:src          "src/scss/main.scss"
-           :output-to    "dist/css/main.css"
-           :style        "compressed"
-           :import-path  ["src/scss"]}]
   :sass {:src              "src/scss"
          :output-directory "dist/css/"}
   :figwheel {:css-dirs     ["dist/css"]
