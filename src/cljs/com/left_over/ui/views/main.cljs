@@ -3,4 +3,4 @@
 
 (defn root [_]
   [:div.has-text-centered
-   [:a {:href (nav/path-for :ui/home)} "enter"]])
+   [:a {:href (nav/path-for :ui/news)} "enter"]])

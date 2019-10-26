@@ -25,9 +25,9 @@
 (defn nav-bar [_state]
   (let [is-active? (r/atom false)]
     (fn [state]
-      [:nav.tabs
+      [:nav.tabs.main-navigation
        {:class [(when @is-active? "is-active")]}
        [:ul
-        (for [pg [:ui/home :ui/about :ui/shows :ui/photos :ui/contact]]
+        (for [pg [:ui/news :ui/about :ui/shows :ui/photos :ui/contact]]
           ^{:key pg} [nav-item state is-active? pg])]
        [:div.navbar-end]])))

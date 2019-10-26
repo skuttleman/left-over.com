@@ -10,7 +10,7 @@
      [["/photos" :api/photos]]]
 
     ["/" :ui/main]
-    ["/home" :ui/home]
+    ["/news" :ui/news]
     ["/about" :ui/about]
     ["/shows" :ui/shows]
     ["/photos" :ui/photos]

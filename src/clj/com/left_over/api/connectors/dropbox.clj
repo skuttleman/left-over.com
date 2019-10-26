@@ -24,4 +24,6 @@
                             (post "https://api.dropboxapi.com/2/files/get_temporary_link"
                                   {:path path_lower})))
                      (v/all))))
-      (v/then (partial map #(select-keys % #{:link})))))
+      (v/then (partial map #(-> %
+                                (select-keys #{:link :metadata})
+                                (update :metadata select-keys #{:name}))))))
