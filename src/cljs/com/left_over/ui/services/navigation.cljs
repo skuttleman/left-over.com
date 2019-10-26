@@ -6,7 +6,10 @@
 
 (def ^:private app-routes
   [""
-   [["/" :ui/main]
+   [["/api"
+     [["/photos" :api/photos]]]
+
+    ["/" :ui/main]
     ["/home" :ui/home]
     ["/about" :ui/about]
     ["/shows" :ui/shows]

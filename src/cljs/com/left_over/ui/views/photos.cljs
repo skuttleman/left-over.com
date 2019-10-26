@@ -1,4 +1,15 @@
-(ns com.left-over.ui.views.photos)
+(ns com.left-over.ui.views.photos
+  (:require
+    [com.left-over.ui.services.store.actions :as actions]
+    [com.left-over.ui.services.store.core :as store]))
 
 (defn root [_]
-  [:div "photos"])
+  (store/dispatch actions/fetch-photos)
+  (fn [{[status result] :photos}]
+    (case status
+      :init [:div "loading"]
+      :error [:div "something went wrong. please try again later"]
+      :success [:div
+                [:ul.photos
+                 (for [{:keys [link]} result]
+                   ^{:key link} [:li.photo [:img {:src link}]])]])))

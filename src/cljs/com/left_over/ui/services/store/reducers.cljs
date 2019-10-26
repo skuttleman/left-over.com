@@ -10,4 +10,14 @@
      :router/navigate page
      state)))
 
-(def reducer (cr/combine {:page page}))
+(defn photos
+  ([] [:init])
+  ([state [type result]]
+   (case type
+     :photos/request [:init]
+     :photos/success [:success result]
+     :photos/failure [:error result]
+     state)))
+
+(def reducer (cr/combine {:page   page
+                          :photos photos}))

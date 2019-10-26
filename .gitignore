@@ -1,7 +1,6 @@
+*.log
 *jar
-.lein-deps-sum
-.lein-plugins/
-.lein-repl-history
+.lein-*
 .nrepl-port
 .repl
 /*.iml
@@ -9,9 +8,8 @@
 /classes/
 /lib/
 /out/
-/resources/public/css/
-/resources/public/images/
-/resources/public/js/
+/dist/css/
+/dist/images/
+/dist/js/
 /target/
-figwheel_server.log
 pom.xml
