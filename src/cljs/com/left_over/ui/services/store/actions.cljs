@@ -7,6 +7,7 @@
 
 (def fetch-photos
   (fn [[dispatch]]
+    (dispatch [:photos/request])
     (-> (http/get (str (env/get :api-base-url) (nav/path-for :api/photos)))
         (v/then (partial conj [:photos/success])
                 (partial conj [:photos/failure]))
