@@ -14,7 +14,7 @@
   ([] [:init])
   ([state [type result]]
    (case type
-     :photos/request [:init]
+     (:router/navigate :photos/request) [:init]
      :photos/success [:success result]
      :photos/failure [:error result]
      state)))
