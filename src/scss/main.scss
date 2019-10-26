@@ -7,3 +7,24 @@
         margin-bottom: 10px;
     }
 }
+
+.loader-container {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
+.loader {
+    border-left-color: rgb(100,100,100);
+    border-bottom-color: rgb(100,100,100);
+    &.large {
+        border-width: 8px;
+        height: 100px;
+        width: 100px;
+    }
+    &.medium {
+        border-width: 4px;
+        height: 40px;
+        width: 40px;
+    }
+}

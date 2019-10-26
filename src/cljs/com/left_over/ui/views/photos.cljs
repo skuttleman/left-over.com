@@ -3,11 +3,11 @@
     [com.left-over.ui.services.store.actions :as actions]
     [com.left-over.ui.services.store.core :as store]))
 
-(defn root [_]
+(defn root [_state]
   (store/dispatch actions/fetch-photos)
   (fn [{[status result] :photos}]
     (case status
-      :init [:div "loading"]
+      :init [:div.loader-container [:div.loader.large]]
       :error [:div
               [:p "something went wrong"]
               [:p "please try again later"]]
