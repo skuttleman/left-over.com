@@ -1,12 +1,13 @@
 (ns com.left-over.ui.views.navbar
   (:require
+    [com.left-over.common.services.env :as env]
     [com.left-over.ui.services.navigation :as nav]
     [reagent.core :as r]))
 
 (defn logo []
   [:a.navbar-item {:href (nav/path-for :ui/main)
                    :style {:padding 0}}
-   [:img {:src    "/images/logo.jpg"
+   [:img {:src    (str (env/get :api-base-url) (nav/path-for :api/image {:route-params {:image "logo.jpg"}}))
           :width  "100%"
           :height "auto"
           :style  {:max-width  "703px"

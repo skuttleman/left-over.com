@@ -5,10 +5,23 @@
     [com.left-over.common.services.env :as env]
     [com.left-over.ui.services.navigation :as nav]))
 
+(defn ^:private fetch* [url action-ns]
+  (let [[request success failure] (map keyword
+                                       (repeat (name action-ns))
+                                       ["request" "success" "failure"])]
+    (fn [[dispatch]]
+      (dispatch [request])
+      (-> url
+          (http/get)
+          (v/then (partial conj [success])
+                  (partial conj [failure]))
+          (v/then dispatch)))))
+
 (def fetch-photos
-  (fn [[dispatch]]
-    (dispatch [:photos/request])
-    (-> (http/get (str (env/get :api-base-url) (nav/path-for :api/photos)))
-        (v/then (partial conj [:photos/success])
-                (partial conj [:photos/failure]))
-        (v/then dispatch))))
+  (fetch* (str (env/get :api-base-url) (nav/path-for :api/photos)) :photos))
+
+(def fetch-past-shows
+  (fetch* (str (env/get :api-base-url) (nav/path-for :api/shows.past)) :shows.past))
+
+(def fetch-upcoming-shows
+  (fetch* (str (env/get :api-base-url) (nav/path-for :api/shows.past)) :shows.upcoming))

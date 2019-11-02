@@ -1,0 +1,88 @@
+{
+  "data": {
+    "page": {
+      "upcoming_events": {
+        "edges": [
+          {
+            "is_hidden_on_profile_calendar": false,
+            "is_added_to_profile_calendar": false,
+            "node": {
+              "id": "2382072628787205",
+              "startTimestampForDisplay": 1574560800,
+              "time_range": {
+                "start": "2019-11-23T21:00:00-0500"
+              },
+              "timezone": "America/New_York",
+              "happensOnSingleDay": true,
+              "childEvents": {
+                "count": 0
+              },
+              "is_event_draft": false,
+              "scheduled_publish_timestamp": 0,
+              "shortTimeLabel": "Sat 9 PM EST",
+              "shortDateLabel": "Sat, Nov 23",
+              "suggested_event_context_sentence": {
+                "text": "38 guests"
+              },
+              "event_place": {
+                "__typename": "Page",
+                "contextual_name": "Sidelines Sports Bar & Grill",
+                "city": {
+                  "cityContextualName": "Glen Burnie, MD",
+                  "id": "108407739184505",
+                  "contextual_name": "Glen Burnie, MD"
+                },
+                "id": "458240260943576",
+                "name": "Sidelines Sports Bar & Grill",
+                "url": "https://www.facebook.com/Sidelines-Sports-Bar-Grill-458240260943576/"
+              },
+              "is_canceled": false,
+              "imported_source_name": null,
+              "preassigned_discount_note": null,
+              "name": "Left-Over Rocks Sidelines",
+              "has_child_events": false,
+              "event_buy_ticket_url": null,
+              "can_viewer_purchase_onsite_tickets": false,
+              "event_viewer_capability": {
+                "is_viewer_admin_no_business_permissions": true,
+                "can_viewer_edit": true,
+                "can_viewer_share": true,
+                "can_viewer_create_repeat_event": true,
+                "canViewerWatch": true
+              },
+              "tickets_type": "ONSITE_TICKET",
+              "canViewerJoin": true,
+              "isPast": false,
+              "connectionStyle": "INTERESTED",
+              "eventID": "2382072628787205",
+              "watchStatus": "UNWATCHED",
+              "canJoin": true,
+              "__typename": "Event"
+            },
+            "cursor": "AQHRiXvpS6qPMihM4YyV1KhN0J-SpoZcqU2xWqDevIAwKcehvbrgRMJ_7GXw77H5xKmruu8O8TbKFRHqWdCmTbFw4g"
+          }
+        ],
+        "page_info": {
+          "has_next_page": false,
+          "end_cursor": "AQHR5o6jhWKcMmXCb1YzztXUun7rL-zpxVy5BBOkjDATMotKnWXVDsY9H1ib5SZ4MlOTfwtkHoD_6E0OfwpdGrurSQ"
+        }
+      },
+      "id": "1913506912253886",
+      "viewer_profile_permissions": [
+        "ADMINISTER",
+        "EDIT_PROFILE",
+        "CREATE_CONTENT",
+        "MODERATE_CONTENT",
+        "CREATE_ADS",
+        "BASIC_ADMIN"
+      ],
+      "admin_info": {
+        "is_viewer_business_manager_admin": false
+      }
+    }
+  },
+  "extensions": {
+    "is_final": true,
+    "dtsg_token": null
+  }
+}

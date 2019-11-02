@@ -5,6 +5,6 @@
 
 (defn handler [request]
   (let [file (io/file (str "dist" (:uri request)))]
-    (if (.exists file)
+    (if (.isFile file)
       {:status 200 :body file}
       {:status 200 :body (io/file "dist/index.html")})))

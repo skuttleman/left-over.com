@@ -7,7 +7,11 @@
 (def ^:private app-routes
   [""
    [["/api"
-     [["/photos" :api/photos]]]
+     [["/photos" :api/photos]
+      [["/images/" :image] :api/image]
+      ["/shows"
+       [["/past" :api/shows.past]
+        ["/upcoming" :api/shows.upcoming]]]]]
 
     ["/" :ui/main]
     ["/news" :ui/news]
