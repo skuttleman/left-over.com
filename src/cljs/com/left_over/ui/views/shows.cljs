@@ -1,6 +1,8 @@
 (ns com.left-over.ui.views.shows
-  (:require [com.left-over.ui.services.store.core :as store]
-            [com.left-over.ui.services.store.actions :as actions]))
+  (:require
+    [com.left-over.common.utils.dates :as dates]
+    [com.left-over.ui.services.store.actions :as actions]
+    [com.left-over.ui.services.store.core :as store]))
 
 (defn show-list [type shows & missing-msgs]
   (if (seq shows)
@@ -8,8 +10,15 @@
      {:classes [(name type)]}
      (for [show shows]
        ^{:key (:id show)}
-       [:li.show
-        (pr-str show)])]
+       [:li.show.tile.is-parent
+        [:div.tile.box.is-child
+         [:p [:em [:strong (:name show)]]]
+         [:p (get-in show [:location :name])]
+         [:time
+          {:dateTime (dates/format (:date-time show) :date/system)}
+          (dates/format (:date-time show) :date/view)
+          " @ "
+          (dates/format (:date-time show) :time/view)]]])]
     (into [:<>] (map (partial conj [:p])) missing-msgs)))
 
 (defn root [_state]
@@ -18,19 +27,16 @@
   (fn [{{[upcoming-status upcoming-result] :upcoming
          [past-status past-result] :past} :shows}]
     [:<>
-     (case upcoming-status
-       :init [:div.loader-container [:div.loader.large]]
+     (condp #(contains? %2 %1) (set [upcoming-status past-status])
        :error [:div
                [:p "something went wrong"]
                [:p "please try again later"]]
-       :success
-       [:div
-        [show-list :upcoming upcoming-result "we don't have any upcoming shows booked" "check back soon"]])
-     (case past-status
        :init [:div.loader-container [:div.loader.large]]
-       :error [:div
-               [:p "something went wrong"]
-               [:p "please try again later"]]
        :success
-       [:div
-        [show-list :past past-result]])]))
+       [:<>
+        [:div
+         [:p [:strong "Upcoming Shows"]]
+         [show-list :upcoming upcoming-result "we don't have any upcoming shows booked" "check back soon"]]
+        [:div
+         [:p [:strong "Past Shows"]]
+         [show-list :past past-result]]])]))

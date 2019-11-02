@@ -1,6 +1,7 @@
 (ns com.left-over.ui.services.navigation
   (:require
     [bidi.bidi :as bidi]
+    [com.left-over.common.services.env :as env]
     [com.left-over.ui.services.store.core :as store]
     [pushy.core :as pushy]))
 
@@ -32,6 +33,12 @@
    (path-for page nil))
   ([page {:keys [route-params]}]
    (apply bidi/path-for app-routes page (mapcat namify route-params))))
+
+(defn api-for
+  ([page]
+   (api-for page nil))
+  ([page params]
+   (str (env/get :api-base-url) (path-for page params))))
 
 (defonce ^:private history
   (let [history (pushy/pushy (comp store/dispatch (partial conj [:router/navigate])) match-route)]

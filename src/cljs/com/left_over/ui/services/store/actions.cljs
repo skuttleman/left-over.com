@@ -18,10 +18,10 @@
           (v/then dispatch)))))
 
 (def fetch-photos
-  (fetch* (str (env/get :api-base-url) (nav/path-for :api/photos)) :photos))
+  (fetch* (nav/api-for :api/photos) :photos))
 
 (def fetch-past-shows
-  (fetch* (str (env/get :api-base-url) (nav/path-for :api/shows.past)) :shows.past))
+  (fetch* (nav/api-for :api/shows.past) :shows.past))
 
 (def fetch-upcoming-shows
-  (fetch* (str (env/get :api-base-url) (nav/path-for :api/shows.past)) :shows.upcoming))
+  (fetch* (nav/api-for :api/shows.upcoming) :shows.upcoming))

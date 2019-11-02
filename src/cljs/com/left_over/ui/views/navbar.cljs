@@ -7,7 +7,7 @@
 (defn logo []
   [:a.navbar-item {:href (nav/path-for :ui/main)
                    :style {:padding 0}}
-   [:img {:src    (str (env/get :api-base-url) (nav/path-for :api/image {:route-params {:image "logo.jpg"}}))
+   [:img {:src    (nav/api-for :api/image {:route-params {:image "logo.jpg"}})
           :width  "100%"
           :height "auto"
           :style  {:max-width  "703px"
