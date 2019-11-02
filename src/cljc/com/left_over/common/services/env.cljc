@@ -7,7 +7,6 @@
 (def get
   #?(:clj  env*/env
      :cljs (let [dev? (boolean (re-find #"localhost" (.-host (.-location js/window))))]
-             {:dev? dev?
-              :api-base-url (if dev?
-                              "http://localhost:3000"
-                              "https://left-over-api.herokuapp.com")})))
+             {:dev?         dev?
+              :api-base-url (or (.-API_HOST js/window)
+                                "http://localhost:3000")})))
