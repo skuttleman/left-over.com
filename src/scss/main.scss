@@ -28,3 +28,24 @@
         width: 40px;
     }
 }
+
+.show p:hover {
+    perspective: 1000px;
+    z-index: 100;
+}
+
+.bio {
+    display: flex;
+    @media(max-width: 600px) {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    .img-container {
+        min-width: 220px;
+        img {
+            width: 200px;
+            height: auto;
+        }
+    }
+}

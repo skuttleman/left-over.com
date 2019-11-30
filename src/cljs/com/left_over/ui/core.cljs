@@ -6,12 +6,10 @@
     [com.left-over.ui.views.contact :as contact]
     [com.left-over.ui.views.main :as main]
     [com.left-over.ui.views.navbar :as navbar]
-    [com.left-over.ui.views.news :as news]
     [com.left-over.ui.views.photos :as photos]
     [com.left-over.ui.views.shows :as shows]
     [reagent.core :as r]
-    com.left-over.ui.services.navigation
-    ))
+    com.left-over.ui.services.navigation))
 
 (enable-console-print!)
 
@@ -30,7 +28,6 @@
 
 (def ^:private components
   {:ui/main       main/root
-   :ui/news       news/root
    :ui/about      about/root
    :ui/shows      shows/root
    :ui/photos     photos/root

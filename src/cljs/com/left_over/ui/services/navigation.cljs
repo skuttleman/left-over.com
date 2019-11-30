@@ -15,7 +15,6 @@
         ["/upcoming" :api/shows.upcoming]]]]]
 
     ["/" :ui/main]
-    ["/news" :ui/news]
     ["/about" :ui/about]
     ["/shows" :ui/shows]
     ["/photos" :ui/photos]
