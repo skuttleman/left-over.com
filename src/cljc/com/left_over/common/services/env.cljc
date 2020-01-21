@@ -14,4 +14,4 @@
                             :api-base-url (or (.-API_HOST js/window)
                                               "http://localhost:3000")})
                 :default nil)]
-     (get env k default))))
+     (clojure.core/get env k default))))
