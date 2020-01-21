@@ -27,9 +27,10 @@
                             (maps/select-renamed-keys {:id                       :id
                                                        :name                     :name
                                                        :timezone                 :timezone
+                                                       :timeContext              :dates
                                                        :startTimestampForDisplay :date-time
                                                        :event_place              :location})
-                            (update :date-time (fn [seconds] (Date. ^Long (* 1000 seconds))))
+                            (maps/update-maybe :date-time (fn [seconds] (Date. ^Long (* 1000 seconds))))
                             (update :location maps/select-renamed-keys {:contextual_name :name :city :city})
                             (update-in [:location :city] :contextual_name))))
             shows))

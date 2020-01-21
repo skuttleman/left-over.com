@@ -7,3 +7,8 @@
               result))
           {}
           key-map))
+
+(defn update-maybe [m k f & f-args]
+  (if (contains? m k)
+    (apply update m k f f-args)
+    m))
