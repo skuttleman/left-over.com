@@ -14,5 +14,6 @@
                             :api-base-url (or (.-API_HOST js/window)
                                               "http://localhost:3000")})
                 :default nil)]
-     #?(:cljs (println (.-API_HOST js/window)))
+     #?(:cljs (println "foo" (.-API_HOST js/window)))
+     #?(:cljs (println "bar" (.-host (.-location js/window))))
      (clojure.core/get env k default))))
