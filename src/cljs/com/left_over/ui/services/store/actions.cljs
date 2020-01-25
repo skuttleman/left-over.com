@@ -20,8 +20,5 @@
 (def fetch-photos
   (fetch* (nav/api-for :api/photos) :photos))
 
-(def fetch-past-shows
-  (fetch* (nav/api-for :api/shows.past) :shows.past))
-
-(def fetch-upcoming-shows
-  (fetch* (nav/api-for :api/shows.upcoming) :shows.upcoming))
+(def fetch-shows
+  (fetch* (nav/api-for :api/shows) :shows))

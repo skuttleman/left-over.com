@@ -10,9 +10,7 @@
    [["/api"
      [["/photos" :api/photos]
       [["/images/" :image] :api/image]
-      ["/shows"
-       [["/past" :api/shows.past]
-        ["/upcoming" :api/shows.upcoming]]]]]
+      ["/shows" :api/shows]]]
 
     ["/" :ui/main]
     ["/about" :ui/about]

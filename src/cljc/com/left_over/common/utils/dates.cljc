@@ -18,7 +18,7 @@
   #?(:clj
      (:import
        (java.io Writer)
-       (java.time LocalDate LocalDateTime ZoneId)
+       (java.time LocalDate LocalDateTime)
        (java.time.format DateTimeFormatter)
        (java.util Date))))
 
@@ -138,10 +138,10 @@
 (defn ->inst [inst]
   (cond
     (inst? inst) inst
-    #?@(:clj [(instance? LocalDateTime inst) (-> inst
-                                                 (.atZone (ZoneId/systemDefault))
-                                                 .toInstant
-                                                 Date/from)])))
+    (instance? LocalDateTime inst) (-> inst
+                                       (ldt/at-zone (zi/system-default))
+                                       zdt/to-instant
+                                       #?(:clj Date/from :cljs (js/Date.)))))
 
 (defn relative [inst]
   (let [now (if (instance? LocalDate inst)

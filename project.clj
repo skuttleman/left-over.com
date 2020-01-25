@@ -4,11 +4,13 @@
   :license {:name "Eclipse Public License"
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
   :main com.left-over.api.server
-  :aot [com.left-over.api.server]
+  :aot [com.left-over.api.server com.left-over.api.services.db.migrations]
   :min-lein-version "2.9.1"
   :dependencies [[bidi "2.1.3" :exclusions [[ring/ring-core]]]
+                 [camel-snake-kebab "0.4.1"]
                  [clj-http "3.9.1"]
                  [cljs-http "0.1.46"]
+                 [clojure.jdbc/clojure.jdbc-c3p0 "0.3.3" :exclusions [[org.clojure/java.jdbc]]]
                  [com.ben-allred/collaj "0.8.0"]
                  [com.ben-allred/vow "0.1.0"]
                  [com.cognitect.aws/api "0.8.391"]
@@ -17,16 +19,21 @@
                  [com.taoensso/timbre "4.10.0"]
                  [compojure "1.6.0"]
                  [environ "1.1.0"]
+                 [honeysql "0.9.2"]
                  [kibu/pushy "0.3.8"]
                  [metosin/jsonista "0.1.1"]
+                 [nilenso/honeysql-postgres "0.2.5" :exclusions [[net.cgrand/macrovich]]]
                  [org.clojure/clojure "1.10.1"]
                  [org.clojure/clojurescript "1.10.520"]
                  [org.clojure/core.async "0.4.500"]
                  [org.immutant/immutant "2.1.10" :exclusions [[ring/ring-core]]]
+                 [org.postgresql/postgresql "9.4-1206-jdbc41" :exclusions [[org.clojure/java.jdbc]]]
+                 [ragtime "0.7.2"]
                  [reagent "0.8.1"]
                  [ring-cors "0.1.13"]
                  [ring/ring-core "1.3.2"]
                  [ring/ring-devel "1.6.3" :exclusions [[ring/ring-core]]]
+                 [seancorfield/next.jdbc "1.0.5"]
                  [tick "0.4.20-alpha"]]
   :plugins [[lein-figwheel "0.5.19"]
             [lein-sass "0.5.0"]
@@ -49,6 +56,7 @@
                                :main          com.left-over.ui.core
                                :optimizations :advanced
                                :pretty-print  false}}]}
+  :aliases {"migrations" ["run" "-m" "com.left-over.api.services.db.migrations/-main"]}
   :cooper {"cljs" ["lein" "figwheel"]
            "sass" ["lein" "sass" "auto"]
            "server" ["lein" "run"]}

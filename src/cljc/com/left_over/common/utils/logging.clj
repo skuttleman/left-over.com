@@ -22,3 +22,8 @@
 (defmacro spy-on [f]
   `(fn [& args#]
      (spy-on* (cons ~f args#))))
+
+(defmacro spy-tap [tap-f x]
+  `(let [result# ~x]
+     (spy (~tap-f result#))
+     result#))

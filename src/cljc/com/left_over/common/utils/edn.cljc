@@ -9,4 +9,6 @@
 (defn parse [s]
   (if (string? s)
     (e/read-string #?(:cljs {:readers tags/*cljs-data-readers*}) s)
-    (e/read #?(:cljs {:readers tags/*cljs-data-readers*}) s)))
+    (try (e/read #?(:cljs {:readers tags/*cljs-data-readers*}) s)
+         (catch #?(:clj Throwable :default :default) _
+           nil))))

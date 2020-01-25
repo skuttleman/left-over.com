@@ -23,21 +23,23 @@
     (into [:<>] (map (partial conj [:p])) missing-msgs)))
 
 (defn root [_state]
-  (store/dispatch actions/fetch-upcoming-shows)
-  (store/dispatch actions/fetch-past-shows)
-  (fn [{{[upcoming-status upcoming-result] :upcoming
-         [past-status past-result] :past} :shows}]
+  (store/dispatch actions/fetch-shows)
+  (fn [{[status shows] :shows}]
     [:<>
-     (condp #(contains? %2 %1) (set [upcoming-status past-status])
+     (case status
        :error [:div
                [:p "something went wrong"]
                [:p "please try again later"]]
        :init [:div.loader-container [:div.loader.large]]
-       :success
-       [:<>
-        [:div
-         [:p [:strong "Upcoming Shows"]]
-         [show-list :upcoming upcoming-result "we don't have any upcoming shows booked" "check back soon"]]
-        [:div
-         [:p [:strong "Past Shows"]]
-         [show-list :past past-result]]])]))
+       :success (let [[past future] (->> shows
+                                         (sort-by :date-time)
+                                         (split-with (comp pos?
+                                                           (partial compare (dates/->inst (dates/now)))
+                                                           :date-time)))]
+                  [:<>
+                   [:div
+                    [:p [:strong "Upcoming Shows"]]
+                    [show-list :upcoming future "we don't have any upcoming shows booked" "check back soon"]]
+                   [:div
+                    [:p [:strong "Past Shows"]]
+                    [show-list :past (reverse past) "Unable to fetch past shows"]]]))]))

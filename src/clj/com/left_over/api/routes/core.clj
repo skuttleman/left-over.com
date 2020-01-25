@@ -1,8 +1,9 @@
 (ns com.left-over.api.routes.core
   (:require
     [com.left-over.api.connectors.dropbox :as dropbox]
-    [com.left-over.api.connectors.facebook :as fb]
     [com.left-over.api.connectors.s3 :as s3]
+    [com.left-over.api.services.db.models.shows :as shows]
+    [com.left-over.api.services.middleware :as middleware]
     [compojure.core :refer [ANY DELETE GET POST PUT context defroutes]]
     [ring.middleware.cookies :refer [wrap-cookies]]
     [ring.middleware.cors :refer [wrap-cors]]
@@ -17,9 +18,8 @@
     (GET "/photos" []
       (let [[status photos] @(dropbox/fetch-photos)]
         (if (= :success status)
-          {:status  200
-           :body    (pr-str photos)
-           :headers {"content-type" "application/edn"}}
+          {:status 200
+           :body   photos}
           {:status 500
            :body   "something went wrong"})))
 
@@ -32,15 +32,9 @@
         {:status 404}))
 
     (context "/shows" []
-      (GET "/past" []
-        {:status  200
-         :body    (pr-str (fb/past-shows))
-         :headers {"content-type" "application/edn"}})
-
-      (GET "/upcoming" []
-        {:status  200
-         :body    (pr-str (fb/upcoming-shows))
-         :headers {"content-type" "application/edn"}})))
+      (GET "/" {:keys [db]}
+        {:status 200
+         :body   (shows/select-for-website db)})))
 
   (context "/" []
     (ANY "/*" [] {:status 404 :body "not found"})))
@@ -52,6 +46,8 @@
       wrap-nested-params
       wrap-params
       wrap-cookies
+      middleware/with-transaction
+      middleware/with-content-type
       (wrap-cors :access-control-allow-origin [#".*"]
                  :access-control-allow-methods [:get :head :options])))
 

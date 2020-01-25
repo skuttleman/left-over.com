@@ -12,3 +12,6 @@
   (if (contains? m k)
     (apply update m k f f-args)
     m))
+
+(defn map-kv [key-fn val-fn m]
+  (into {} (map (fn [[k v]] [(key-fn k) (val-fn v)])) m))
