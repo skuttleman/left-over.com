@@ -14,11 +14,12 @@
         [:div.tile.box.is-child
          [:p [:em [:strong (:name show)]]]
          [:p (get-in show [:location :name])]
-         [:time
-          {:dateTime (dates/format (:date-time show) :date/system)}
-          (dates/format (:date-time show) :date/view)
-          " @ "
-          (dates/format (:date-time show) :time/view)]]])]
+         (when-let [dt (:date-time show)]
+           [:time
+            {:dateTime (dates/format dt :date/system)}
+            (dates/format dt :date/view)
+            " @ "
+            (dates/format dt :time/view)])]])]
     (into [:<>] (map (partial conj [:p])) missing-msgs)))
 
 (defn root [_state]

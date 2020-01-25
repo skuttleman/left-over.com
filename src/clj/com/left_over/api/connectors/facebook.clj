@@ -1,7 +1,7 @@
 (ns com.left-over.api.connectors.facebook
   (:require
     [clojure.java.io :as io]
-    [clojure.set :as set]
+    [com.left-over.common.utils.dates :as dates]
     [com.left-over.common.utils.json :as json]
     [com.left-over.common.utils.maps :as maps])
   (:import
@@ -10,19 +10,16 @@
 (defn ^:private json [file]
   (json/parse (io/resource file)))
 
-(defn ^:private fetch-old [results page]
-  (let [stub (json (format "stubs/fb-event-past-%d.json" page))
-        next-results (into results (get-in stub [:data :page :past_events :edges]))]
-    (if (get-in stub [:data :page :past_events :page_info :has_next_page])
-      (recur next-results (inc page))
-      next-results)))
-
-(defn ^:private fetch-new []
-  (get-in (json "stubs/fb-event-upcoming.json") [:data :page :upcoming_events :edges]))
+(defn ^:private fetch* [stub k]
+  (get-in (json stub) [:data :page k :edges]))
 
 (defn ^:private re-format [shows]
   (sequence (comp (map :node)
                   (remove (some-fn :is_event_draft :is_canceled))
+                  (map (fn [event]
+                         (if-let [date-time (some-> event :childEvents :edges first :node :currentStartTimestamp)]
+                           (assoc event :startTimestampForDisplay date-time)
+                           event)))
                   (map #(-> %
                             (maps/select-renamed-keys {:id                       :id
                                                        :name                     :name
@@ -35,8 +32,19 @@
                             (update-in [:location :city] :contextual_name))))
             shows))
 
+(defn ^:private upcoming* [compare other-shows]
+  (->> [(fetch* "stubs/fb-event-recurring.json" :upcomingRecurringEvents)
+        (fetch* "stubs/fb-event-upcoming.json" :upcoming_events)
+        other-shows]
+       (mapcat re-format)
+       (sort-by :date-time compare)))
+
 (defn past-shows []
-  (re-format (fetch-old [] 1)))
+  (->> (fetch* "stubs/fb-event-past.json" :past_events)
+       (upcoming* #(compare %2 %1))
+       (take-while (comp (complement pos?) (partial compare (dates/->inst (dates/now))) :date-time))))
 
 (defn upcoming-shows []
-  (re-format (fetch-new)))
+  (->> []
+       (upcoming* compare)
+       (drop-while (comp pos? (partial compare (dates/->inst (dates/now))) :date-time))))
