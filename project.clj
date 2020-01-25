@@ -14,6 +14,7 @@
                  [com.cognitect.aws/api "0.8.391"]
                  [com.cognitect.aws/endpoints "1.1.11.664"]
                  [com.cognitect.aws/s3 "762.2.558.0"]
+                 [com.taoensso/timbre "4.10.0"]
                  [compojure "1.6.0"]
                  [environ "1.1.0"]
                  [kibu/pushy "0.3.8"]
