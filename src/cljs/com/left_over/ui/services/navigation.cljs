@@ -3,6 +3,7 @@
     [bidi.bidi :as bidi]
     [clojure.string :as string]
     [com.left-over.common.services.env :as env]
+    [com.left-over.common.utils.keywords :as keywords]
     [com.left-over.common.utils.maps :as maps]
     [com.left-over.ui.services.store.core :as store]
     [pushy.core :as pushy]))
@@ -45,14 +46,24 @@
 (defn path-for
   ([page]
    (path-for page nil))
-  ([page {:keys [route-params]}]
-   (apply bidi/path-for app-routes page (mapcat namify route-params))))
+  ([page {:keys [route-params query-params]}]
+   (cond-> (apply bidi/path-for app-routes page (mapcat namify route-params))
+     (seq query-params) (str "?" (->> query-params
+                                      (map (fn [[k v]]
+                                             (str (name k) "=" (keywords/safe-name v))))
+                                      (string/join "&"))))))
 
 (defn api-for
   ([page]
    (api-for page nil))
   ([page params]
    (str (env/get :api-base-url) (path-for page params))))
+
+(defn ui-for
+  ([page]
+   (ui-for page nil))
+  ([page params]
+   (str (.-origin js/location) (path-for page params))))
 
 (defonce ^:private history
   (let [history (pushy/pushy (comp store/dispatch (partial conj [:router/navigate])) match-route)]
@@ -85,6 +96,9 @@
   (.setItem js/localStorage "auth-token" token)
   (go-to! (path-for :ui.admin/main)))
 
-(defn logout! []
-  (.setItem js/localStorage "auth-token" nil)
-  (go-to! (path-for :ui.admin/login)))
+(defn logout!
+  ([]
+   (logout! nil))
+  ([params]
+   (.removeItem js/localStorage "auth-token")
+   (go-to! (path-for :ui.admin/login params))))

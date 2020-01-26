@@ -10,5 +10,5 @@
       (models/select ::repo.users/model (models/under :users))
       (repos/exec! db)))
 
-(defn select-all [db]
-  (select* db nil))
+(defn find-by-email [db email]
+  (first (select* db [:= :users.email email])))
