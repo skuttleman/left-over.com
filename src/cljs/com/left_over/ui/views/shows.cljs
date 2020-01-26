@@ -17,7 +17,7 @@
          (when-let [dt (:date-time show)]
            [:time
             {:dateTime (dates/format dt :date/system)}
-            (dates/format dt :date/view)
+            (dates/relative dt)
             " @ "
             (dates/format dt :time/view)])]])]
     (into [:<>] (map (partial conj [:p])) missing-msgs)))
