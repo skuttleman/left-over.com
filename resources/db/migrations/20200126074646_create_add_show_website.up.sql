@@ -1,0 +1,1 @@
+ALTER TABLE shows ADD COLUMN website VARCHAR(255);
