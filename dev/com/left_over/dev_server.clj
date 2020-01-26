@@ -1,10 +1,11 @@
 (ns com.left-over.dev-server
-  (:require [clojure.string :refer [starts-with?]]
-            [ring.middleware.resource :refer [wrap-resource]]
-            [clojure.java.io :as io]))
+  (:require
+    [clojure.java.io :as io]
+    [clojure.string :as string]))
 
-(defn handler [request]
-  (let [file (io/file (str "dist" (:uri request)))]
-    (if (.isFile file)
-      {:status 200 :body file}
-      {:status 200 :body (io/file "dist/index.html")})))
+(defn handler [{:keys [uri]}]
+  (let [file (io/file (str "dist" uri))]
+    (cond
+      (.isFile file) {:status 200 :body file}
+      (string/starts-with? uri "/admin") {:status 200 :body (io/file "dist/admin.html")}
+      :else {:status 200 :body (io/file "dist/index.html")})))

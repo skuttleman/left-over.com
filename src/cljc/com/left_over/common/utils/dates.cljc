@@ -12,8 +12,7 @@
     [cljc.java-time.zoned-date-time :as zdt]
     [clojure.string :as string]
     [tick.format :as tf]
-    tick.locale-en-us
-    [com.left-over.common.utils.logging :as log])
+    tick.locale-en-us)
   #?(:clj
      (:import
        (java.io Writer)

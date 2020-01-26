@@ -9,6 +9,7 @@
   :dependencies [[bidi "2.1.3" :exclusions [[ring/ring-core]]]
                  [camel-snake-kebab "0.4.1"]
                  [clj-http "3.9.1"]
+                 [clj-jwt "0.1.1"]
                  [cljs-http "0.1.46"]
                  [clojure.jdbc/clojure.jdbc-c3p0 "0.3.3" :exclusions [[org.clojure/java.jdbc]]]
                  [com.ben-allred/collaj "0.8.0"]
@@ -26,6 +27,7 @@
                  [org.clojure/clojure "1.10.1"]
                  [org.clojure/clojurescript "1.10.520"]
                  [org.clojure/core.async "0.4.500"]
+                 [org.clojure/core.match "0.3.0"]
                  [org.immutant/immutant "2.1.10" :exclusions [[ring/ring-core]]]
                  [org.postgresql/postgresql "9.4-1206-jdbc41" :exclusions [[org.clojure/java.jdbc]]]
                  [ragtime "0.7.2"]
@@ -45,7 +47,7 @@
                 :source-paths ["src/cljs" "src/cljc" "dev"]
                 :figwheel     {:on-jsload "com.left-over.ui.core/mount!"}
                 :compiler     {:main                 com.left-over.ui.core
-                               :asset-path           "js/compiled/out"
+                               :asset-path           "/js/compiled/out"
                                :output-to            "dist/js/compiled/app.js"
                                :output-dir           "dist/js/compiled/out"
                                :source-map-timestamp true

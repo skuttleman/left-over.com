@@ -1,7 +1,9 @@
 (ns com.left-over.ui.services.navigation
   (:require
     [bidi.bidi :as bidi]
+    [clojure.string :as string]
     [com.left-over.common.services.env :as env]
+    [com.left-over.common.utils.maps :as maps]
     [com.left-over.ui.services.store.core :as store]
     [pushy.core :as pushy]))
 
@@ -12,18 +14,33 @@
       [["/images/" :image] :api/image]
       ["/shows" :api/shows]]]
 
+    ["/auth"
+     [["/info" :auth/info]
+      ["/login" :auth/login]
+      ["/logout" :auth/logout]]]
+
     ["/" :ui/main]
     ["/about" :ui/about]
     ["/shows" :ui/shows]
     ["/photos" :ui/photos]
     ["/contact" :ui/contact]
+
+    ["/admin"
+     [["" :ui.admin/main]
+      ["/login" :ui.admin/login]]]
+
     [true :nav/not-found]]])
 
 (defn ^:private namify [[k v]]
   [k (if (keyword? v) (name v) (str v))])
 
 (defn match-route [path]
-  (bidi/match-route app-routes path))
+  (let [[uri query-string] (string/split path #"\?")]
+    (-> (bidi/match-route app-routes path)
+        (assoc :uri uri)
+        (maps/assoc-maybe :query-params (not-empty (into {}
+                                                         (map #(string/split % #"="))
+                                                         (some-> query-string (string/split #"&"))))))))
 
 (defn path-for
   ([page]
@@ -63,3 +80,11 @@
   ([page params]
    (nav-and-replace* history page params)
    nil))
+
+(defn login! [token]
+  (.setItem js/localStorage "auth-token" token)
+  (go-to! (path-for :ui.admin/main)))
+
+(defn logout! []
+  (.setItem js/localStorage "auth-token" nil)
+  (go-to! (path-for :ui.admin/login)))
