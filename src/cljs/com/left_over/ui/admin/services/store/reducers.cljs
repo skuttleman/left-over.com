@@ -34,7 +34,18 @@
      :toast/remove (dissoc state id)
      state)))
 
-(def reducer (cr/combine {:auth   auth
-                          :forms  forms
-                          :page   reducers/page
-                          :toasts toasts}))
+(defn ^:private locations
+  ([] [:init])
+  ([state [type result]]
+   (case type
+     (:router/navigate :locations/request) [:init]
+     :locations/success [:success result]
+     :locations/failure [:error result]
+     state)))
+
+(def reducer (cr/combine {:auth      auth
+                          :forms     forms
+                          :locations locations
+                          :page      reducers/page
+                          :shows     reducers/shows
+                          :toasts    toasts}))

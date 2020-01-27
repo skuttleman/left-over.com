@@ -2,7 +2,8 @@
   (:require
     [com.ben-allred.vow.core :as v]
     [com.left-over.common.services.http :as http]
-    [com.left-over.ui.services.navigation :as nav]))
+    [com.left-over.ui.services.navigation :as nav]
+    [com.left-over.common.utils.logging :as log]))
 
 (defn fetch* [url action-ns]
   (let [[request success failure] (map keyword

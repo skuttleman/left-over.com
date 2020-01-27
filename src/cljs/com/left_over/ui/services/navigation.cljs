@@ -13,7 +13,10 @@
    [["/api"
      [["/photos" :api/photos]
       [["/images/" :image] :api/image]
-      ["/shows" :api/shows]]]
+      ["/shows" :api/shows]
+      ["/admin"
+       [["/locations" :api.admin/locations]
+        ["/shows" :api.admin/shows]]]]]
 
     ["/auth"
      [["/info" :auth/info]

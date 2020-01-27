@@ -37,3 +37,11 @@
       (-> request
           (maps/assoc-maybe :auth/user user)
           handler))))
+
+(defn with-ex-handling [handler]
+  (fn [request]
+    (try (handler request)
+      (catch Throwable ex
+        (if-let [response (:response (ex-data ex))]
+          response
+          (throw ex))))))

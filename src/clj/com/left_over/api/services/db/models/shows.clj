@@ -5,19 +5,23 @@
     [com.left-over.api.services.db.models.shared :as models]
     [com.left-over.api.services.db.repositories.core :as repos]))
 
-(defn ^:private select* [db clause]
+(defn ^:private select* [clause]
   (-> clause
       repo.shows/select-by
       (entities/inner-join entities/users :creator [:= :creator.id :shows.created-by])
       (entities/inner-join entities/locations :location [:= :location.id :shows.location-id])
-      (assoc :order-by [[:shows.date-time :desc]] :limit 100)
-      (models/select ::repo.shows/model (models/under :shows))
+      (assoc :order-by [[:shows.date-time :desc]])
+      (models/select ::repo.shows/model (models/under :shows))))
+
+(defn select-for-admin [db]
+  (-> [:= :shows.deleted false]
+      select*
       (repos/exec! db)))
 
-(defn select-for-editing [db]
-  (select* db [:= :shows.deleted false]))
-
 (defn select-for-website [db]
-  (select* db [:and
-               [:= :shows.deleted false]
-               [:= :shows.hidden false]]))
+  (-> [:and
+       [:= :shows.deleted false]
+       [:= :shows.hidden false]]
+      select*
+      (assoc-in [0 :limit] 100)
+      (repos/exec! db)))

@@ -5,10 +5,11 @@
     [com.left-over.common.utils.logging :as log]
     [com.left-over.ui.admin.services.store.actions :as admin.actions]
     [com.left-over.ui.admin.views.auth :as auth]
+    [com.left-over.ui.admin.views.main :as admin.main]
+    [com.left-over.ui.admin.views.toasts :as toast]
     [com.left-over.ui.services.navigation :as nav]
     [com.left-over.ui.services.store.core :as store]
     [com.left-over.ui.views.navbar :as navbar]
-    [com.left-over.ui.admin.views.toasts :as toast]
     [reagent.core :as r]))
 
 (defn not-found [_]
@@ -19,10 +20,7 @@
     [:a {:href (nav/path-for :ui.admin/main)} "home"]]])
 
 (def ^:private handler->component
-  {:ui.admin/main  (fn [{[_ user] :auth}]
-                     [:div
-                      [log/pprint user]
-                      [auth/logout]])
+  {:ui.admin/main  admin.main/root
    :ui.admin/login auth/login
    :nav/not-found  not-found})
 
@@ -55,7 +53,7 @@
       :else [app* state])))
 
 (defn ^:export mount! []
-  (let [{{token "token" toast-msg-id "toast-msg-id"} :query-params :keys [handler]} (:page (store/get-state))]
+  (let [{{token "token"} :query-params :keys [handler]} (:page (store/get-state))]
     (if (and (= :ui.admin/main handler) token)
       (nav/login! token)
       (-> admin.actions/fetch-auth-info

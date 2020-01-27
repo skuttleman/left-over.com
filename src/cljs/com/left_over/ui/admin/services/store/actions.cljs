@@ -12,6 +12,12 @@
 (def fetch-auth-info
   (actions/fetch* (nav/api-for :auth/info) :auth.info))
 
+(def fetch-locations
+  (actions/fetch* (nav/api-for :api.admin/locations) :locations))
+
+(def fetch-shows
+  (actions/fetch* (nav/api-for :api.admin/shows) :shows))
+
 (defn create-form [model]
   (let [internal-id (gensym)
         external-id (gensym)]
