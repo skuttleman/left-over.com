@@ -91,7 +91,7 @@
           [fields/form {:on-submit      on-submit
                         :form           form
                         :button-content "Save"}
-           [fields/input (-> {:label "Name"}
+           [fields/input (-> {:label "Name" :auto-focus true}
                              (forms/with-attrs form [:name]))]
            [fields/input (-> {:label "City"}
                              (forms/with-attrs form [:city]))]

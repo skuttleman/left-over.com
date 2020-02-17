@@ -57,7 +57,7 @@
                                      (admin.actions/act-or-toast (admin.actions/navigate :ui.admin/main))
                                      store/dispatch))
                     :form      form}
-       [fields/input (-> {:label "Name"}
+       [fields/input (-> {:label "Name" :auto-focus true}
                          (forms/with-attrs form [:name]))]
        [fields/input (-> {:label "When?"
                           :type  "datetime-local"}
