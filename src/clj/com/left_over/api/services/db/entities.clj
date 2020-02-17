@@ -46,9 +46,11 @@
 (defn offset [query amt]
   (assoc query :offset amt))
 
-(defn modify [entity m]
-  {:update (:table entity)
-   :set    m})
+(defn modify [entity m clause]
+  {:update    (:table entity)
+   :set       m
+   :where     clause
+   :returning [:*]})
 
 (defn select [entity]
   (-> entity
@@ -76,12 +78,12 @@
 
 (defmacro ^:private defentity [entity]
   (let [entity-name (name entity)]
-    `(def ~entity (repos/transact (fn [db#]
-                                    (->> ~entity-name
-                                         (format "SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='%s'")
-                                         (repos/exec-raw! db#)
-                                         (into #{} (map (comp csk/->kebab-case-keyword :columns/column_name)))
-                                         (assoc {:table (keyword ~entity-name)} :fields)))))))
+    `(def ~entity (repos/with-db (fn [db#]
+                                   (->> ~entity-name
+                                        (format "SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='%s'")
+                                        (repos/exec-raw! db#)
+                                        (into #{} (map (comp csk/->kebab-case-keyword :columns/column_name)))
+                                        (assoc {:table (keyword ~entity-name)} :fields)))))))
 
 (defentity shows)
 

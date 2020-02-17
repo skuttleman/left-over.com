@@ -1,9 +1,41 @@
-(ns com.left-over.ui.views.components)
+(ns com.left-over.ui.views.components
+  (:require
+    [com.left-over.common.utils.colls :as colls]))
+
+(def ^:private level->class
+  {:error "is-danger"})
+
+(defn spinner []
+  [:div.loader-container [:div.loader.large]])
+
+(defn alert [level body]
+  [:div.message
+   {:class [(level->class level)]}
+   [:div.message-body
+    body]])
+
+(defn render [component & more-args]
+  (-> component
+      (or :<>)
+      colls/force-vector
+      (into more-args)))
+
+(defn render-with-attrs [component attrs & more-args]
+  (-> component
+      colls/force-vector
+      (update 1 merge attrs)
+      (into more-args)))
+
+(defn icon
+  ([icon-class]
+   (icon {} icon-class))
+  ([attrs icon-class]
+   [:i.fas (update attrs :class conj (str "fa-" (name icon-class)))]))
 
 (defn with-status [keys component state]
   (condp #(contains? %2 %1) (into #{} (map (comp first state)) keys)
     :error [:div
             [:p "something went wrong"]
             [:p "please try again later"]]
-    :init [:div.loader-container [:div.loader.large]]
-    [component (into state (map (juxt identity (comp second state))) keys)]))
+    :init [spinner]
+    (conj (colls/force-vector component) (into state (map (juxt identity (comp second state))) keys))))

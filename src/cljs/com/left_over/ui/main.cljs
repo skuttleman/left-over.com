@@ -37,8 +37,9 @@
         component (components handler not-found)]
     [:div.columns {:style {:min-height "100vh" :margin-top "0"}}
      [:div.column.is-variable.is-0-mobile {:style {:padding "0"}}]
-     [:div.column.is-variable {:style {:height  "100vh"
-                                       :padding 0}}
+     [:div.column.is-variable {:style {:height    "100vh"
+                                       :min-width "703px"
+                                       :padding   0}}
       [:div.rows {:style {:height         "100%"
                           :display        :flex
                           :flex-direction :column}}

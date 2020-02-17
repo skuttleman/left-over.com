@@ -1,11 +1,55 @@
 (ns com.left-over.ui.admin.views.fields
-  (:require [reagent.core :as r]
-            [com.left-over.common.utils.strings :as strings]
-            [com.left-over.common.utils.maps :as maps]))
+  (:require
+    [clojure.set :as set]
+    [com.left-over.common.utils.logging :as log]
+    [com.left-over.common.utils.maps :as maps]
+    [com.left-over.common.utils.strings :as strings]
+    [com.left-over.ui.services.forms.core :as forms]
+    [com.left-over.ui.views.components :as components]
+    [reagent.core :as r]
+    [com.left-over.common.utils.colls :as colls]))
+
+(defonce ^:private listeners (atom {}))
+
+(def ^:private key->code
+  {:key-codes/tab   9
+   :key-codes/esc   27
+   :key-codes/enter 13})
+
+(def ^:private code->key
+  (set/map-invert key->code))
+
+(defn add-listener
+  ([event cb]
+   (add-listener event cb nil))
+  ([event cb options]
+   (let [key (gensym)
+         listener [js/window event (.addEventListener js/window (name event) cb (clj->js options))]]
+     (swap! listeners assoc key listener)
+     key)))
+
+(defn remove-listener [key]
+  (when-let [[node event id] (get @listeners key)]
+    (swap! listeners dissoc key)
+    (.removeEventListener node (name event) id)))
 
 (defn ^:private focus [node]
   (when node
     (.focus node)))
+
+(defn ^:private blur [node]
+  (when node
+    (.blur node)))
+
+(defn ^:private attempt [on-submit form]
+  (fn [e]
+    (.preventDefault e)
+    (forms/attempt! form)
+    (when-not (forms/errors form)
+      (on-submit @form))))
+
+(defn event->key [e]
+  (-> e .-keyCode code->key))
 
 (defn ^:private target-value [event]
   (some-> event .-target .-value))
@@ -19,8 +63,8 @@
       (when label
         [:label.label
          (cond-> {:html-for id}
-                 label-small? (assoc :style {:font-weight :normal
-                                             :font-size   "0.8em"}))
+           label-small? (assoc :style {:font-weight :normal
+                                       :font-size   "0.8em"}))
          label])
       (into [:div.form-field-control] body)]
      (when show-errors?
@@ -44,7 +88,7 @@
          :reagent-render
          (fn [attrs & args]
            (into [component (cond-> (dissoc attrs :auto-focus?)
-                                    auto-focus? (assoc :ref ref))]
+                              auto-focus? (assoc :ref ref))]
                  args))}))))
 
 (defn ^:private with-id [component]
@@ -65,10 +109,13 @@
         (->> (conj [component]))
         (into args))))
 
-(defn form [attrs & body]
-  (into [:form.form
-         (maps/update-maybe attrs :on-submit comp (fn [e] (.preventDefault e) e))]
-        body))
+(defn form [{:keys [form button-content] :or {button-content "Submit"} :as attrs} & body]
+  (-> [:form.form (maps/update-maybe attrs :on-submit attempt form)]
+      (into body)
+      (conj [:button.button.is-link {:type     :submit
+                                     :disabled (and (forms/attempted? form)
+                                                    (forms/errors form))}
+             button-content])))
 
 (def ^{:arglists '([attrs options])} select
   (with-auto-focus
@@ -120,7 +167,7 @@
             (-> {:type      (or type :text)
                  :disabled  disabled
                  :on-change (comp on-change target-value)}
-                (merge (select-keys attrs #{:class :id :on-blur :ref :value})))]])))))
+                (merge (select-keys attrs #{:auto-focus :class :id :on-blur :ref :value :tab-index})))]])))))
 
 (def ^{:arglists '([attrs])} checkbox
   (with-auto-focus
@@ -147,3 +194,55 @@
                :on-click #(on-change (not value))}
               (merge (select-keys attrs #{:class :id :on-blur :ref})))
           (if value true-display false-display)]]))))
+
+(defn ^:private ref-fn [ref-fn ref]
+  (fn [node]
+    (when node
+      (vreset! ref node))
+    (when ref-fn
+      (ref-fn node))))
+
+(defn openable [_component]
+  (let [open? (r/atom false)
+        ref (volatile! nil)
+        listeners [(add-listener :click
+                                 (fn [e]
+                                   (let [nodes (->> (.-target e)
+                                                    (iterate #(some-> % .-parentNode))
+                                                    (take-while some?)
+                                                    (filter #{@ref}))]
+                                     (if (empty? nodes)
+                                       (do (reset! open? false)
+                                           (some-> @ref blur))
+                                       (some-> @ref focus)))))
+                   (add-listener :keydown
+                                 #(when (#{:key-codes/tab :key-codes/esc} (event->key %))
+                                    (reset! open? false))
+                                 true)]]
+    (r/create-class
+      {:component-will-unmount
+       (fn [_]
+         (run! remove-listener listeners))
+       :reagent-render
+       (fn [component]
+         (let [[_ {:keys [on-search search]}] (colls/force-vector component)
+               attrs {:on-toggle (fn [_]
+                                   (swap! open? not)
+                                   (when (and (not @open?) on-search)
+                                     (on-search nil)))
+                      :open?     @open?}]
+           (-> component
+               (components/render-with-attrs attrs (when on-search
+                                                     [input {:class :dropdown-search
+                                                             :on-change   on-search
+                                                             :value       search
+                                                             :tab-index   -1
+                                                             :auto-focus true}]))
+               (update 1 #(-> %
+                              (update :ref ref-fn ref)
+                              (update :on-blur (fn [on-blur]
+                                                 (fn [e]
+                                                   (let [node @ref]
+                                                     (cond
+                                                       (and node @open?) (focus node)
+                                                       on-blur (on-blur e)))))))))))})))

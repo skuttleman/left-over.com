@@ -1,0 +1,24 @@
+.modal {
+    transition: top 0.333s linear;
+    z-index: 200;
+
+    &.mounted {
+        top: -150vh;
+
+        .modal-background {
+            opacity: 0.1;
+        }
+    }
+
+    &.modal-hidden {
+        top: -150vh;
+
+        .modal-background {
+            opacity: 0.1;
+        }
+    }
+
+    .modal-background {
+        transition: opacity 0.333s linear;
+    }
+}

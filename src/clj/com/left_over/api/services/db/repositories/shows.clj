@@ -21,6 +21,14 @@
   [_ _ value]
   (prep/timestamp value))
 
+(defmethod repos/->sql-value [:shows :created-at]
+  [_ _ value]
+  (prep/timestamp value))
+
+(defmethod repos/->sql-value [:shows :updated-at]
+  [_ _ value]
+  (prep/timestamp value))
+
 (defn select-by [clause]
   (-> entities/shows
       entities/select

@@ -18,7 +18,8 @@
     [ring.middleware.nested-params :refer [wrap-nested-params]]
     [ring.middleware.params :refer [wrap-params]]
     [ring.middleware.reload :refer [wrap-reload]]
-    [ring.util.response :as resp]))
+    [ring.util.response :as resp])
+  (:import (java.util UUID)))
 
 (defn verified? [email pw]
   (some (fn [k]
@@ -37,9 +38,28 @@
     {:status 200
      :body   (locations/select-for-admin db)})
 
+  (GET "/shows/:show-id" {:keys [db params]}
+    (if-let [show (shows/find-by-id db (UUID/fromString (:show-id params)))]
+      {:status 200
+       :body   show}
+      {:status 404
+       :body   {:message "not found"}}))
+
+  (PUT "/shows/:show-id" {:keys [auth/user body db params]}
+    {:status 200
+     :body   (shows/save db user (assoc body :id (UUID/fromString (:show-id params))))})
+
+  (DELETE "/shows/:show-id" {:keys [auth/user db params]}
+    (shows/save db user {:id (UUID/fromString (:show-id params)) :deleted? true})
+    {:status 204})
+
+  (POST "/shows" {:keys [auth/user body db]}
+    {:status 201
+     :body   (shows/save db user body)})
+
   (GET "/shows" {:keys [db]}
     {:status 200
-     :body (shows/select-for-admin db)}))
+     :body   (shows/select-for-admin db)}))
 
 (defroutes app*
   (context "/auth" []
@@ -96,7 +116,7 @@
       wrap-params
       wrap-cookies
       (wrap-cors :access-control-allow-origin [#".*"]
-                 :access-control-allow-methods [:get :head :options]
+                 :access-control-allow-methods [:get :post :put :delete :head :options]
                  :access-control-allow-credentials "true")))
 
 (def app-dev

@@ -9,7 +9,7 @@
 
 (defn with-transaction [handler]
   (fn [request]
-    (repos/transact
+    (repos/with-db
       (fn [db]
         (handler (assoc request :db db))))))
 

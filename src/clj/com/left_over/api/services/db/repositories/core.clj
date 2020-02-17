@@ -38,9 +38,6 @@
                         (env/get :db-port)
                         (env/get :db-name))})
 
-(defonce db-spec
-         (c3p0/make-datasource-spec db-cfg))
-
 (defn ^:private sql-format [query]
   (sql/format query :quoting :ansi))
 
@@ -103,5 +100,7 @@
                 xform-after (comp xform-after))]
     (exec* db query' xform)))
 
-(defn transact [f]
-  (jdbc/transact (:datasource db-spec) f {:isolation :read-uncommitted}))
+(def ^{:arglists '([f])} with-db
+  (let [db-spec (delay (c3p0/make-datasource-spec db-cfg))]
+    (fn [f]
+      (jdbc/transact (:datasource @db-spec) f {:isolation :read-uncommitted}))))

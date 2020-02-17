@@ -16,6 +16,7 @@
       ["/shows" :api/shows]
       ["/admin"
        [["/locations" :api.admin/locations]
+        [["/shows/" :show-id] :api.admin/show]
         ["/shows" :api.admin/shows]]]]]
 
     ["/auth"
@@ -31,7 +32,9 @@
 
     ["/admin"
      [["" :ui.admin/main]
-      ["/login" :ui.admin/login]]]
+      ["/login" :ui.admin/login]
+      ["/shows/create" :ui.admin/new-show]
+      [["/shows/" :show-id] :ui.admin/show]]]
 
     [true :nav/not-found]]])
 
@@ -44,7 +47,8 @@
         (assoc :uri uri)
         (maps/assoc-maybe :query-params (not-empty (into {}
                                                          (map #(string/split % #"="))
-                                                         (some-> query-string (string/split #"&"))))))))
+                                                         (some-> query-string (string/split #"&")))))
+        (maps/update-maybe :route-params maps/update-maybe :show-id uuid))))
 
 (defn path-for
   ([page]

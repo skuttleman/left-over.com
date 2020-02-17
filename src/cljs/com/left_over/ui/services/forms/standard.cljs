@@ -31,7 +31,7 @@
 (defn ^:private model->trackable [model]
   (->> model
        (nest {} [])
-       (into {} (map (fn [k value]
+       (into {} (map (fn [[k value]]
                        [k {:current  value
                            :initial  value
                            :visited? false}])))))
@@ -76,6 +76,9 @@
       (not= current initial)))
 
   forms/ITrack
+  (attempt! [_]
+    (dispatch [:forms/swap! internal-id assoc :persist-attempted? true])
+    nil)
   (attempted? [_]
     (get-in (store/get-state) [:forms :forms/state internal-id :persist-attempted?]))
   (visit! [_ path]

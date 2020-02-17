@@ -7,8 +7,10 @@
     [cljc.java-time.day-of-week :as dow]
     [cljc.java-time.format.date-time-formatter :as dtf]
     [cljc.java-time.instant :as inst]
-    [cljc.java-time.zone-id :as zi]
+    [cljc.java-time.local-date :as ld]
+    [cljc.java-time.local-date-time :as ldt]
     [cljc.java-time.zone-offset :as zo]
+    [cljc.java-time.offset-date-time :as odt]
     [cljc.java-time.zoned-date-time :as zdt]
     [clojure.string :as string]
     [tick.format :as tf]
@@ -22,6 +24,7 @@
 
 (def ^:private formats
   {:datetime/view     "EEE, MMM d, yyyy h:mm a"
+   :datetime/local    "yyyy-MM-dd'T'HH:mm"
    :date/system       "yyyy-MM-dd"
    :date/view         "EEE, MMM d, yyyy"
    :date.no-year/view "EEE, MMM d"
@@ -37,6 +40,10 @@
     (string? v) (zdt/parse v)
     (inst? v) (zdt/of-instant (inst/of-epoch-milli (.getTime v)) zo/utc)))
 
+(defn ^:private to-inst [instant]
+  #?(:clj  (Date/from instant)
+     :cljs (js/Date. instant)))
+
 (defn format
   ([inst]
    (format inst :datetime/view))
@@ -44,8 +51,16 @@
    (let [inst' (zdt/with-zone-same-instant (->date inst) (zo/system-default))]
      (-> fmt
          (formats fmt)
-         (tf/formatter)
+         tf/formatter
          (dtf/format inst')))))
+
+(defn local-dt-str->inst [date-str]
+  (let [ldt (ldt/parse date-str)]
+    (to-inst (ldt/to-instant ldt (-> date-str
+                                     (subs 0 10)
+                                     ld/parse
+                                     (ld/at-start-of-day (zo/system-default))
+                                     zdt/get-offset)))))
 
 (defn plus [inst? amt interval]
   (cond-> (->date inst?)
@@ -115,7 +130,7 @@
     (inst? inst) inst
     (instance? ZonedDateTime inst) (-> inst
                                        zdt/to-instant
-                                       #?(:clj Date/from :cljs (js/Date.)))))
+                                       to-inst)))
 
 (defn relative [inst]
   (let [now (now)

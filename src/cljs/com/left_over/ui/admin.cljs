@@ -6,6 +6,8 @@
     [com.left-over.ui.admin.services.store.actions :as admin.actions]
     [com.left-over.ui.admin.views.auth :as auth]
     [com.left-over.ui.admin.views.main :as admin.main]
+    [com.left-over.ui.admin.views.modal :as modal]
+    [com.left-over.ui.admin.views.shows :as admin.shows]
     [com.left-over.ui.admin.views.toasts :as toast]
     [com.left-over.ui.services.navigation :as nav]
     [com.left-over.ui.services.store.core :as store]
@@ -20,9 +22,11 @@
     [:a {:href (nav/path-for :ui.admin/main)} "home"]]])
 
 (def ^:private handler->component
-  {:ui.admin/main  admin.main/root
-   :ui.admin/login auth/login
-   :nav/not-found  not-found})
+  {:ui.admin/main     admin.main/root
+   :ui.admin/login    auth/login
+   :nav/not-found     not-found
+   :ui.admin/new-show admin.shows/root
+   :ui.admin/show     admin.shows/root})
 
 (defn app* [{{:keys [query-params handler] :as page} :page}]
   (when-let [toast-msg-id (get query-params "toast-msg-id")]
@@ -33,6 +37,7 @@
       [:div.columns {:style {:min-height "100vh" :margin-top "0"}}
        [:div.column.is-variable.is-0-mobile {:style {:padding "0"}}]
        [:div.column.is-variable {:style {:height  "100vh"
+                                         :min-width "703px"
                                          :padding 0}}
         [:div.rows {:style {:height         "100%"
                             :display        :flex
@@ -40,10 +45,11 @@
          [:div.row
           [navbar/logo]]
          [:div.row
-          [:div {:style {:margin "16px"}}
+          [:div {:style {:margin "16px" :width "100%"}}
            [component state]]]]]
        [:div.column.is-variable.is-0-mobile {:style {:padding "0"}}]
-       [toast/toasts (:toasts state)]])))
+       [toast/toasts (:toasts state)]
+       [modal/modal (:modal state)]])))
 
 (defn app []
   (let [{[status] :auth {:keys [handler query-params]} :page :as state} (store/get-state)]

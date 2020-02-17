@@ -43,9 +43,38 @@
      :locations/failure [:error result]
      state)))
 
+(defn ^:private show
+  ([] [:init])
+  ([state [type result]]
+   (case type
+     (:router/navigate :show/request) [:init]
+     :show/success [:success result]
+     :show/failure [:error result]
+     state)))
+
+(defn modal
+  ([] {:state :unmounted})
+  ([state [type content title actions]]
+   (case type
+     :modal/mount {:state :mounted :content content :title title :actions actions}
+     :modal/show (assoc state :state :shown)
+     :modal/hide (assoc state :state :modal-hidden)
+     :modal/unmount {:state :unmounted}
+     state)))
+
+(defn search
+  ([] nil)
+  ([state [type value]]
+   (case type
+     :search/set value
+     state)))
+
 (def reducer (cr/combine {:auth      auth
                           :forms     forms
                           :locations locations
+                          :modal     modal
                           :page      reducers/page
+                          :search    search
                           :shows     reducers/shows
+                          :show      show
                           :toasts    toasts}))
