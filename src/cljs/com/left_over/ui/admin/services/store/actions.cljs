@@ -35,6 +35,14 @@
   (fn [_]
     (http/delete (nav/api-for :api.admin/show {:route-params {:show-id show-id}}))))
 
+(defn create-location [location]
+  (fn [_]
+    (http/post (nav/api-for :api.admin/locations) {:body location})))
+
+(defn update-location [location-id location]
+  (fn [_]
+    (http/put (nav/api-for :api.admin/location {:route-params {:location-id location-id}}) {:body location})))
+
 (defn create-form
   ([model]
    (create-form model (constantly nil)))
@@ -73,6 +81,10 @@
   ([page params]
    (fn [_]
      (nav/navigate! page params))))
+
+(defn all [& actions]
+  (fn [[dispatch]]
+    (run! dispatch actions)))
 
 (defn act-or-toast [promise action]
   (fn [[dispatch]]

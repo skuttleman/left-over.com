@@ -34,6 +34,14 @@
       (throw (ex-info "error" {:response {:status 401 :body {:message "You must be authenticated to use this API"}}})))))
 
 (defroutes admin-routes
+  (PUT "/locations/:location-id" {:keys [auth/user body db params]}
+    {:status 200
+     :body   (locations/save db user (assoc body :id (UUID/fromString (:location-id params))))})
+
+  (POST "/locations" {:keys [auth/user body db]}
+    {:status 201
+     :body (locations/save db user body)})
+
   (GET "/locations" {:keys [db]}
     {:status 200
      :body   (locations/select-for-admin db)})

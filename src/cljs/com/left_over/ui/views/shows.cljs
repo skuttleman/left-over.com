@@ -8,6 +8,20 @@
     [com.left-over.ui.services.store.core :as store]
     [com.left-over.ui.views.components :as components]))
 
+(defn ^:private delete-show [show-id]
+  (fn [_]
+    (store/dispatch (admin.actions/show-modal "Are you sure you want to delete this show?"
+                                              "Delete Show"
+                                              [:button.button.is-danger
+                                               {:on-click (fn [_]
+                                                            (-> show-id
+                                                                admin.actions/delete-show
+                                                                store/dispatch
+                                                                (admin.actions/act-or-toast admin.actions/fetch-shows)
+                                                                store/dispatch))}
+                                               "Delete"]
+                                              [:button.button "Cancel"]))))
+
 (defn show-list [type shows & missing-msgs]
   (if (seq shows)
     [:ul.shows
@@ -17,7 +31,11 @@
        [:li.show.tile.is-parent
         [:div.tile.box.is-child
          [:p
-          [:em [:strong (:name show)]]
+          [(if (:website show)
+             :a
+             :span)
+           {:target :_blank :href (:website show)}
+           [:em [:strong (:name show)]]]
           (when (:hidden? show)
             [:em {:style {:color :gray}} " (not visible on website)"])]
          [:p [(if (:website location)
@@ -35,18 +53,7 @@
            [:p.row.space-between
             [:a {:href (nav/path-for :ui.admin/show {:route-params {:show-id show-id}})} "Edit"]
             [:button.button.is-link.is-danger
-             {:on-click (fn [_]
-                          (store/dispatch (admin.actions/show-modal "Are you sure you want to delete this show?"
-                                                                    "Delete Show"
-                                                                    [:button.button.is-danger
-                                                                     {:on-click (fn [_]
-                                                                                  (-> show-id
-                                                                                      admin.actions/delete-show
-                                                                                      store/dispatch
-                                                                                      (admin.actions/act-or-toast admin.actions/fetch-shows)
-                                                                                      store/dispatch))}
-                                                                     "Delete"]
-                                                                    [:button.button "Cancel"])))}
+             {:on-click (delete-show show-id)}
              "Delete"]])]])]
     (into [:<>] (map (partial conj [:p])) missing-msgs)))
 

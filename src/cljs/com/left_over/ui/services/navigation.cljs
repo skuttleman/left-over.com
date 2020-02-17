@@ -15,7 +15,8 @@
       [["/images/" :image] :api/image]
       ["/shows" :api/shows]
       ["/admin"
-       [["/locations" :api.admin/locations]
+       [[["/locations/" :location-id] :api.admin/location]
+        ["/locations" :api.admin/locations]
         [["/shows/" :show-id] :api.admin/show]
         ["/shows" :api.admin/shows]]]]]
 

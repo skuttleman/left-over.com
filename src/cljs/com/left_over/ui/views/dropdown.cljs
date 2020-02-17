@@ -2,6 +2,7 @@
   (:require
     [clojure.set :as set]
     [com.left-over.common.utils.logging :as log]
+    [com.left-over.common.utils.maps :as maps]
     [com.left-over.ui.admin.views.fields :as fields]
     [com.left-over.ui.views.components :as components]))
 
@@ -42,12 +43,12 @@
     {:style {:margin-left "10px"}}
     [components/icon (if (:open? attrs) :chevron-up :chevron-down)]]])
 
-(defn ^:private dropdown* [{:keys [button-control loading? list-control open? options options-by-id ref value]
+(defn ^:private dropdown* [{:keys [button-control loading? list-control on-edit open? options options-by-id ref value]
                             :or   {list-control option-list button-control button}
                             :as   attrs}
                            search-input]
   (let [selected (seq (map options-by-id value))]
-    [:div.dropdown
+    [:div.dropdown.row.space-between
      {:class [(when open? "is-active")]
       :ref   ref}
      [:div.dropdown-trigger
@@ -58,6 +59,11 @@
            (cond->
              selected (assoc :selected selected)
              open? (update :class conj "is-focused")))]]
+     (when on-edit
+       [:<>
+        [:button.button.is-link {:type :button :on-click #(on-edit nil)} "Create"]
+        (when (= 1 (count value))
+          [:button.button.is-link {:type :button :on-click #(on-edit (first selected))} "Edit"])])
      (when open?
        [:div.dropdown-menu
         [:div.dropdown-content

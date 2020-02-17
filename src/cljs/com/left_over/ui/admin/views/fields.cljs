@@ -11,6 +11,8 @@
 
 (defonce ^:private listeners (atom {}))
 
+(def common-keys #{:auto-focus :class :id :on-blur :on-submit :ref :value :tab-index})
+
 (def ^:private key->code
   {:key-codes/tab   9
    :key-codes/esc   27
@@ -110,7 +112,9 @@
         (into args))))
 
 (defn form [{:keys [form button-content] :or {button-content "Submit"} :as attrs} & body]
-  (-> [:form.form (maps/update-maybe attrs :on-submit attempt form)]
+  (-> [:form.form (-> attrs
+                      (select-keys common-keys)
+                      (maps/update-maybe :on-submit attempt form))]
       (into body)
       (conj [:button.button.is-link {:type     :submit
                                      :disabled (and (forms/attempted? form)
@@ -154,7 +158,7 @@
             (-> {:value     value
                  :disabled  disabled
                  :on-change (comp on-change target-value)}
-                (merge (select-keys attrs #{:class :id :on-blur :ref})))]])))))
+                (merge (select-keys attrs common-keys)))]])))))
 
 (def ^{:arglists '([attrs])} input
   (with-auto-focus
@@ -167,7 +171,7 @@
             (-> {:type      (or type :text)
                  :disabled  disabled
                  :on-change (comp on-change target-value)}
-                (merge (select-keys attrs #{:auto-focus :class :id :on-blur :ref :value :tab-index})))]])))))
+                (merge (select-keys attrs common-keys)))]])))))
 
 (def ^{:arglists '([attrs])} checkbox
   (with-auto-focus
@@ -180,7 +184,7 @@
                :type      :checkbox
                :disabled  disabled
                :on-change #(on-change (not value))}
-              (merge (select-keys attrs #{:class :id :on-blur :ref})))]]))))
+              (merge (select-keys attrs common-keys)))]]))))
 
 (def ^{:arglists '([attrs])} button
   (with-auto-focus
@@ -192,7 +196,7 @@
           (-> {:type     :button
                :disabled disabled
                :on-click #(on-change (not value))}
-              (merge (select-keys attrs #{:class :id :on-blur :ref})))
+              (merge (select-keys attrs common-keys)))
           (if value true-display false-display)]]))))
 
 (defn ^:private ref-fn [ref-fn ref]
