@@ -66,7 +66,7 @@
     [:<>
      [:div
       [:p [:strong "Upcoming Shows"]]
-      [show-list :upcoming future "we don't have any upcoming shows booked" "check back soon"]]
+      [show-list :upcoming future "We don't have any upcoming shows booked." "Check back soon."]]
      [:div
       [:p [:strong "Past Shows"]]
       [show-list :past (reverse past) "No past shows"]]]))

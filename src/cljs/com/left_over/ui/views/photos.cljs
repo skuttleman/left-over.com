@@ -8,13 +8,13 @@
   [:div
    (if (seq photos)
      [:<>
-      [:p "here are some photos"]
+      [:p "Here are some photos."]
       [:ul.photos
        (for [{:keys [link]} photos]
          ^{:key link} [:li.photo.has-text-centered [:img {:src link}]])]]
      [:<>
-      [:p "we don't have any photos to share with you right now"]
-      [:p "check back soon"]])])
+      [:p "We don't have any photos to share with you right now."]
+      [:p "Check back soon."]])])
 
 (defn root [_state]
   (store/dispatch actions/fetch-photos)
