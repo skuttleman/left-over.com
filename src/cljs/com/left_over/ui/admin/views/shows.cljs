@@ -30,7 +30,11 @@
   [:span (:name item)])
 
 (defn selected-item [{[item] :selected}]
-  [:span (if item
+  [:span
+   {:style {:white-space :nowrap
+            :overflow :hidden
+            :text-overflow :ellipsis}}
+   (if item
            (:name item)
            "Select…")])
 
@@ -62,7 +66,8 @@
        [fields/input (-> {:label "When?"
                           :type  "datetime-local"}
                          (forms/with-attrs form [:date-time] model->view view->model))]
-       [dropdown/dropdown (-> {:label           "Where?"
+       [dropdown/dropdown (-> {:class           ["location-selector"]
+                               :label           "Where?"
                                :options         location-options
                                :options-by-id   locations-by-id
                                :on-edit         (location-form-modal form search)
