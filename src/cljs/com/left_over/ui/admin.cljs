@@ -34,20 +34,19 @@
     (nav/nav-and-replace! handler (update page :query-params dissoc "toast-msg-id")))
   (fn [{{:keys [handler]} :page :as state}]
     (let [component (handler->component handler not-found)]
-      [:div.columns {:style {:min-height "100vh" :margin-top "0"}}
-       [:div.column.is-variable.is-0-mobile {:style {:padding "0"}}]
-       [:div.column.is-variable {:style {:height  "100vh"
-                                         :min-width "703px"
-                                         :padding 0}}
+      [:div {:style {:min-height "100vh"
+                              :max-width  "100vw"
+                              :margin-top "0"}}
+       [:div.is-variable {:style {:height  "100vh"
+                                          :padding 0}}
         [:div.rows {:style {:height         "100%"
                             :display        :flex
                             :flex-direction :column}}
          [:div.row
-          [navbar/logo]]
-         [:div.row
-          [:div {:style {:margin "16px" :width "100%"}}
+          [navbar/logo true]]
+         [:div.row {:style {:padding "8px"}}
+          [:div {:style {:width "100%"}}
            [component state]]]]]
-       [:div.column.is-variable.is-0-mobile {:style {:padding "0"}}]
        [toast/toasts (:toasts state)]
        [modal/modal (:modal state)]])))
 

@@ -28,10 +28,13 @@
 
 (defn display-text [attrs]
   (let [selected-count (count (:selected attrs))]
-    (case selected-count
-      0 "Select…"
-      1 "1 Item Selected"
-      (str selected-count " Items Selected"))))
+    [:span {:style {:white-space   :nowrap
+                    :overflow      :hidden
+                    :text-overflow :ellipsis}}
+     (case selected-count
+       0 "Select…"
+       1 "1 Item Selected"
+       (str selected-count " Items Selected"))]))
 
 (defn button [{:keys [display-text-fn] :or {display-text-fn display-text} :as attrs}]
   [:button.button

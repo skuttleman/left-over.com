@@ -4,13 +4,14 @@
     [com.left-over.ui.services.navigation :as nav]
     [reagent.core :as r]))
 
-(defn logo []
-  [:a.navbar-item {:href (nav/path-for :ui/main)
-                   :style {:padding 0}}
+(defn logo [admin?]
+  [:a.navbar-item
+   {:href  (nav/path-for (if admin? :ui.admin/main :ui/main))
+    :style {:padding 0}}
    [:img {:src    (nav/api-for :api/image {:route-params {:image "logo.jpg"}})
           :width  "100%"
           :height "auto"
-          :style  {:max-width  "703px"
+          :style  {:max-width  "100vw"
                    :max-height "unset"}}]])
 
 (defn nav-item [{:keys [page]} is-active? pg]

@@ -35,23 +35,22 @@
   (let [state (store/get-state)
         handler (get-in state [:page :handler])
         component (components handler not-found)]
-    [:div.columns {:style {:min-height "100vh" :margin-top "0"}}
-     [:div.column.is-variable.is-0-mobile {:style {:padding "0"}}]
-     [:div.column.is-variable {:style {:height    "100vh"
-                                       :min-width "703px"
+    [:div {:style {:min-height "100vh"
+                   :max-width  "100vw"
+                   :margin-top "0"}}
+     [:div.is-variable {:style {:height    "100vh"
                                        :padding   0}}
       [:div.rows {:style {:height         "100%"
                           :display        :flex
                           :flex-direction :column}}
        [:div.row
-        [navbar/logo]]
+        [navbar/logo false]]
        (when (not= :ui/main handler)
          [:div.row
           [navbar/nav-bar state]])
        [:div.row {:style (handler->style handler)}
         [:div {:style {:margin "16px"}}
-         [component state]]]]]
-     [:div.column.is-variable.is-0-mobile {:style {:padding "0"}}]]))
+         [component state]]]]]]))
 
 (defn ^:export mount! []
   (r/render-component [app] (.getElementById js/document "app")))
