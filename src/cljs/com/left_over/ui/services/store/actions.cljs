@@ -2,10 +2,10 @@
   (:require
     [com.ben-allred.vow.core :as v]
     [com.left-over.common.services.http :as http]
-    [com.left-over.common.services.env :as env]
-    [com.left-over.ui.services.navigation :as nav]))
+    [com.left-over.ui.services.navigation :as nav]
+    [com.left-over.common.utils.logging :as log]))
 
-(defn ^:private fetch* [url action-ns]
+(defn fetch* [url action-ns]
   (let [[request success failure] (map keyword
                                        (repeat (name action-ns))
                                        ["request" "success" "failure"])]

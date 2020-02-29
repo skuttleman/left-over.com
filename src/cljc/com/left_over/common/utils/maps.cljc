@@ -13,5 +13,12 @@
     (apply update m k f f-args)
     m))
 
+(defn assoc-maybe [m & kvs]
+  (loop [m m [k v :as kvs] kvs]
+    (cond
+      (empty? kvs) m
+      (some? v) (recur (assoc m k v) (nnext kvs))
+      :else (recur m (nnext kvs)))))
+
 (defn map-kv [key-fn val-fn m]
   (into {} (map (fn [[k v]] [(key-fn k) (val-fn v)])) m))

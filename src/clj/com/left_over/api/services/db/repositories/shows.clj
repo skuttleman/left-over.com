@@ -3,7 +3,6 @@
     [clojure.set :as set]
     [com.left-over.api.services.db.entities :as entities]
     [com.left-over.api.services.db.preparations :as prep]
-    [com.left-over.api.services.db.models.shared :as models]
     [com.left-over.api.services.db.repositories.core :as repos]))
 
 (defmethod repos/->api ::model
@@ -22,8 +21,16 @@
   [_ _ value]
   (prep/timestamp value))
 
+(defmethod repos/->sql-value [:shows :created-at]
+  [_ _ value]
+  (prep/timestamp value))
+
+(defmethod repos/->sql-value [:shows :updated-at]
+  [_ _ value]
+  (prep/timestamp value))
+
 (defn select-by [clause]
   (-> entities/shows
       entities/select
       (entities/with-alias :shows)
-      (assoc :where clause)))
+      (cond-> clause (assoc :where clause))))

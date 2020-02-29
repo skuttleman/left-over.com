@@ -2,7 +2,6 @@
   (:require
     [com.ben-allred.collaj.reducers :as cr]))
 
-
 (defn page
   ([] nil)
   ([state [type page]]

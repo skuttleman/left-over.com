@@ -105,11 +105,13 @@
                           (fn [exception]
                             (async/put! ch (assoc (ex-data exception) :cookies (clj-http.cookies/get-cookies cs))))))
              ch)
-     :cljs (client* request)))
+     :cljs (let [token (.getItem js/localStorage "auth-token")]
+             (-> request
+                 (cond-> token (assoc-in [:headers "authorization"] (str "Bearer " token)))
+                 client*))))
 
 (defn ^:private prep [request content-type]
   (-> request
-      (assoc :with-credentials? false)
       (update :headers (partial into {} (map (juxt (comp name key) val))))
       (cond->
         (:body request) (update :body (fn [body]

@@ -4,6 +4,11 @@
   (cond-> x
     (not (and (coll? x) (sequential? x))) vector))
 
+(defn force-vector [x]
+  (if (vector? x)
+    x
+    [x]))
+
 (defn only! [[item & more]]
   (when (seq more)
     (throw (ex-info "collection has more than one item" {})))
