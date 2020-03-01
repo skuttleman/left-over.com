@@ -37,6 +37,7 @@
                  [ring/ring-core "1.3.2"]
                  [ring/ring-devel "1.6.3" :exclusions [[ring/ring-core]]]
                  [seancorfield/next.jdbc "1.0.5"]
+                 [sudharsh/clj-oauth2 "0.5.3"]
                  [tick "0.4.20-alpha"]]
   :plugins [[lein-figwheel "0.5.19"]
             [lein-sass "0.5.0"]

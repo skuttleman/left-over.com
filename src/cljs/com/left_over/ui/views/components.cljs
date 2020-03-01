@@ -5,6 +5,10 @@
 (def ^:private level->class
   {:error "is-danger"})
 
+(def ^:private style->class
+  {:solid "fas"
+   :brand "fab"})
+
 (defn spinner []
   [:div.loader-container [:div.loader.large]])
 
@@ -30,7 +34,7 @@
   ([icon-class]
    (icon {} icon-class))
   ([attrs icon-class]
-   [:i.fas (update attrs :class conj (str "fa-" (name icon-class)))]))
+   [:i (update attrs :class conj (style->class (:icon-style attrs :solid)) (str "fa-" (name icon-class)))]))
 
 (defn with-status [keys component state]
   (condp #(contains? %2 %1) (into #{} (map (comp first state)) keys)
