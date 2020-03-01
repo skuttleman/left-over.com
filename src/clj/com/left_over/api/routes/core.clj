@@ -4,7 +4,7 @@
     [com.left-over.api.routes.auth :as auth]
     [com.left-over.api.routes.public :as public]
     [com.left-over.api.services.middleware :as middleware]
-    [compojure.core :refer [ANY context defroutes]]
+    [compojure.core :refer [ANY GET context defroutes]]
     [ring.middleware.cookies :refer [wrap-cookies]]
     [ring.middleware.cors :refer [wrap-cors]]
     [ring.middleware.keyword-params :refer [wrap-keyword-params]]
@@ -14,14 +14,15 @@
     [ring.middleware.reload :refer [wrap-reload]]))
 
 (defroutes app*
-  (context "/auth" []
+  (context "/auth" _
     #'auth/routes)
-  (context "/api" []
-    (context "/admin" []
+  (context "/api" _
+    (context "/admin" _
       #'admin/routes)
     #'public/routes)
-  (context "/" []
-    (ANY "/*" [] {:status 404 :body {:message "not found"}})))
+  (context "/" _
+    (GET "/health" _ {:status 200 :body {:a :ok}})
+    (ANY "/*" _ {:status 404 :body {:message "not found"}})))
 
 (def app
   (-> #'app*
