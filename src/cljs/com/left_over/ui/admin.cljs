@@ -17,9 +17,7 @@
 (defn not-found [_]
   [:div
    [:p "page not found"]
-   [:p
-    "go "
-    [:a {:href (nav/path-for :ui.admin/main)} "home"]]])
+   [:p "go " [:a {:href (nav/path-for :ui.admin/main)} "home"]]])
 
 (def ^:private handler->component
   {:ui.admin/main     admin.main/root
@@ -34,19 +32,20 @@
     (nav/nav-and-replace! handler (update page :query-params dissoc "toast-msg-id")))
   (fn [{{:keys [handler]} :page :as state}]
     (let [component (handler->component handler not-found)]
-      [:div {:style {:min-height "100vh"
-                              :max-width  "100vw"
-                              :margin-top "0"}}
-       [:div.is-variable {:style {:height  "100vh"
-                                          :padding 0}}
-        [:div.rows {:style {:height         "100%"
-                            :display        :flex
-                            :flex-direction :column}}
-         [:div.row
-          [navbar/logo true]]
-         [:div.row {:style {:padding "8px"}}
-          [:div {:style {:width "100%"}}
-           [component state]]]]]
+      [:<>
+       [:div.columns {:style {:max-width "100vw"
+                              :margin    0}}
+        [:div.column.is-variable.is-0-mobile {:style {:padding "0"}}]
+        [:div.column.is-variable {:style {:padding 0}}
+         [:div {:style {:height         "100%"
+                        :display        :flex
+                        :flex-direction :column}}
+          [:div
+           [navbar/logo true]]
+          [:div {:style {:padding "8px"}}
+           [:div {:style {:width "100%"}}
+            [component state]]]]]
+        [:div.column.is-variable.is-0-mobile {:style {:padding "0"}}]]
        [toast/toasts (:toasts state)]
        [modal/modal (:modal state)]])))
 

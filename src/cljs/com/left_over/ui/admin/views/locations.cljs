@@ -1,12 +1,12 @@
 (ns com.left-over.ui.admin.views.locations
   (:require
     [com.ben-allred.formation.core :as f]
+    [com.ben-allred.vow.core :as v]
+    [com.left-over.common.utils.logging :as log]
     [com.left-over.ui.admin.services.store.actions :as admin.actions]
     [com.left-over.ui.admin.views.fields :as fields]
     [com.left-over.ui.services.forms.core :as forms]
-    [com.left-over.ui.services.store.core :as store]
-    [com.ben-allred.vow.core :as v]
-    [com.left-over.common.utils.logging :as log]))
+    [com.left-over.ui.services.store.core :as store]))
 
 (def states
   [["AL" "Alabama"]
@@ -78,6 +78,9 @@
         store/dispatch
         (v/then (comp (partial swap! show-form assoc :location-id) :id)))))
 
+(defn ^:private cancel-form [_]
+  (store/dispatch admin.actions/hide-modal))
+
 (defn location-form [show-form location]
   (let [form-id (-> location
                     (select-keys #{:name :city :state :website})
@@ -89,6 +92,7 @@
       (let [{{form form-id} :forms} (store/get-state)]
         (when form
           [fields/form {:on-submit      on-submit
+                        :on-cancel      cancel-form
                         :form           form
                         :button-content "Save"}
            [fields/input (-> {:label "Name" :auto-focus true}
@@ -100,10 +104,4 @@
                 (forms/with-attrs form [:state]))
             states]
            [fields/input (-> {:label "Website URL"}
-                             (forms/with-attrs form [:website]))]
-           [:button.button
-            {:type     :button
-             :on-click (fn [_]
-                         (store/dispatch admin.actions/hide-modal))
-             :style    {:margin-right "8px"}}
-            "Cancel"]])))))
+                             (forms/with-attrs form [:website]))]])))))

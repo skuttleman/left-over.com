@@ -1,8 +1,8 @@
 (ns com.left-over.ui.admin.views.modal
   (:require
-    [com.left-over.ui.services.store.core :as store]
+    [com.left-over.common.utils.logging :as log]
     [com.left-over.ui.admin.services.store.actions :as admin.actions]
-    [com.ben-allred.vow.core :as v]))
+    [com.left-over.ui.services.store.core :as store]))
 
 (defn ^:private hide-modal [e]
   (store/dispatch admin.actions/hide-modal)

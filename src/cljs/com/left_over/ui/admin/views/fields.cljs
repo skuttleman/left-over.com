@@ -111,7 +111,7 @@
         (->> (conj [component]))
         (into args))))
 
-(defn form [{:keys [form button-content] :or {button-content "Submit"} :as attrs} & body]
+(defn form [{:keys [button-content form on-cancel] :or {button-content "Submit"} :as attrs} & body]
   (-> [:form.form (-> attrs
                       (select-keys common-keys)
                       (maps/update-maybe :on-submit attempt form))]
@@ -119,7 +119,12 @@
       (conj [:button.button.is-link {:type     :submit
                                      :disabled (and (forms/attempted? form)
                                                     (forms/errors form))}
-             button-content])))
+             button-content])
+      (cond->
+        on-cancel (conj [:button.button {:type     :button
+                                         :style    {:margin-left "8px"}
+                                         :on-click on-cancel}
+                         "Cancel"]))))
 
 (def ^{:arglists '([attrs options])} select
   (with-auto-focus
@@ -237,10 +242,10 @@
                       :open?     @open?}]
            (-> component
                (components/render-with-attrs attrs (when on-search
-                                                     [input {:class :dropdown-search
-                                                             :on-change   on-search
-                                                             :value       search
-                                                             :tab-index   -1
+                                                     [input {:class      :dropdown-search
+                                                             :on-change  on-search
+                                                             :value      search
+                                                             :tab-index  -1
                                                              :auto-focus true}]))
                (update 1 #(-> %
                               (update :ref ref-fn ref)

@@ -1,6 +1,5 @@
 (ns com.left-over.ui.views.navbar
   (:require
-    [com.left-over.common.services.env :as env]
     [com.left-over.ui.services.navigation :as nav]
     [reagent.core :as r]))
 

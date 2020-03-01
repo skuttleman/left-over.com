@@ -11,10 +11,8 @@
 
 (defn root* [{:keys [shows]}]
   [:div
-   [:div.row.full
-    [:div.row.space-between
-     [:a.link {:href (nav/path-for :ui.admin/new-show)} "Create a show"]
-     #_[:a.link {:href (nav/path-for :ui.admin/locations)} "Manage locations"]]
+   [:div.row.full.space-between
+    [:a.link {:href (nav/path-for :ui.admin/new-show)} "Create a show"]
     [auth/logout]]
    [shows/show-list :admin (sort-by :date-time shows)]])
 
