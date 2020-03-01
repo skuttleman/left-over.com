@@ -3,11 +3,12 @@
   (:require
     [#?(:clj clj-http.client :cljs cljs-http.client) :as client]
     [#?(:clj clj-http.core :cljs cljs-http.core) :as http*]
-    [com.left-over.common.utils.edn :as edn]
-    [com.left-over.common.utils.json :as json]
     [clojure.core.async :as async]
     [clojure.set :as set]
-    [com.ben-allred.vow.core :as v #?@(:cljs [:include-macros true])]))
+    [com.ben-allred.vow.core :as v #?@(:cljs [:include-macros true])]
+    [com.left-over.common.utils.edn :as edn]
+    [com.left-over.common.utils.json :as json]
+    [com.left-over.common.utils.logging :as log]))
 
 (def status->kw
   {200 :http.status/ok
@@ -59,7 +60,9 @@
                    (as-> response $
                          (cond-> $ (vector? $) second)
                          (:status $)
-                         (cond-> $ (keyword? $) kw->status)))]
+                         (cond-> $ (keyword? $) kw->status))
+                   (log/warn "unknown status" response)
+                   500)]
     (<= lower status upper)))
 
 (def ^{:arglists '([response])} success?
@@ -70,6 +73,9 @@
 
 (def ^{:arglists '([response])} server-error?
   (partial check-status 500 599))
+
+(def ^{:arglists '([response])} error?
+  (some-fn client-error? server-error?))
 
 (def ^:private client*
   (-> http*/request
