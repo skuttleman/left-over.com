@@ -6,6 +6,7 @@
     [clojure.core.async :as async]
     [clojure.set :as set]
     [com.ben-allred.vow.core :as v #?@(:cljs [:include-macros true])]
+    [com.left-over.common.services.env :as env]
     [com.left-over.common.utils.edn :as edn]
     [com.left-over.common.utils.json :as json]
     [com.left-over.common.utils.logging :as log]))
@@ -111,9 +112,15 @@
                           (fn [exception]
                             (async/put! ch (assoc (ex-data exception) :cookies (clj-http.cookies/get-cookies cs))))))
              ch)
-     :cljs (let [token (.getItem js/localStorage "auth-token")]
+     :cljs (let [token (when (env/get :admin?)
+                         (.getItem js/localStorage "auth-token"))]
              (-> request
-                 (cond-> token (assoc-in [:headers "authorization"] (str "Bearer " token)))
+                 (cond->
+                   token
+                   (assoc-in [:headers "authorization"] (str "Bearer " token))
+
+                   (not token)
+                   (assoc :with-credentials? false))
                  client*))))
 
 (defn ^:private prep [request content-type]
