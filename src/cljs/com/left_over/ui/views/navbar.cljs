@@ -7,7 +7,7 @@
   [:a.navbar-item
    {:href  (nav/path-for (if admin? :ui.admin/main :ui/main))
     :style {:padding 0}}
-   [:img {:src    (nav/api-for :api/image {:route-params {:image "logo.jpg"}})
+   [:img {:src    (nav/s3-for :s3/image {:route-params {:image "logo.jpg"}})
           :width  "100%"
           :height "auto"
           :style  {:max-width  "100vw"

@@ -11,14 +11,15 @@
 (def ^:private app-routes
   [""
    [["/api"
-     [["/photos" :api/photos]
-      [["/images/" :image] :api/image]
-      ["/shows" :api/shows]
+     [["/shows" :api/shows]
       ["/admin"
        [[["/locations/" :location-id] :api.admin/location]
         ["/locations" :api.admin/locations]
         [["/shows/" :show-id] :api.admin/show]
         ["/shows" :api.admin/shows]]]]]
+
+    ["/images"
+     [[["/" :image] :s3/image]]]
 
     ["/auth"
      [["/info" :auth/info]
@@ -72,6 +73,12 @@
    (ui-for page nil))
   ([page params]
    (str (.-origin js/location) (path-for page params))))
+
+(defn s3-for
+  ([page]
+   (s3-for page nil))
+  ([page params]
+   (str "https://left-over.s3.amazonaws.com" (path-for page params))))
 
 (defonce ^:private history
   (let [history (pushy/pushy (comp store/dispatch (partial conj [:router/navigate])) match-route)]

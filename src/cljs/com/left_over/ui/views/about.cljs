@@ -66,5 +66,5 @@
       ^{:key name}
       [:li.bio.box
        [:div.img-container
-        [:img {:src (nav/api-for :api/image {:route-params {:image image}})}]]
+        [:img {:src (nav/s3-for :s3/image {:route-params {:image image}})}]]
        [:p bio]])]])
