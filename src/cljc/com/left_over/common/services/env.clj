@@ -6,7 +6,8 @@
 
 (def ^:private js-env-vars [:api-base-url
                             :aws-api-key
-                            :dropbox-images-uri])
+                            :aws-api-uri
+                            :aws-s3-uri])
 
 (defmacro env []
   (into {} (map (juxt keywords/keyword env*/env)) js-env-vars))

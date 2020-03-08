@@ -2,7 +2,6 @@
   (:require
     [com.left-over.api.routes.admin :as admin]
     [com.left-over.api.routes.auth :as auth]
-    [com.left-over.api.routes.public :as public]
     [com.left-over.api.services.middleware :as middleware]
     [compojure.core :refer [ANY GET context defroutes]]
     [ring.middleware.cookies :refer [wrap-cookies]]
@@ -18,8 +17,7 @@
     #'auth/routes)
   (context "/api" _
     (context "/admin" _
-      #'admin/routes)
-    #'public/routes)
+      #'admin/routes))
   (context "/" _
     (GET "/health" _ {:status 200 :body {:a :ok}})
     (ANY "/*" _ {:status 404 :body {:message "not found"}})))

@@ -21,7 +21,10 @@
            (v/then dispatch))))))
 
 (def fetch-photos
-  (fetch* (env/get :dropbox-images-uri) :photos {:headers {:x-api-key (env/get :aws-api-key)}}))
+  (fetch* (nav/aws-for :aws/images) :photos {:headers {:x-api-key (env/get :aws-api-key)}}))
+
+(def fetch-videos
+  (fetch* (nav/aws-for :aws/videos) :videos {:headers {:x-api-key (env/get :aws-api-key)}}))
 
 (def fetch-shows
-  (fetch* (nav/api-for :api/shows) :shows))
+  (fetch* (nav/aws-for :aws/shows) :shows {:headers {:x-api-key (env/get :aws-api-key)}}))
