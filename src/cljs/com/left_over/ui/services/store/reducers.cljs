@@ -27,6 +27,16 @@
      :shows/failure [:error result]
      state)))
 
+(defn videos
+  ([] [:init])
+  ([state [type result]]
+   (case type
+     (:router/navigate :videos/request) [:init]
+     :videos/success [:success result]
+     :videos/failure [:error result]
+     state)))
+
 (def reducer (cr/combine {:page   page
                           :photos photos
-                          :shows  shows}))
+                          :shows  shows
+                          :videos videos}))

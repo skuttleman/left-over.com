@@ -8,6 +8,7 @@
     [com.left-over.ui.views.navbar :as navbar]
     [com.left-over.ui.views.photos :as photos]
     [com.left-over.ui.views.shows :as shows]
+    [com.left-over.ui.views.videos :as videos]
     [reagent.core :as r]))
 
 (defn not-found [_]
@@ -28,6 +29,7 @@
    :ui/about      about/root
    :ui/shows      shows/root
    :ui/photos     photos/root
+   :ui/videos     videos/root
    :ui/contact    contact/root
    :nav/not-found not-found})
 

@@ -2,12 +2,12 @@
 @import 'modal';
 @import 'toast';
 
-.main-navigation * {
+.main-navigation *:not(i) {
     font-family: 'Rye', sans-serif;
 }
 
-.photos {
-    .photo:not(:last-child) {
+.photos, .videos {
+    .photo:not(:last-child), .video:not(:last-child) {
         margin-bottom: 10px;
     }
 }

@@ -29,6 +29,7 @@
           ["/about" :ui/about]
           ["/shows" :ui/shows]
           ["/photos" :ui/photos]
+          ["/videos" :ui/videos]
           ["/contact" :ui/contact]
           ["/admin"
            [["" :ui.admin/main]

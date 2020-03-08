@@ -1,6 +1,7 @@
 (ns com.left-over.ui.views.navbar
   (:require
     [com.left-over.ui.services.navigation :as nav]
+    [com.left-over.ui.views.components :as components]
     [reagent.core :as r]))
 
 (defn logo [admin?]
@@ -13,22 +14,24 @@
           :style  {:max-width  "100vw"
                    :max-height "unset"}}]])
 
-(defn nav-item [{:keys [page]} is-active? pg]
-  (let [page-str (name pg)]
+(defn nav-item [{:keys [page]} pg icon]
+  (let [page-str (name pg)
+        active? (= pg (:handler page))]
     [:li
-     {:class [(when (= pg (:handler page))
-                "is-active")]}
+     {:class [(when active? "is-active")]}
      [:a.navbar-item
-      {:href     (nav/path-for pg)
-       :on-click (fn [_] (reset! is-active? false))}
-      page-str]]))
+      {:href (nav/path-for pg)}
+      [components/icon icon]
+      [:pre {:style {:padding 0 :font-size "1rem" :background-color :transparent}} "  "]
+      [:span {:class [(when-not active? "is-hidden-mobile")]} page-str]]]))
 
-(defn nav-bar [_state]
-  (let [is-active? (r/atom false)]
-    (fn [state]
-      [:nav.tabs.main-navigation
-       {:class [(when @is-active? "is-active")]}
-       [:ul
-        (for [pg [:ui/about :ui/shows :ui/photos :ui/contact]]
-          ^{:key pg} [nav-item state is-active? pg])]
-       [:div.navbar-end]])))
+(defn nav-bar [state]
+  [:nav.tabs.main-navigation
+   [:ul
+    (for [[pg icon] [[:ui/about :info-circle]
+                     [:ui/shows :music]
+                     [:ui/photos :images]
+                     [:ui/videos :video]
+                     [:ui/contact :link]]]
+      ^{:key pg} [nav-item state pg icon])]
+   [:div.navbar-end]])

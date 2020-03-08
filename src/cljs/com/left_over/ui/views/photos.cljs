@@ -7,11 +7,9 @@
 (defn root* [{:keys [photos]}]
   [:div
    (if (seq photos)
-     [:<>
-      [:p "Here are some photos."]
-      [:ul.photos
-       (for [{:keys [link]} photos]
-         ^{:key link} [:li.photo.has-text-centered [:img {:src link}]])]]
+     [:ul.photos
+      (for [{:keys [link]} photos]
+        ^{:key link} [:li.photo.has-text-centered [:img {:src link}]])]
      [:<>
       [:p "We don't have any photos to share with you right now."]
       [:p "Check back soon."]])])
