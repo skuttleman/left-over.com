@@ -13,3 +13,5 @@
 /out/
 /target/
 pom.xml
+node_modules/
+/package*.json

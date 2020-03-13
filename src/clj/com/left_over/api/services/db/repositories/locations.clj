@@ -1,8 +1,8 @@
 (ns com.left-over.api.services.db.repositories.locations
   (:require
-    [com.left-over.api.services.db.entities :as entities]
-    [com.left-over.api.services.db.preparations :as prep]
-    [com.left-over.api.services.db.repositories.core :as repos]))
+    [com.left-over.common.services.db.entities :as entities]
+    [com.left-over.common.services.db.preparations :as prep]
+    [com.left-over.common.services.db.repositories.core :as repos]))
 
 (defmethod repos/->sql-value [:locations :created-at]
   [_ _ value]

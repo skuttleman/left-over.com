@@ -1,7 +1,7 @@
-(ns com.left-over.api.services.db.models.shared
+(ns com.left-over.common.services.db.models.shared
   (:require
-    [com.left-over.api.services.db.preparations :as prep]
-    [com.left-over.api.services.db.repositories.core :as repos]
+    [com.left-over.common.services.db.preparations :as prep]
+    [com.left-over.common.services.db.repositories.core :as repos]
     [com.left-over.common.utils.colls :as colls]))
 
 (defn ^:private with* [k f [pk fk] values]

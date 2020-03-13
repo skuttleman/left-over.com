@@ -1,5 +1,5 @@
 (ns com.left-over.api.services.db.repositories.users
-  (:require [com.left-over.api.services.db.entities :as entities]))
+  (:require [com.left-over.common.services.db.entities :as entities]))
 
 (defn select-by [clause]
   (-> entities/users

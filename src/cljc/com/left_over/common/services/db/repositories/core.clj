@@ -1,8 +1,9 @@
-(ns com.left-over.api.services.db.repositories.core
+(ns com.left-over.common.services.db.repositories.core
   (:require
     [clojure.core.async :as async]
     [clojure.string :as string]
-    [com.left-over.common.services.env :as env]
+    [com.ben-allred.vow.core :as v]
+    [com.left-over.api.services.env :as env]
     [com.left-over.common.utils.colls :as colls]
     [com.left-over.common.utils.logging :as log]
     [com.left-over.common.utils.maps :as maps]
@@ -78,7 +79,7 @@
 (defn ^:private exec* [db query xform]
   (let [formatted (sql-format query)]
     (sql-log formatted)
-    (jdbc/execute! db formatted {:builder-fn (builder-fn xform)})))
+    (v/resolve (jdbc/execute! db formatted {:builder-fn (builder-fn xform)}))))
 
 (def ^:private remove-namespaces
   (map (fn remove* [val]
@@ -91,7 +92,9 @@
   ([db sql]
    (exec-raw! db sql nil))
   ([db sql opts]
-   (jdbc/execute! db [sql] opts)))
+   (try (v/resolve (jdbc/execute! db sql opts))
+        (catch Throwable ex
+          (v/reject ex)))))
 
 (defn exec! [query db]
   (let [[query' xform-before xform-after] (colls/force-sequential query)
@@ -100,7 +103,13 @@
                 xform-after (comp xform-after))]
     (exec* db query' xform)))
 
-(def ^{:arglists '([f])} with-db
+(def ^{:arglists '([f])} transact
   (let [datasource (delay (:datasource (c3p0/make-datasource-spec db-cfg)))]
     (fn [f]
-      (jdbc/transact @datasource f {:isolation :read-uncommitted}))))
+      (jdbc/transact @datasource
+                     (fn [conn]
+                       (let [[status value] @(f conn)]
+                         (if (= :success status)
+                           (v/resolve value)
+                           (v/reject value))))
+                     {:isolation :read-uncommitted}))))

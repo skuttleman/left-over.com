@@ -1,9 +1,9 @@
-(ns com.left-over.api.services.db.repositories.shows
+(ns com.left-over.common.services.db.repositories.shows
   (:require
     [clojure.set :as set]
-    [com.left-over.api.services.db.entities :as entities]
-    [com.left-over.api.services.db.preparations :as prep]
-    [com.left-over.api.services.db.repositories.core :as repos]))
+    [com.left-over.common.services.db.entities :as entities]
+    [com.left-over.common.services.db.preparations :as prep]
+    [com.left-over.common.services.db.repositories.core :as repos]))
 
 (defmethod repos/->api ::model
   [_ hangout]

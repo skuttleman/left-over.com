@@ -2,9 +2,9 @@
   (:require
     [clj-oauth2.client :as oauth2]
     [com.ben-allred.vow.core :as v]
+    [com.left-over.api.services.env :as env]
     [com.left-over.api.services.db.models.users :as users]
     [com.left-over.api.services.jwt :as jwt]
-    [com.left-over.common.services.env :as env]
     [com.left-over.common.services.http :as http]
     [com.left-over.common.utils.edn :as edn]
     [com.left-over.common.utils.json :as json]
@@ -25,13 +25,9 @@
    :access-type        "online"
    :approval_prompt    ""})
 
-(defn log [response]
-  (log/warn "received response from GOOGLE OAUTH:: " response)
-  response)
-
 (defn token->user [token db]
   (-> (http/get (env/get :oauth-token-info-uri) {:query-params {:access_token token}})
-      (v/then-> json/parse log :email (->> (users/find-by-email db)))
+      (v/then-> :email (->> (users/find-by-email db)))
       deref))
 
 (defroutes routes

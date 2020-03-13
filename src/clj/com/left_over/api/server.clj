@@ -2,7 +2,7 @@
   (:gen-class)
   (:require
     [com.left-over.api.routes.core :as routes]
-    [com.left-over.common.services.env :as env]
+    [com.left-over.api.services.env :as env]
     [immutant.web :as web]
     [nrepl.server :as nrepl]
     [ring.middleware.reload :refer [wrap-reload]])

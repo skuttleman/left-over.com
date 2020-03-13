@@ -1,11 +1,13 @@
-(ns com.left-over.api.services.db.models.shows
+(ns com.left-over.common.services.db.models.shows
   (:require
-    [com.left-over.api.services.db.repositories.shows :as repo.shows]
-    [com.left-over.api.services.db.entities :as entities]
-    [com.left-over.api.services.db.models.shared :as models]
-    [com.left-over.api.services.db.repositories.core :as repos]
+    [com.ben-allred.vow.core :as v :include-macros true]
+    [com.left-over.common.services.db.entities :as entities]
+    [com.left-over.common.services.db.models.shared :as models]
+    [com.left-over.common.services.db.repositories.core :as repos]
+    [com.left-over.common.services.db.repositories.shows :as repo.shows]
     [com.left-over.common.utils.colls :as colls])
-  (:import (java.util Date)))
+  #?(:clj (:import
+            (java.util Date))))
 
 (defn ^:private select* [clause]
   (-> clause
@@ -34,14 +36,15 @@
        [:= :shows.deleted false]]
       select*
       (repos/exec! db)
-      colls/only!))
+      (v/then colls/only!)))
 
 (defn save [db user {show-id :id :as show}]
   (let [show' (-> show
                   (dissoc :id)
-                  (assoc :updated-at (Date.))
+                  (assoc :updated-at #?(:clj (Date.) :cljs (js/Date.)))
                   (cond->
-                    (not show-id) (assoc :created-by (:id user) :created-at (Date.))))]
+                    (not show-id) (assoc :created-by (:id user)
+                                         :created-at #?(:clj (Date.) :cljs (js/Date.)))))]
     (-> entities/shows
         (cond->
           show-id (-> (entities/modify show' [:= :shows.id show-id])
@@ -50,6 +53,4 @@
                             (models/insert-many entities/shows ::repo.shows/model)))
 
         (repos/exec! db)
-        first
-        :id
-        (->> (find-by-id db)))))
+        (v/then-> first :id (->> (find-by-id db))))))

@@ -119,6 +119,10 @@
 (defn now []
   (zdt/now zo/utc))
 
+(defn now-ms []
+  (.getTime #?(:clj  (Date.)
+               :cljs (js/Date.))))
+
 (defn inst->ms [inst?]
   (inst/to-epoch-milli (zdt/to-instant (->date inst?))))
 

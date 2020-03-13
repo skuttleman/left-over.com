@@ -1,9 +1,11 @@
-(ns com.left-over.api.services.db.entities
+(ns com.left-over.common.services.db.entities
   (:require
-    [com.left-over.common.utils.keywords :as keywords]
+    [camel-snake-kebab.core :as csk]
     [clojure.set :as set]
-    [com.left-over.api.services.db.repositories.core :as repos]
-    [camel-snake-kebab.core :as csk]))
+    [com.ben-allred.vow.core :as v]
+    [com.left-over.common.services.db.repositories.core :as repos]
+    [com.left-over.common.utils.keywords :as keywords]
+    [com.left-over.common.utils.strings :as strings]))
 
 (defn ^:private with-field-alias [fields table-alias field-aliases]
   (let [table-alias' (name table-alias)]
@@ -76,17 +78,34 @@
   ([query entity alias on aliases]
    (join* query :join entity alias on aliases)))
 
-(defmacro ^:private defentity [entity]
-  (let [entity-name (name entity)]
-    `(def ~entity (repos/with-db (fn [db#]
-                                   (->> ~entity-name
-                                        (format "SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='%s'")
-                                        (repos/exec-raw! db#)
-                                        (into #{} (map (comp csk/->kebab-case-keyword :columns/column_name)))
-                                        (assoc {:table (keyword ~entity-name)} :fields)))))))
+(declare shows locations users)
 
-(defentity shows)
+(defn ^:private make-entity [entity]
+  (repos/transact (fn [conn]
+                    (-> entity
+                        (->> (strings/format "SELECT column_name
+                                              FROM information_schema.columns
+                                              WHERE table_schema='public'
+                                                AND table_name='%s'")
+                             vector
+                             (repos/exec-raw! conn))
+                        (v/then (fn [result]
+                                  (->> result
+                                       (into #{} (map (comp csk/->kebab-case-keyword #?(:clj  :columns/column_name
+                                                                                        :cljs :column_name))))
+                                       (assoc {:table (keyword entity)} :fields))))))))
 
-(defentity locations)
+(defonce ^:private _shows
+  (v/then (make-entity "shows")
+          (fn [entity]
+            (def shows entity))))
 
-(defentity users)
+(defonce ^:private _locations
+  (v/then (make-entity "locations")
+          (fn [entity]
+            (def locations entity))))
+
+(defonce ^:private _users
+  (v/then (make-entity "users")
+          (fn [entity]
+            (def users entity))))

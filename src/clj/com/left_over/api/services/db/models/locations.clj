@@ -1,10 +1,10 @@
 (ns com.left-over.api.services.db.models.locations
   (:require
-    [com.left-over.api.services.db.entities :as entities]
-    [com.left-over.api.services.db.models.shared :as models]
-    [com.left-over.api.services.db.repositories.core :as repos]
+    [com.left-over.common.services.db.entities :as entities]
+    [com.left-over.common.services.db.models.shared :as models]
+    [com.left-over.common.services.db.repositories.core :as repos]
     [com.left-over.api.services.db.repositories.locations :as repo.locations]
-    [com.left-over.api.services.db.repositories.shows :as repo.shows]
+    [com.left-over.common.services.db.repositories.shows :as repo.shows]
     [com.left-over.common.utils.colls :as colls])
   (:import (java.util Date)))
 

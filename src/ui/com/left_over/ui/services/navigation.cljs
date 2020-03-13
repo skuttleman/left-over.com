@@ -2,7 +2,7 @@
   (:require
     [bidi.bidi :as bidi]
     [clojure.string :as string]
-    [com.left-over.common.services.env :as env]
+    [com.left-over.ui.services.env :as env]
     [com.left-over.common.utils.keywords :as keywords]
     [com.left-over.common.utils.maps :as maps]
     [com.left-over.ui.services.store.core :as store]
@@ -42,10 +42,10 @@
            [[["/" :image] :s3/image]]]))
 
 (def ^:private aws-routes
-  (routes ["/dropbox"
+  (routes ["/public"
            [["/images" :aws/images]
-            ["/videos" :aws/videos]]]
-          ["/shows" :aws/shows]))
+            ["/videos" :aws/videos]
+            ["/shows" :aws/shows]]]))
 
 (defn ^:private namify [[k v]]
   [k (if (keyword? v) (name v) (str v))])

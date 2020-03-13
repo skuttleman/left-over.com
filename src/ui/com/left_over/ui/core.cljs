@@ -1,6 +1,6 @@
 (ns com.left-over.ui.core
   (:require
-    [com.left-over.common.services.env :as env]
+    [com.left-over.ui.services.env :as env]
     [com.left-over.ui.admin :as ui.admin]
     [com.left-over.ui.main :as ui.main]))
 
