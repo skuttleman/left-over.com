@@ -34,7 +34,12 @@
   ([icon-class]
    (icon {} icon-class))
   ([attrs icon-class]
-   [:i (update attrs :class conj (style->class (:icon-style attrs :solid)) (str "fa-" (name icon-class)))]))
+   [:i (-> attrs
+           (update :class
+                   conj
+                   (style->class (:icon-style attrs :solid))
+                   (str "fa-" (name icon-class)))
+           (dissoc :icon-style))]))
 
 (defn with-status [keys component state]
   (condp #(contains? %2 %1) (into #{} (map (comp first state)) keys)

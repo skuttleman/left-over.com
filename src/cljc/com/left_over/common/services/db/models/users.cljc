@@ -1,7 +1,7 @@
-(ns com.left-over.api.services.db.models.users
+(ns com.left-over.common.services.db.models.users
   (:require
-    [com.ben-allred.vow.core :as v]
-    [com.left-over.api.services.db.repositories.users :as repo.users]
+    [com.ben-allred.vow.core :as v #?@(:cljs [:include-macros true])]
+    [com.left-over.common.services.db.repositories.users :as repo.users]
     [com.left-over.common.services.db.models.shared :as models]
     [com.left-over.common.services.db.repositories.core :as repos]
     [com.left-over.common.utils.colls :as colls]))

@@ -1,6 +1,7 @@
 (ns com.left-over.common.services.http
   (:refer-clojure :exclude [get])
   (:require
+    #?(:clj [clj-http.cookies :as cookies])
     [#?(:clj clj-http.client :cljs cljs-http.client) :as client]
     [#?(:clj clj-http.core :cljs cljs-http.core) :as http*]
     [clojure.core.async :as async]
@@ -101,14 +102,20 @@
                  client/wrap-channel-from-request-map])))
 
 (defn ^:private client [request]
-  #?(:clj  (let [cs (clj-http.cookies/cookie-store)
+  #?(:clj  (let [cs (cookies/cookie-store)
                  ch (async/chan)]
-             (-> request
-                 (merge {:async? true :cookie-store cs})
-                 (client* (fn [response]
-                            (async/put! ch (assoc response :cookies (clj-http.cookies/get-cookies cs))))
-                          (fn [exception]
-                            (async/put! ch (assoc (ex-data exception) :cookies (clj-http.cookies/get-cookies cs))))))
+             (async/go
+               (try
+                 (-> request
+                     (merge {:cookie-store cs})
+                     client*
+                     (assoc :cookies (cookies/get-cookies cs))
+                     (->> (async/>! ch)))
+                 (catch Throwable ex
+                   (log/error "failed http: "
+                              (select-keys request #{:headers :url :method :query-params :body})
+                              (pr-str ex))
+                   (async/put! ch (assoc (ex-data ex) :cookies (cookies/get-cookies cs))))))
              ch)
      :cljs (let [token (some-> js/localStorage (.getItem "auth-token"))]
              (-> request

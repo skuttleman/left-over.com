@@ -2,6 +2,8 @@
   (:require
     [com.ben-allred.vow.core :as v]
     [com.left-over.api.handlers.public.shows :as shows]
+    [com.left-over.api.handlers.public.images :as images]
+    [com.left-over.api.handlers.public.videos :as videos]
     [com.left-over.api.services.env :as env]
     [com.left-over.common.utils.edn :as edn]
     [com.left-over.common.utils.logging :as log :include-macros true]
@@ -37,14 +39,11 @@
   (doto (express)
     (.use (cors))
     (.use body-parser)
-    #_(.get "/public/images" (handler->route images/handler))
+    (.get "/public/images" (handler->route images/handler))
     (.get "/public/shows" (handler->route shows/handler))
-    #_(.get "/public/videos" (handler->route videos/handler))))
+    (.get "/public/videos" (handler->route videos/handler))))
 
 (defonce server
   (let [port (numbers/parse-int (env/get :dev-aws-port "3100"))]
     (doto (http/createServer app)
       (.listen port (fn [] (log/info "The server is listening on PORT" port))))))
-
-(comment
-  (.close server))

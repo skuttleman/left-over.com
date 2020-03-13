@@ -52,7 +52,8 @@
 (defn ^:private request [url body]
   (http/post url
              {:headers {:authorization (str "Bearer " (env/get :dropbox-access-token))}
-              :body    body}))
+              :body    body
+              :json?   true}))
 
 (defn ^:private fetch* [mime-filter path]
   (-> dropbox-list-folder

@@ -1,6 +1,6 @@
 (ns com.left-over.api.routes.admin
   (:require
-    [com.left-over.api.services.db.models.locations :as locations]
+    [com.left-over.common.services.db.models.locations :as locations]
     [com.left-over.api.utils.promises :as prom]
     [com.left-over.common.services.db.models.shows :as shows]
     [compojure.core :refer [ANY DELETE GET POST PUT context defroutes]])

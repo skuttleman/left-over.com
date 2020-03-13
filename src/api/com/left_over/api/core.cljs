@@ -5,6 +5,7 @@
 
 (nodejs/enable-util-print!)
 (set! (.-XMLHttpRequest js/global) (.-XMLHttpRequest (nodejs/require "xmlhttprequest")))
+(aset js/global "localStorage" nil)
 
 (defn ^:private response [status event]
   (let [origin (get-in event [:headers :origin])]

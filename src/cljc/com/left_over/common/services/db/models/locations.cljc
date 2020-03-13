@@ -1,12 +1,14 @@
-(ns com.left-over.api.services.db.models.locations
+(ns com.left-over.common.services.db.models.locations
   (:require
+    [com.ben-allred.vow.core :as v #?@(:cljs [:include-macros true])]
     [com.left-over.common.services.db.entities :as entities]
     [com.left-over.common.services.db.models.shared :as models]
     [com.left-over.common.services.db.repositories.core :as repos]
-    [com.left-over.api.services.db.repositories.locations :as repo.locations]
+    [com.left-over.common.services.db.repositories.locations :as repo.locations]
     [com.left-over.common.services.db.repositories.shows :as repo.shows]
     [com.left-over.common.utils.colls :as colls])
-  (:import (java.util Date)))
+  #?(:clj (:import
+            (java.util Date))))
 
 (defn ^:private select* [db clause]
   (-> clause
@@ -26,14 +28,15 @@
   (select* db nil))
 
 (defn find-by-id [db location-id]
-  (colls/only! (select* db [:= :locations.id location-id])))
+  (v/then (select* db [:= :locations.id location-id]) colls/only!))
 
 (defn save [db user {location-id :id :as location}]
-  (let [location' (-> location
+  (let [date #?(:clj (Date.) :cljs (js/Date.) :default nil)
+        location' (-> location
                       (dissoc :id)
-                      (assoc :updated-at (Date.))
+                      (assoc :updated-at date)
                       (cond->
-                        (not location-id) (assoc :created-by (:id user) :created-at (Date.))))]
+                        (not location-id) (assoc :created-by (:id user) :created-at date)))]
     (-> entities/locations
         (cond->
           location-id (-> (entities/modify location' [:= :locations.id location-id])
@@ -42,6 +45,4 @@
                                 (models/insert-many entities/locations ::repo.locations/model)))
 
         (repos/exec! db)
-        first
-        :id
-        (->> (find-by-id db)))))
+        (v/then-> first :id (->> (find-by-id db))))))
