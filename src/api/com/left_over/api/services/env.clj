@@ -13,4 +13,7 @@
                   (when (.exists f)
                     (edn/parse (slurp f)))))))
 
-(def get (build-env))
+(def get
+  (into {}
+        (map (juxt (comp keywords/keyword key) val))
+        (System/getenv)))
