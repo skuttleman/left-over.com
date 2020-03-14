@@ -33,8 +33,9 @@
    :subprotocol "postgresql"
    :user        (env/get :db-user)
    :password    (env/get :db-password)
-   :subname     (format "//%s:%s/%s"
-                        #_"//%s:%s/%s?sslmode=require"
+   :subname     (format (if (= "localhost" (env/get :db-host))
+                          "//%s:%s/%s"
+                          "//%s:%s/%s?sslmode=require")
                         (env/get :db-host)
                         (env/get :db-port)
                         (env/get :db-name))})

@@ -25,8 +25,8 @@
                  [metosin/jsonista "0.1.1"]
                  [nilenso/honeysql-postgres "0.2.5" :exclusions [[net.cgrand/macrovich]]]
                  [org.clojure/clojure "1.10.1"]
-                 [org.clojure/clojurescript "1.10.520"]
-                 [org.clojure/core.async "0.4.500"]
+                 [org.clojure/clojurescript "1.10.597"]
+                 [org.clojure/core.async "1.0.567"]
                  [org.clojure/core.match "0.3.0"]
                  [org.immutant/immutant "2.1.10" :exclusions [[ring/ring-core]]]
                  [org.postgresql/postgresql "9.4-1206-jdbc41" :exclusions [[org.clojure/java.jdbc]]]
@@ -37,12 +37,12 @@
                  [ring/ring-devel "1.6.3" :exclusions [[ring/ring-core]]]
                  [seancorfield/next.jdbc "1.0.5"]
                  [sudharsh/clj-oauth2 "0.5.3"]
-                 [tick "0.4.20-alpha"]]
+                 [tick "0.4.23-alpha"]]
   :plugins [[lein-figwheel "0.5.19"]
             [lein-sass "0.5.0"]
             [lein-cooper "1.2.2"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]
-  :source-paths ["src/clj" "src/ui" "src/api" "src/cljc"]
+  :source-paths ["src/clj" "src/api" "src/cljc"]
   :clean-targets ["target" "dist/js" "dist/css"]
   :cljsbuild {:builds
               [{:id           "dev-ui"
@@ -81,7 +81,7 @@
                 :source-paths ["src/api" "src/cljc"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:xmlhttprequest "1.8.0"}
-                               :main          com.left-over.lambda.entry-points.public.images
+                               :main          com.left-over.api.handlers.pub.images
                                :output-to     "target/pub/images.js"
                                :output-dir    "target/js/compiled/pub/images"
                                :target        :nodejs
@@ -91,7 +91,7 @@
                 :source-paths ["src/api" "src/cljc"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:xmlhttprequest "1.8.0"}
-                               :main          com.left-over.lambda.entry-points.public.videos
+                               :main          com.left-over.api.handlers.pub.videos
                                :output-to     "target/pub/videos.js"
                                :output-dir    "target/js/compiled/pub/videos"
                                :target        :nodejs
@@ -101,7 +101,7 @@
                 :source-paths ["src/api" "src/cljc"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:pg "7.18.2"}
-                               :main          com.left-over.api.handlers.public.shows
+                               :main          com.left-over.api.handlers.pub.shows
                                :output-to     "target/pub/shows.js"
                                :output-dir    "target/js/compiled/pub/shows"
                                :target        :nodejs

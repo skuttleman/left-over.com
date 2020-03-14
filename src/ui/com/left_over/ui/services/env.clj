@@ -1,5 +1,4 @@
 (ns com.left-over.ui.services.env
-  (:refer-clojure :exclude [get])
   (:require
     [clojure.java.io :as io]
     [com.left-over.common.utils.edn :as edn]
@@ -10,7 +9,7 @@
                              :aws-api-uri
                              :aws-s3-uri})
 
-(defmacro env []
+(defmacro build-env []
   (let [f (io/file ".lein-env")]
     (into {}
           (comp (map (juxt (comp keywords/keyword key) val))

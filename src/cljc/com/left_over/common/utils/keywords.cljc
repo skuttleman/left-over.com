@@ -1,6 +1,7 @@
 (ns com.left-over.common.utils.keywords
-  (:refer-clojure :exclude [keyword replace str])
-  (:require [clojure.string :as string]))
+  (:refer-clojure :exclude [keyword str])
+  (:require
+    [clojure.string :as string]))
 
 (defn str [v]
   (if (keyword? v)

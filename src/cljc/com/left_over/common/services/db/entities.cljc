@@ -1,11 +1,7 @@
 (ns com.left-over.common.services.db.entities
   (:require
-    [camel-snake-kebab.core :as csk]
     [clojure.set :as set]
-    [com.ben-allred.vow.core :as v]
-    [com.left-over.common.services.db.repositories.core :as repos]
-    [com.left-over.common.utils.keywords :as keywords]
-    [com.left-over.common.utils.strings :as strings]))
+    [com.left-over.common.utils.keywords :as keywords]))
 
 (defn ^:private with-field-alias [fields table-alias field-aliases]
   (let [table-alias' (name table-alias)]
@@ -78,34 +74,14 @@
   ([query entity alias on aliases]
    (join* query :join entity alias on aliases)))
 
-(declare shows locations users)
+(def ^:private common-fields #{:id :created-at :updated-at})
 
-(defn ^:private make-entity [entity]
-  (repos/transact (fn [conn]
-                    (-> entity
-                        (->> (strings/format "SELECT column_name
-                                              FROM information_schema.columns
-                                              WHERE table_schema='public'
-                                                AND table_name='%s'")
-                             vector
-                             (repos/exec-raw! conn))
-                        (v/then (fn [result]
-                                  (->> result
-                                       (into #{} (map (comp csk/->kebab-case-keyword #?(:clj  :columns/column_name
-                                                                                        :cljs :column_name))))
-                                       (assoc {:table (keyword entity)} :fields))))))))
+(def locations {:table  :locations
+                :fields (into common-fields #{:city :created-by :name :state :website})})
 
-(defonce ^:private _shows
-  (v/then (make-entity "shows")
-          (fn [entity]
-            (def shows entity))))
+(def shows {:table  :shows
+            :fields (into common-fields #{:created-by :date-time :deleted :hidden
+                                          :location-id :name :timezone :website})})
 
-(defonce ^:private _locations
-  (v/then (make-entity "locations")
-          (fn [entity]
-            (def locations entity))))
-
-(defonce ^:private _users
-  (v/then (make-entity "users")
-          (fn [entity]
-            (def users entity))))
+(def users {:table  :users
+            :fields (into common-fields #{:email :external-id :first-name :last-name})})

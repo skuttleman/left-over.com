@@ -10,7 +10,6 @@
     [cljc.java-time.local-date :as ld]
     [cljc.java-time.local-date-time :as ldt]
     [cljc.java-time.zone-offset :as zo]
-    [cljc.java-time.offset-date-time :as odt]
     [cljc.java-time.zoned-date-time :as zdt]
     [clojure.string :as string]
     [tick.format :as tf]
@@ -118,10 +117,6 @@
 
 (defn now []
   (zdt/now zo/utc))
-
-(defn now-ms []
-  (.getTime #?(:clj  (Date.)
-               :cljs (js/Date.))))
 
 (defn inst->ms [inst?]
   (inst/to-epoch-milli (zdt/to-instant (->date inst?))))

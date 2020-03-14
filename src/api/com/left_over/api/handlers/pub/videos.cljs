@@ -1,4 +1,4 @@
-(ns com.left-over.api.handlers.public.videos
+(ns com.left-over.api.handlers.pub.videos
   (:require
     [com.left-over.api.core :as core]
     [com.left-over.api.services.dropbox :as dropbox]))

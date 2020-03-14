@@ -8,9 +8,12 @@
     [com.left-over.common.utils.colls :as colls]
     [com.left-over.common.utils.logging :as log]
     [com.left-over.common.utils.strings :as strings]
-    [honeysql.core :as sql]))
+    [honeysql.core :as sql]
+    pg-types))
 
 (def Client (.-Client (nodejs/require "pg")))
+
+(pg-types/setTypeParser pg-types/builtins.UUID #(some-> % uuid))
 
 (defn ^:private sql-value* [table column _]
   [table column])
@@ -23,13 +26,9 @@
 
 (defmethod ->sql-value :default [_ _ value] value)
 
-(defn ^:private sql-format [query]
-  (sql/format query :quoting :ansi))
-
 (defn ^:private sql-log [[statement & args]]
   (async/go
-    (when true
-      (env/get :dev?)
+    (when (env/get :dev?)
       (let [bindings (volatile! args)]
         (log/info
           (string/replace statement
@@ -62,7 +61,6 @@
          (cond
            (map? x) (into {} (map (juxt (comp keyword name key) (comp remove* val))) x)
            (coll? x) (map remove* x)
-           (and (string? x) (re-matches #"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" x)) (uuid x)
            :else x))))
 
 (defn exec! [query conn]

@@ -12,36 +12,36 @@
   {:auth/failed [:error (constantly [:div "Your login attempt failed. Please check your email and password and try again."])]})
 
 (def fetch-auth-info
-  (actions/fetch* (nav/api-for :auth/info) :auth.info))
+  (actions/fetch* (nav/api-for :auth/info) :auth.info {:token? true}))
 
 (def fetch-locations
-  (actions/fetch* (nav/api-for :api.admin/locations) :locations))
+  (actions/fetch* (nav/api-for :api.admin/locations) :locations {:token? true}))
 
 (def fetch-shows
-  (actions/fetch* (nav/api-for :api.admin/shows) :shows))
+  (actions/fetch* (nav/api-for :api.admin/shows) :shows {:token? true}))
 
 (defn fetch-show [show-id]
-  (actions/fetch* (nav/api-for :api.admin/show {:route-params {:show-id show-id}}) :show))
+  (actions/fetch* (nav/api-for :api.admin/show {:route-params {:show-id show-id}}) :show {:token? true}))
 
 (defn create-show [show]
   (fn [_]
-    (http/post (nav/api-for :api.admin/shows) {:body show})))
+    (http/post (nav/api-for :api.admin/shows) {:body show :token? true})))
 
 (defn update-show [show-id show]
   (fn [_]
-    (http/put (nav/api-for :api.admin/show {:route-params {:show-id show-id}}) {:body show})))
+    (http/put (nav/api-for :api.admin/show {:route-params {:show-id show-id}}) {:body show :token? true})))
 
 (defn delete-show [show-id]
   (fn [_]
-    (http/delete (nav/api-for :api.admin/show {:route-params {:show-id show-id}}))))
+    (http/delete (nav/api-for :api.admin/show {:route-params {:show-id show-id}}) {:token? true})))
 
 (defn create-location [location]
   (fn [_]
-    (http/post (nav/api-for :api.admin/locations) {:body location})))
+    (http/post (nav/api-for :api.admin/locations) {:body location :token? true})))
 
 (defn update-location [location-id location]
   (fn [_]
-    (http/put (nav/api-for :api.admin/location {:route-params {:location-id location-id}}) {:body location})))
+    (http/put (nav/api-for :api.admin/location {:route-params {:location-id location-id}}) {:body location :token? true})))
 
 (defn create-form
   ([model]

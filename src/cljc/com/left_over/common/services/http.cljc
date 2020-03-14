@@ -117,7 +117,8 @@
                               (pr-str ex))
                    (async/put! ch (assoc (ex-data ex) :cookies (cookies/get-cookies cs))))))
              ch)
-     :cljs (let [token (some-> js/localStorage (.getItem "auth-token"))]
+     :cljs (let [token (when (:token? request)
+                         (some-> js/localStorage (.getItem "auth-token")))]
              (-> request
                  (cond->
                    token

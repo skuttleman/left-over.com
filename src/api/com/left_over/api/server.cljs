@@ -1,9 +1,9 @@
 (ns com.left-over.api.server
   (:require
     [com.ben-allred.vow.core :as v]
-    [com.left-over.api.handlers.public.shows :as shows]
-    [com.left-over.api.handlers.public.images :as images]
-    [com.left-over.api.handlers.public.videos :as videos]
+    [com.left-over.api.handlers.pub.shows :as shows]
+    [com.left-over.api.handlers.pub.images :as images]
+    [com.left-over.api.handlers.pub.videos :as videos]
     [com.left-over.api.services.env :as env]
     [com.left-over.common.utils.edn :as edn]
     [com.left-over.common.utils.logging :as log :include-macros true]

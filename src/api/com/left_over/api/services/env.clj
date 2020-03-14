@@ -3,10 +3,9 @@
   (:require
     [clojure.java.io :as io]
     [com.left-over.common.utils.edn :as edn]
-    [com.left-over.common.utils.keywords :as keywords]
-    [com.left-over.common.utils.logging :as log]))
+    [com.left-over.common.utils.keywords :as keywords]))
 
-(defmacro env []
+(defmacro build-env []
   (let [f (io/file ".lein-env")]
     (into {}
           (map (juxt (comp keywords/keyword key) val))
@@ -14,6 +13,4 @@
                   (when (.exists f)
                     (edn/parse (slurp f)))))))
 
-(def get
-  (let [env (env)]
-    (assoc env :dev? (= (:environment env "development") "development"))))
+(def get (build-env))
