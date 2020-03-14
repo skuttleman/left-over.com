@@ -1,17 +1,19 @@
 (ns com.left-over.api.services.middleware
   (:require [clojure.java.io :as io]
             [clojure.string :as string]
-            [com.left-over.api.services.db.repositories.core :as repos]
+            [com.ben-allred.vow.core :as v]
             [com.left-over.api.services.jwt :as jwt]
+            [com.left-over.api.utils.promises :as prom]
+            [com.left-over.common.services.db.repositories.core :as repos]
             [com.left-over.common.utils.edn :as edn]
             [com.left-over.common.utils.maps :as maps])
   (:import (java.io PushbackReader)))
 
 (defn with-transaction [handler]
   (fn [request]
-    (repos/with-db
-      (fn [db]
-        (handler (assoc request :db db))))))
+    (prom/deref! (repos/transact
+                   (fn [db]
+                     (v/resolve (handler (assoc request :db db))))))))
 
 (defn with-content-type [handler]
   (fn [request]

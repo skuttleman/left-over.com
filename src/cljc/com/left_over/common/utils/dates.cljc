@@ -10,7 +10,6 @@
     [cljc.java-time.local-date :as ld]
     [cljc.java-time.local-date-time :as ldt]
     [cljc.java-time.zone-offset :as zo]
-    [cljc.java-time.offset-date-time :as odt]
     [cljc.java-time.zoned-date-time :as zdt]
     [clojure.string :as string]
     [tick.format :as tf]

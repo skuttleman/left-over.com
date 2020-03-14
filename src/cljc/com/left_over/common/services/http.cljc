@@ -1,56 +1,56 @@
 (ns com.left-over.common.services.http
   (:refer-clojure :exclude [get])
   (:require
+    #?(:clj [clj-http.cookies :as cookies])
     [#?(:clj clj-http.client :cljs cljs-http.client) :as client]
     [#?(:clj clj-http.core :cljs cljs-http.core) :as http*]
     [clojure.core.async :as async]
     [clojure.set :as set]
     [com.ben-allred.vow.core :as v #?@(:cljs [:include-macros true])]
-    [com.left-over.common.services.env :as env]
     [com.left-over.common.utils.edn :as edn]
     [com.left-over.common.utils.json :as json]
-    [com.left-over.common.utils.logging :as log]))
+    [com.left-over.common.utils.logging :as log #?@(:cljs [:include-macros true])]))
 
 (def status->kw
-  {200 :http.status/ok
-   201 :http.status/created
-   202 :http.status/accepted
-   203 :http.status/non-authoritative-information
-   204 :http.status/no-content
-   205 :http.status/reset-content
-   206 :http.status/partial-content
-   300 :http.status/multiple-choices
-   301 :http.status/moved-permanently
-   302 :http.status/found
-   303 :http.status/see-other
-   304 :http.status/not-modified
-   305 :http.status/use-proxy
-   306 :http.status/unused
-   307 :http.status/temporary-redirect
-   400 :http.status/bad-request
-   401 :http.status/unauthorized
-   402 :http.status/payment-required
-   403 :http.status/forbidden
-   404 :http.status/not-found
-   405 :http.status/method-not-allowed
-   406 :http.status/not-acceptable
-   407 :http.status/proxy-authentication-required
-   408 :http.status/request-timeout
-   409 :http.status/conflict
-   410 :http.status/gone
-   411 :http.status/length-required
-   412 :http.status/precondition-failed
-   413 :http.status/request-entity-too-large
-   414 :http.status/request-uri-too-long
-   415 :http.status/unsupported-media-type
-   416 :http.status/requested-range-not-satisfiable
-   417 :http.status/expectation-failed
-   500 :http.status/internal-server-error
-   501 :http.status/not-implemented
-   502 :http.status/bad-gateway
-   503 :http.status/service-unavailable
-   504 :http.status/gateway-timeout
-   505 :http.status/http-version-not-supported})
+  {200 ::ok
+   201 ::created
+   202 ::accepted
+   203 ::non-authoritative-information
+   204 ::no-content
+   205 ::reset-content
+   206 ::partial-content
+   300 ::multiple-choices
+   301 ::moved-permanently
+   302 ::found
+   303 ::see-other
+   304 ::not-modified
+   305 ::use-proxy
+   306 ::unused
+   307 ::temporary-redirect
+   400 ::bad-request
+   401 ::unauthorized
+   402 ::payment-required
+   403 ::forbidden
+   404 ::not-found
+   405 ::method-not-allowed
+   406 ::not-acceptable
+   407 ::proxy-authentication-required
+   408 ::request-timeout
+   409 ::conflict
+   410 ::gone
+   411 ::length-required
+   412 ::precondition-failed
+   413 ::request-entity-too-large
+   414 ::request-uri-too-long
+   415 ::unsupported-media-type
+   416 ::requested-range-not-satisfiable
+   417 ::expectation-failed
+   500 ::internal-server-error
+   501 ::not-implemented
+   502 ::bad-gateway
+   503 ::service-unavailable
+   504 ::gateway-timeout
+   505 ::http-version-not-supported})
 
 (def kw->status
   (set/map-invert status->kw))
@@ -62,7 +62,6 @@
                          (cond-> $ (vector? $) second)
                          (:status $)
                          (cond-> $ (keyword? $) kw->status))
-                   (log/warn "unknown status" response)
                    500)]
     (<= lower status upper)))
 
@@ -103,17 +102,23 @@
                  client/wrap-channel-from-request-map])))
 
 (defn ^:private client [request]
-  #?(:clj  (let [cs (clj-http.cookies/cookie-store)
+  #?(:clj  (let [cs (cookies/cookie-store)
                  ch (async/chan)]
-             (-> request
-                 (merge {:async? true :cookie-store cs})
-                 (client* (fn [response]
-                            (async/put! ch (assoc response :cookies (clj-http.cookies/get-cookies cs))))
-                          (fn [exception]
-                            (async/put! ch (assoc (ex-data exception) :cookies (clj-http.cookies/get-cookies cs))))))
+             (async/go
+               (try
+                 (-> request
+                     (merge {:cookie-store cs})
+                     client*
+                     (assoc :cookies (cookies/get-cookies cs))
+                     (->> (async/>! ch)))
+                 (catch Throwable ex
+                   (log/error "failed http: "
+                              (select-keys request #{:headers :url :method :query-params :body})
+                              (pr-str ex))
+                   (async/put! ch (assoc (ex-data ex) :cookies (cookies/get-cookies cs))))))
              ch)
-     :cljs (let [token (when (env/get :admin?)
-                         (.getItem js/localStorage "auth-token"))]
+     :cljs (let [token (when (:token? request)
+                         (some-> js/localStorage (.getItem "auth-token")))]
              (-> request
                  (cond->
                    token
@@ -144,9 +149,9 @@
       (-> response
           (update :status #(status->kw % %))
           (update :body (fn [body]
-                          (case content-type
-                            "application/json" (json/parse body)
-                            "application/edn" (edn/parse body)
+                          (condp re-find (str content-type)
+                            #"application/json" (json/parse body)
+                            #"application/edn" (edn/parse body)
                             body)))
           (->> (conj [(if (success? response) :success :error)]))))))
 
@@ -162,9 +167,10 @@
       (v/ch->prom (comp #{:success} first))
       (v/then second (comp v/reject second))))
 
-(defn ^:private go [method url {:keys [response?] :as request}]
-  (let [content-type #?(:cljs "application/edn" :default "application/json")
-        headers (merge {:content-type content-type :accept content-type}
+(defn ^:private go [method url {:keys [response? json?] :as request}]
+  (let [content-type (if json? "application/json" "application/edn")
+        headers (merge (cond-> {:accept content-type}
+                         (:body request) (assoc :content-type content-type))
                        (:headers request))]
     (-> request
         (assoc :method method :url url :headers headers)

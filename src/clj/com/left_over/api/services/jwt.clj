@@ -1,8 +1,8 @@
 (ns com.left-over.api.services.jwt
   (:require
     [clj-jwt.core :as clj-jwt]
+    [com.left-over.api.services.env :as env]
     [com.left-over.common.utils.edn :as edn]
-    [com.left-over.common.services.env :as env]
     [com.left-over.common.utils.dates :as dates])
   (:import (org.joda.time DateTime)))
 
