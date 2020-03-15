@@ -1,6 +1,6 @@
 (ns com.left-over.api.server
   (:require
-    [com.ben-allred.vow.core :as v]
+    [com.ben-allred.vow.core :as v :include-macros true]
     [com.left-over.api.handlers.auth :as auth]
     [com.left-over.api.handlers.pub.images :as images]
     [com.left-over.api.handlers.pub.shows :as shows]

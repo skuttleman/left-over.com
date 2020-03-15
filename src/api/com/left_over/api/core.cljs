@@ -1,7 +1,7 @@
 (ns com.left-over.api.core
   (:require
     [cljs.nodejs :as nodejs]
-    [com.ben-allred.vow.core :as v]
+    [com.ben-allred.vow.core :as v :include-macros true]
     [com.left-over.api.services.jwt :as jwt]
     [com.left-over.common.utils.keywords :as keywords]
     [com.left-over.common.utils.logging :as log]

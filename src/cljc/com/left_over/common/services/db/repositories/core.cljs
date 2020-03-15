@@ -3,7 +3,7 @@
     [cljs.nodejs :as nodejs]
     [clojure.core.async :as async]
     [clojure.string :as string]
-    [com.ben-allred.vow.core :as v]
+    [com.ben-allred.vow.core :as v :include-macros true]
     [com.left-over.api.services.env :as env]
     [com.left-over.common.utils.colls :as colls]
     [com.left-over.common.utils.logging :as log]

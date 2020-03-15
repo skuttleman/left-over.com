@@ -1,7 +1,7 @@
 (ns com.left-over.common.services.db.models.shows
   (:require
-    [com.ben-allred.vow.core :as v :include-macros true]
-    [com.left-over.common.services.db.entities :as entities]
+    [com.ben-allred.vow.core :as v #?@(:cljs [:include-macros true])]
+    [com.left-over.api.services.db.entities :as entities]
     [com.left-over.common.services.db.models.shared :as models]
     [com.left-over.common.services.db.repositories.core :as repos]
     [com.left-over.common.services.db.repositories.shows :as repo.shows]

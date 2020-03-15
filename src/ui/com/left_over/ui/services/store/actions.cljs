@@ -1,6 +1,6 @@
 (ns com.left-over.ui.services.store.actions
   (:require
-    [com.ben-allred.vow.core :as v]
+    [com.ben-allred.vow.core :as v :include-macros true]
     [com.left-over.ui.services.env :as env]
     [com.left-over.common.services.http :as http]
     [com.left-over.ui.services.navigation :as nav]))

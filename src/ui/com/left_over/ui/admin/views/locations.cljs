@@ -1,7 +1,7 @@
 (ns com.left-over.ui.admin.views.locations
   (:require
     [com.ben-allred.formation.core :as f]
-    [com.ben-allred.vow.core :as v]
+    [com.ben-allred.vow.core :as v :include-macros true]
     [com.left-over.common.utils.logging :as log]
     [com.left-over.ui.admin.services.store.actions :as admin.actions]
     [com.left-over.ui.admin.views.fields :as fields]

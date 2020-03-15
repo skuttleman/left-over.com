@@ -73,15 +73,3 @@
    (inner-join query entity alias on {}))
   ([query entity alias on aliases]
    (join* query :join entity alias on aliases)))
-
-(def ^:private common-fields #{:id :created-at :updated-at})
-
-(def locations {:table  :locations
-                :fields (into common-fields #{:city :created-by :name :state :website})})
-
-(def shows {:table  :shows
-            :fields (into common-fields #{:created-by :date-time :deleted :hidden
-                                          :location-id :name :timezone :website})})
-
-(def users {:table  :users
-            :fields (into common-fields #{:email :external-id :first-name :last-name})})

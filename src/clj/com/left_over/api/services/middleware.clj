@@ -1,19 +1,20 @@
 (ns com.left-over.api.services.middleware
-  (:require [clojure.java.io :as io]
-            [clojure.string :as string]
-            [com.ben-allred.vow.core :as v]
-            [com.left-over.api.services.jwt :as jwt]
-            [com.left-over.api.utils.promises :as prom]
-            [com.left-over.common.services.db.repositories.core :as repos]
-            [com.left-over.common.utils.edn :as edn]
-            [com.left-over.common.utils.maps :as maps])
-  (:import (java.io PushbackReader)))
+  (:require
+    [clojure.java.io :as io]
+    [clojure.string :as string]
+    [com.ben-allred.vow.core :as v]
+    [com.left-over.api.services.jwt :as jwt]
+    [com.left-over.common.services.db.repositories.core :as repos]
+    [com.left-over.common.utils.edn :as edn]
+    [com.left-over.common.utils.maps :as maps])
+  (:import
+    (java.io PushbackReader)))
 
 (defn with-transaction [handler]
   (fn [request]
-    (prom/deref! (repos/transact
-                   (fn [db]
-                     (v/resolve (handler (assoc request :db db))))))))
+    (v/deref! (repos/transact
+                (fn [db]
+                  (v/resolve (handler (assoc request :db db))))))))
 
 (defn with-content-type [handler]
   (fn [request]
@@ -43,7 +44,7 @@
 (defn with-ex-handling [handler]
   (fn [request]
     (try (handler request)
-      (catch Throwable ex
-        (if-let [response (:response (ex-data ex))]
-          response
-          (throw ex))))))
+         (catch Throwable ex
+           (if-let [response (:response (ex-data ex))]
+             response
+             (throw ex))))))

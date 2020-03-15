@@ -14,7 +14,7 @@
                  [clojure.jdbc/clojure.jdbc-c3p0 "0.3.3" :exclusions [[org.clojure/java.jdbc]]]
                  [com.ben-allred/collaj "0.8.0"]
                  [com.ben-allred/formation "0.6.2"]
-                 [com.ben-allred/vow "0.1.0"]
+                 [com.ben-allred/vow "0.3.1"]
                  [com.cognitect.aws/api "0.8.391"]
                  [com.cognitect.aws/endpoints "1.1.11.664"]
                  [com.cognitect.aws/s3 "762.2.558.0"]

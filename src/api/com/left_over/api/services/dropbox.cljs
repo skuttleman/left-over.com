@@ -1,7 +1,7 @@
 (ns com.left-over.api.services.dropbox
   (:require
     [clojure.string :as string]
-    [com.ben-allred.vow.core :as v]
+    [com.ben-allred.vow.core :as v :include-macros true]
     [com.left-over.api.services.env :as env]
     [com.left-over.common.services.http :as http]
     [com.left-over.common.utils.memoize :as memo]

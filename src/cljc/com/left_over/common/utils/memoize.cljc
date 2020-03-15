@@ -1,6 +1,6 @@
 (ns com.left-over.common.utils.memoize
   (:require
-    [com.ben-allred.vow.core :as v])
+    [com.ben-allred.vow.core :as v #?@(:cljs [:include-macros true])])
   #?(:clj (:import
             (java.util Date))))
 
