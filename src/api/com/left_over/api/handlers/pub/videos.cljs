@@ -4,6 +4,6 @@
     [com.left-over.api.services.dropbox :as dropbox]))
 
 (def handler
-  (core/handler dropbox/fetch-images))
+  (core/with-event dropbox/fetch-images))
 
 (set! (.-exports js/module) #js {:handler handler})

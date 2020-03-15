@@ -1,0 +1,94 @@
+(ns com.left-over.api.handlers.auth
+  (:require
+    [com.ben-allred.vow.core :as v :include-macros true]
+    [com.left-over.common.utils.uri :as uri]
+    [com.left-over.api.core :as core]
+    [com.left-over.common.services.http :as http]
+    [clojure.string :as string]
+    [com.left-over.api.services.env :as env]
+    [com.left-over.common.utils.edn :as edn]
+    [com.left-over.common.utils.logging :as log]
+    [com.left-over.common.services.db.repositories.core :as repos]
+    [com.left-over.common.services.db.models.users :as users]
+    [com.left-over.api.services.jwt :as jwt]))
+
+(def ^:private oauth-config
+  {:redirect-uri       (env/get :oauth-redirect-uri)
+   :client-id          (env/get :oauth-client-id)
+   :client-secret      (env/get :oauth-client-secret)
+   :scope              (edn/parse (env/get :oauth-scopes))
+   :authorization-uri  (env/get :oauth-authorization-uri)
+   :access-token-uri   (env/get :oauth-token-uri)
+   :access-query-param :access_token
+   :grant-type         "authorization_code"
+   :access-type        "online"
+   :approval_prompt    ""})
+
+(defn ^:private fetch-access-token [config {:keys [code]}]
+  (let [{:keys [access-token-uri client-id client-secret grant-type redirect-uri]} config
+        request {:content-type "application/x-www-form-urlencoded"
+                 :body         (uri/form-url-encode {:grant_type    grant-type
+                                                     :code          code
+                                                     :redirect_uri  redirect-uri
+                                                     :client_id     client-id
+                                                     :client_secret client-secret})}]
+    (http/post access-token-uri request)))
+
+(defn ^:private oauth-redirect-uri
+  [{:keys [authorization-uri client-id redirect-uri scope access-type]} & [state]]
+  (-> authorization-uri
+      uri/parse
+      (assoc :query (cond-> {:client_id     client-id
+                             :redirect_uri  redirect-uri
+                             :response_type "code"}
+                      state (assoc :state state)
+                      access-type (assoc :access_type access-type)
+                      scope (assoc :scope (string/join " " scope))))
+      uri/stringify))
+
+(defn ^:private token->user [token]
+  (when token
+    (repos/transact (fn [conn]
+                      (-> (env/get :oauth-token-info-uri)
+                          (http/get {:query-params {:access_token token}
+                                     :json?        true})
+                          (v/then-> :email (->> (users/find-by-email conn))))))))
+
+(defn ^:private redirect-to [url]
+  (with-meta {}
+             {:status  302
+              :headers {:Location url}}))
+
+(defn ^:private callback* [{:keys [query-params] :as event}]
+  (let [redirect-uri (:redirect-uri (edn/parse (:state query-params)))]
+    (-> (if redirect-uri
+          (fetch-access-token oauth-config query-params)
+          (v/reject))
+        (v/then :access_token)
+        (v/then token->user)
+        (v/then-> (some-> jwt/encode))
+        (v/catch (constantly nil))
+        (v/then (fn [jwt]
+                  (cond
+                    jwt (redirect-to (str redirect-uri "?token=" jwt))
+                    redirect-uri (redirect-to (str redirect-uri "?token-msg-id=auth/failed"))
+                    :else (throw (ex-info "cannot redirect" {:event event}))))))))
+
+(defn ^:private login* [event]
+  (v/resolve (redirect-to (oauth-redirect-uri oauth-config (:query-params event)))))
+
+(defn ^:private info* [event]
+  (if-let [user (:user event)]
+    (v/resolve user)
+    (v/reject (ex-info "unauthorized" {:response {:status 401
+                                                  :body   {:message "unauthorized"}}}))))
+
+(def info-handler (core/with-event (core/with-user info*)))
+
+(def login-handler (core/with-event (core/with-user login*)))
+
+(def callback-handler (core/with-event (core/with-user callback*)))
+
+(set! (.-exports js/module) #js {:info     info-handler
+                                 :login    login-handler
+                                 :callback callback-handler})

@@ -1,5 +1,6 @@
 (ns com.left-over.ui.admin.views.auth
   (:require
+    [com.left-over.common.utils.uri :as uri]
     [com.left-over.ui.services.navigation :as nav]
     [com.left-over.ui.views.components :as components]))
 
@@ -7,10 +8,10 @@
   [:div.has-text-centered
    [:h1.title "Admin Portal"]
    [:a.button.is-link {:href (->> (nav/ui-for :ui.admin/main)
-                                  js/encodeURIComponent
+                                  uri/url-encode
                                   (hash-map :redirect-uri)
                                   (hash-map :query-params)
-                                  (nav/api-for :auth/login))}
+                                  (nav/aws-for :aws/login))}
     [components/icon {:icon-style :brand} :google-plus-g]
     [:span {:style {:margin-left "8px"}} "Login with Google"]]])
 

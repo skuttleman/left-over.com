@@ -12,7 +12,7 @@
   {:auth/failed [:error (constantly [:div "Your login attempt failed. Please check your email and password and try again."])]})
 
 (def fetch-auth-info
-  (actions/fetch* (nav/api-for :auth/info) :auth.info {:token? true}))
+  (actions/fetch* (nav/aws-for :aws/info) :auth.info {:token? true}))
 
 (def fetch-locations
   (actions/fetch* (nav/api-for :api.admin/locations) :locations {:token? true}))

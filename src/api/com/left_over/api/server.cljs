@@ -1,8 +1,9 @@
 (ns com.left-over.api.server
   (:require
     [com.ben-allred.vow.core :as v]
-    [com.left-over.api.handlers.pub.shows :as shows]
+    [com.left-over.api.handlers.auth :as auth]
     [com.left-over.api.handlers.pub.images :as images]
+    [com.left-over.api.handlers.pub.shows :as shows]
     [com.left-over.api.handlers.pub.videos :as videos]
     [com.left-over.api.services.env :as env]
     [com.left-over.common.utils.edn :as edn]
@@ -14,7 +15,7 @@
   (:import
     (goog.string StringBuffer)))
 
-(defn body-parser [req _res next]
+(defn ^:private body-parser [req _res next]
   (let [buffer (StringBuffer.)]
     (doto req
       (.setEncoding "utf8")
@@ -25,9 +26,12 @@
                    (next)))
       (.on "error" next))))
 
-(defn handler->route [handler]
-  (fn [_req res next]
-    (v/then (handler nil nil)
+(defn ^:private handler->route [handler]
+  (fn [req res next]
+    (v/then (handler #js {:headers      (.-headers req)
+                          :body         (.-body req)
+                          :query-params (.-query req)}
+                     nil)
             (fn [result]
               (doto res
                 (.status (.-statusCode result))
@@ -35,13 +39,29 @@
                 (.send (.-body result))))
             next)))
 
+(def cors-middleware (cors #js {:origin (fn [_ cb] (cb nil true))}))
+
+(def pub-route
+  (doto (express/Router)
+    (.get "/images" (handler->route images/handler))
+    (.get "/shows" (handler->route shows/handler))
+    (.get "/videos" (handler->route videos/handler))))
+
+(def auth-route
+  (doto (express/Router)
+    (.get "/callback" (handler->route auth/callback-handler))
+    (.get "/info" (handler->route auth/info-handler))
+    (.get "/login" (handler->route auth/login-handler))))
+
 (def app
   (doto (express)
-    (.use (cors))
+    (.options "*" (fn [req res next]
+                    (.set res "Access-Control-Allow-Credentials" "true")
+                    (cors-middleware req res next)))
+    (.use cors-middleware)
     (.use body-parser)
-    (.get "/public/images" (handler->route images/handler))
-    (.get "/public/shows" (handler->route shows/handler))
-    (.get "/public/videos" (handler->route videos/handler))))
+    (.use "/public" pub-route)
+    (.use "/auth" auth-route)))
 
 (defonce server
   (let [port (numbers/parse-int (env/get :dev-aws-port "3100"))]

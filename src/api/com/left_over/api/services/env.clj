@@ -5,7 +5,7 @@
     [com.left-over.common.utils.edn :as edn]
     [com.left-over.common.utils.keywords :as keywords]))
 
-(defmacro build-env []
+(def get
   (let [f (io/file ".lein-env")]
     (into {}
           (map (juxt (comp keywords/keyword key) val))
@@ -13,7 +13,5 @@
                   (when (.exists f)
                     (edn/parse (slurp f)))))))
 
-(def get
-  (into {}
-        (map (juxt (comp keywords/keyword key) val))
-        (System/getenv)))
+(defmacro build-env []
+  get)

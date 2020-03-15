@@ -22,6 +22,7 @@
                  [compojure "1.6.0"]
                  [honeysql "0.9.2"]
                  [kibu/pushy "0.3.8"]
+                 [lambdaisland/uri "1.2.1"]
                  [metosin/jsonista "0.1.1"]
                  [nilenso/honeysql-postgres "0.2.5" :exclusions [[net.cgrand/macrovich]]]
                  [org.clojure/clojure "1.10.1"]
@@ -36,7 +37,6 @@
                  [ring/ring-core "1.3.2"]
                  [ring/ring-devel "1.6.3" :exclusions [[ring/ring-core]]]
                  [seancorfield/next.jdbc "1.0.5"]
-                 [sudharsh/clj-oauth2 "0.5.3"]
                  [tick "0.4.23-alpha"]]
   :plugins [[lein-figwheel "0.5.19"]
             [lein-sass "0.5.0"]
@@ -61,6 +61,7 @@
                 :compiler     {:install-deps         true
                                :npm-deps             {:cors           "2.8.5"
                                                       :express        "4.17.1"
+                                                      :jwt-simple     "0.5.6"
                                                       :pg             "7.18.2"
                                                       :xmlhttprequest "1.8.0"
                                                       :ws             "7.1.2"} ;; required to use figwheel REPL
@@ -115,22 +116,22 @@
            "api-repl"  ["bin/sleepnode.sh" "target/js/compiled/server.js"]}
   :sass {:src              "src/scss"
          :output-directory "dist/css/"}
-  :profiles {:dev     {:dependencies  [[binaryage/devtools "0.9.10"]
-                                       [cider/piggieback "0.4.0"]
-                                       [figwheel-sidecar "0.5.19"]
-                                       [ring/ring-core "1.3.2"]]
-                       :source-paths  ["src/clj" "src/cljc" "dev"]
-                       :main          com.left-over.api.server/-dev}
-             :dev-ui  {:dependencies  [[binaryage/devtools "0.9.10"]
-                                       [cider/piggieback "0.4.0"]
-                                       [figwheel-sidecar "0.5.19"]]
-                       :figwheel      {:css-dirs     ["dist/css"]
-                                       :nrepl-port   7888
-                                       :ring-handler com.left-over.dev-server/handler}
-                       :source-paths  ["src/ui" "src/cljc" "dev"]}
-             :dev-api {:dependencies  [[binaryage/devtools "0.9.10"]
-                                       [cider/piggieback "0.4.0"]
-                                       [figwheel-sidecar "0.5.19"]]
-                       :figwheel      {:nrepl-port  7999
-                                       :server-port 3559}
-                       :source-paths  ["src/api" "src/cljc" "dev"]}})
+  :profiles {:dev     {:dependencies [[binaryage/devtools "0.9.10"]
+                                      [cider/piggieback "0.4.0"]
+                                      [figwheel-sidecar "0.5.19"]
+                                      [ring/ring-core "1.3.2"]]
+                       :source-paths ["src/clj" "src/cljc" "dev"]
+                       :main         com.left-over.api.server/-dev}
+             :dev-ui  {:dependencies [[binaryage/devtools "0.9.10"]
+                                      [cider/piggieback "0.4.0"]
+                                      [figwheel-sidecar "0.5.19"]]
+                       :figwheel     {:css-dirs     ["dist/css"]
+                                      :nrepl-port   7888
+                                      :ring-handler com.left-over.dev-server/handler}
+                       :source-paths ["src/ui" "src/cljc" "dev"]}
+             :dev-api {:dependencies [[binaryage/devtools "0.9.10"]
+                                      [cider/piggieback "0.4.0"]
+                                      [figwheel-sidecar "0.5.19"]]
+                       :figwheel     {:nrepl-port  7999
+                                      :server-port 3559}
+                       :source-paths ["src/api" "src/cljc" "dev"]}})

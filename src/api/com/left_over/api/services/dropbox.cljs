@@ -77,12 +77,12 @@
                                (select-keys #{:link :metadata})
                                (update :metadata select-keys #{:mime-type :name :size})))))))
 
-(def ^{:arglists '([])} fetch-images
-  (memo/memo #(fetch* image? (env/get :dropbox-images-path))
+(def ^{:arglists '([event])} fetch-images
+  (memo/memo (fn [_event] (fetch* image? (env/get :dropbox-images-path)))
              (js/parseInt (env/get :dropbox-cache-ttl))
              (js/parseInt (env/get :dropbox-max-cache-ttl))))
 
-(def ^{:arglists '([])} fetch-videos
-  (memo/memo #(fetch* video? (env/get :dropbox-videos-path))
+(def ^{:arglists '([event])} fetch-videos
+  (memo/memo (fn [_event] (fetch* video? (env/get :dropbox-videos-path)))
              (numbers/parse-int (env/get :dropbox-cache-ttl))
              (numbers/parse-int (env/get :dropbox-max-cache-ttl))))
