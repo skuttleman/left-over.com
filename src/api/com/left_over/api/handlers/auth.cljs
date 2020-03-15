@@ -59,10 +59,13 @@
              {:status  302
               :headers {:Location url}}))
 
-(defn ^:private callback* [{:keys [query-params] :as event}]
-  (let [redirect-uri (:redirect-uri (edn/parse (:state query-params)))]
+(defmulti ^:private handler* :path)
+
+(defmethod ^:private handler* "/auth/callback"
+  [{:keys [queryStringParameters] :as event}]
+  (let [redirect-uri (:redirect-uri (edn/parse (:state queryStringParameters)))]
     (-> (if redirect-uri
-          (fetch-access-token oauth-config query-params)
+          (fetch-access-token oauth-config queryStringParameters)
           (v/reject))
         (v/then :access_token)
         (v/then token->user)
@@ -74,21 +77,15 @@
                     redirect-uri (redirect-to (str redirect-uri "?token-msg-id=auth/failed"))
                     :else (throw (ex-info "cannot redirect" {:event event}))))))))
 
-(defn ^:private login* [event]
-  (v/resolve (redirect-to (oauth-redirect-uri oauth-config (:query-params event)))))
+(defmethod ^:private handler* "/auth/login"
+  [event]
+  (v/resolve (redirect-to (oauth-redirect-uri oauth-config (:queryStringParameters event)))))
 
-(defn ^:private info* [event]
-  (if-let [user (:user event)]
-    (v/resolve user)
-    (v/reject (ex-info "unauthorized" {:response {:status 401
-                                                  :body   {:message "unauthorized"}}}))))
+(defmethod ^:private handler* "/auth/info"
+  [event]
+  (v/resolve (or (:user event)
+                 ^{:status 401} {:message "unauthorized"})))
 
-(def info-handler (core/with-event (core/with-user info*)))
+(def handler (core/with-event (core/with-user handler*)))
 
-(def login-handler (core/with-event (core/with-user login*)))
-
-(def callback-handler (core/with-event (core/with-user callback*)))
-
-(set! (.-exports js/module) #js {:info     info-handler
-                                 :login    login-handler
-                                 :callback callback-handler})
+(set! (.-exports js/module) #js {:handler handler})

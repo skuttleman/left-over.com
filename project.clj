@@ -107,6 +107,18 @@
                                :output-dir    "target/js/compiled/pub/shows"
                                :target        :nodejs
                                :optimizations :simple
+                               :pretty-print  true}}
+               {:id           "auth"
+                :source-paths ["src/api" "src/cljc"]
+                :compiler     {:install-deps  true
+                               :npm-deps      {:pg             "7.18.2"
+                                               :jwt-simple     "0.5.6"
+                                               :xmlhttprequest "1.8.0"}
+                               :main          com.left-over.api.handlers.auth
+                               :output-to     "target/auth.js"
+                               :output-dir    "target/js/compiled/auth"
+                               :target        :nodejs
+                               :optimizations :simple
                                :pretty-print  true}}]}
   :aliases {"migrations" ["run" "-m" "com.left-over.api.services.db.migrations/-main"]}
   :cooper {"cljs"      ["lein" "with-profile" "dev-ui" "figwheel" "dev-ui"]

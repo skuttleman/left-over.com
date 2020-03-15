@@ -3,7 +3,9 @@
     [cljs.nodejs :as nodejs]
     [com.ben-allred.vow.core :as v]
     [com.left-over.api.services.jwt :as jwt]
-    [com.left-over.common.utils.logging :as log]))
+    [com.left-over.common.utils.keywords :as keywords]
+    [com.left-over.common.utils.logging :as log]
+    [com.left-over.common.utils.maps :as maps]))
 
 (nodejs/enable-util-print!)
 (set! (.-XMLHttpRequest js/global) (.-XMLHttpRequest (nodejs/require "xmlhttprequest")))
@@ -26,15 +28,17 @@
 (defn ^:private error [err]
   (log/error err)
   (if-let [response (:response (ex-data err))]
-    (with-meta (:body response) {:status (:status response)})
+    (with-meta (:body response) response)
     {:message "error fetching resource"}))
 
 (defn with-event [handler]
   (fn handle
-    ([event ctx cb]`
+    ([event ctx cb]
      (v/then (handle event ctx) (partial cb nil) cb))
     ([event _ctx]
-     (let [event* (js->clj event :keywordize-keys true)]
+     (let [event* (update (js->clj event :keywordize-keys true)
+                          :headers
+                          (partial maps/map-kv (comp keywords/keyword name) identity))]
        (-> event*
            handler
            (v/then (response 200 event*))

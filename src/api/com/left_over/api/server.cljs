@@ -39,21 +39,21 @@
                 (.send (.-body result))))
             next)))
 
-(def cors-middleware (cors #js {:origin (fn [_ cb] (cb nil true))}))
+(def ^:private cors-middleware (cors #js {:origin (fn [_ cb] (cb nil true))}))
 
-(def pub-route
+(def ^:private pub-route
   (doto (express/Router)
     (.get "/images" (handler->route images/handler))
     (.get "/shows" (handler->route shows/handler))
     (.get "/videos" (handler->route videos/handler))))
 
-(def auth-route
+(def ^:private auth-route
   (doto (express/Router)
-    (.get "/callback" (handler->route auth/callback-handler))
-    (.get "/info" (handler->route auth/info-handler))
-    (.get "/login" (handler->route auth/login-handler))))
+    (.get "/callback" (handler->route auth/handler))
+    (.get "/info" (handler->route auth/handler))
+    (.get "/login" (handler->route auth/handler))))
 
-(def app
+(def ^:private app
   (doto (express)
     (.options "*" (fn [req res next]
                     (.set res "Access-Control-Allow-Credentials" "true")

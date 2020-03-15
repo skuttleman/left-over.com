@@ -1,10 +1,15 @@
 (ns com.left-over.api.services.jwt
   (:require
     [com.left-over.api.services.env :as env]
-    [com.left-over.common.utils.dates :as dates]
     [com.left-over.common.utils.edn :as edn]
     [com.left-over.common.utils.numbers :as numbers]
     jwt-simple))
+
+(defn now []
+  (.getTime (js/Date.)))
+
+(defn in-days [x]
+  (* 1000 60 60 24 x))
 
 (defn decode [token]
   (try
@@ -16,15 +21,13 @@
 
 (defn encode [payload]
   (let [days-to-expire (numbers/parse-int (env/get :jwt-expiration "30"))
-        now (dates/now)]
+        now (now)]
     (-> {:iat  (-> now
-                   dates/inst->ms
                    (/ 1000)
                    js/Math.floor)
          :data (edn/stringify payload)
          :exp  (-> now
-                   (dates/plus days-to-expire :days)
-                   dates/inst->ms
+                   (+ (in-days days-to-expire))
                    (/ 1000)
                    js/Math.floor)}
         clj->js
