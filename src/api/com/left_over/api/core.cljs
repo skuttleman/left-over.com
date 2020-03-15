@@ -54,7 +54,7 @@
 (defn with-user [handler]
   (fn [event]
     (let [user (try
-                    (some-> event (get-in [:headers :authorization]) (subs 7) jwt/decode :data)
-                    (catch :default _ nil))]
+                 (some-> event (get-in [:headers :authorization]) (subs 7) jwt/decode :data)
+                 (catch :default _ nil))]
       (handler (cond-> event
                  user (assoc :user user))))))
