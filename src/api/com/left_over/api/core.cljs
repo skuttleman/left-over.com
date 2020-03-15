@@ -32,7 +32,7 @@
     {:message "error fetching resource"}))
 
 (defn ^:private log [m]
-  (log/info (select-keys m #{:headers :path :queryStringParameters :method :status}))
+  (log/info (select-keys m #{:headers :path :queryStringParameters :method :statusCode}))
   m)
 
 (defn with-event [handler]
