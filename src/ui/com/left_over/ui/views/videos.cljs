@@ -8,10 +8,10 @@
   [:div
    (if (seq videos)
      [:ul.videos
-      (for [{:keys [link metadata]} videos]
+      (for [{:keys [link]} videos]
         ^{:key link} [:li.video
                       [:video {:controls true :width "100%" :height "100%"}
-                       [:source {:src link :type (:mime-type metadata)}]
+                       [:source {:src link}]
                        "Sorry, your browser doesn't support embedded videos."]])]
      [:<>
       [:p "We don't have any videos to share with you right now."]
