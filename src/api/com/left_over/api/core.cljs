@@ -31,6 +31,10 @@
     (with-meta (:body response) response)
     {:message "error fetching resource"}))
 
+(defn ^:private log [m]
+  (log/info (select-keys m #{:headers :path :queryStringParameters :method :status}))
+  m)
+
 (defn with-event [handler]
   (fn handle
     ([event ctx cb]
@@ -40,9 +44,11 @@
                           :headers
                           (partial maps/map-kv (comp keywords/keyword name) identity))]
        (-> event*
+           log
            handler
            (v/then (response 200 event*))
            (v/catch (comp (response 500 event*) error))
+           (v/then log)
            (v/then clj->js))))))
 
 (defn with-user [handler]
