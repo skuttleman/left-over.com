@@ -28,9 +28,10 @@
 
 (defn ^:private handler->route [handler]
   (fn [req res next]
-    (v/then (handler #js {:headers      (.-headers req)
-                          :body         (.-body req)
-                          :query-params (.-query req)}
+    (v/then (handler #js {:headers               (.-headers req)
+                          :body                  (.-body req)
+                          :queryStringParameters (.-query req)
+                          :path                  (str "/auth" (.-path req))}
                      nil)
             (fn [result]
               (doto res
