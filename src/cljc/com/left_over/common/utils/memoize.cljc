@@ -10,12 +10,12 @@
 
 (defn memo [f ttl max-ttl]
   (let [cache (atom {:fetched-at 0})]
-    (fn []
+    (fn [arg]
       (let [{:keys [data fetched-at]} @cache
             now (now-ms)
             promise (when (or (empty? data) (> (- now fetched-at) ttl))
                       (swap! cache assoc :fetched-at now)
-                      (v/peek (f)
+                      (v/peek (f arg)
                               (fn [data] (swap! cache assoc :data data))
                               (fn [_] (swap! cache assoc :fetched-at fetched-at))))]
         (if (and promise (> (- now fetched-at) max-ttl))

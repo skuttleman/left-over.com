@@ -9,7 +9,7 @@
     [pushy.core :as pushy]))
 
 (defn ^:private routes [& routes]
-  ["" (into [] (concat routes [true :nav/not-found]))])
+  ["" (into [] (concat routes [[true :nav/not-found]]))])
 
 (def ^:private api-routes
   (routes ["/api"
@@ -18,11 +18,7 @@
              [[["/locations/" :location-id] :api.admin/location]
               ["/locations" :api.admin/locations]
               [["/shows/" :show-id] :api.admin/show]
-              ["/shows" :api.admin/shows]]]]]
-          ["/auth"
-           [["/info" :auth/info]
-            ["/login" :auth/login]
-            ["/logout" :auth/logout]]]))
+              ["/shows" :api.admin/shows]]]]]))
 
 (def ^:private ui-routes
   (routes ["/" :ui/main]
@@ -45,7 +41,10 @@
   (routes ["/public"
            [["/images" :aws/images]
             ["/videos" :aws/videos]
-            ["/shows" :aws/shows]]]))
+            ["/shows" :aws/shows]]]
+          ["/auth"
+           [["/info" :aws/info]
+            ["/login" :aws/login]]]))
 
 (defn ^:private namify [[k v]]
   [k (if (keyword? v) (name v) (str v))])

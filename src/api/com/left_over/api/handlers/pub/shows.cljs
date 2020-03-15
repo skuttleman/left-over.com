@@ -4,6 +4,6 @@
     [com.left-over.api.services.shows :as shows]))
 
 (def handler
-  (core/handler shows/shows))
+  (core/with-event shows/shows))
 
 (set! (.-exports js/module) #js {:handler handler})

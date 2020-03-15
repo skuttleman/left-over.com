@@ -6,10 +6,10 @@
     [com.left-over.common.utils.memoize :as memo]
     [com.left-over.common.utils.numbers :as numbers]))
 
-(defn ^:private shows* []
+(defn ^:private shows* [_event]
   (repos/transact shows/select-for-website))
 
-(def ^{:arglists '([])} shows
+(def ^{:arglists '([event])} shows
   (memo/memo shows*
              (numbers/parse-int (env/get :db-cache-ttl))
              (numbers/parse-int (env/get :db-max-cache-ttl))))

@@ -2,24 +2,27 @@
 
 set -e
 
-CLJS_BUILDS="images videos shows"
+PUB_BUILDS="images videos shows"
 
 function build() {
-    echo "building pub:${1}"
+    BUILD_ID="${1}"
+    BUILD_ZIP="${2}"
+    BUILD_TARGET="${3}"
+
+    echo "building ${BUILD_ID}"
     rm -rf node_modules
-    lein cljsbuild once pub-${1}
-    zip -r target/pub.${1}.zip node_modules
-    zip -j target/pub.${1}.zip target/pub/${1}.js
+    rm -rf target/js
+    rm -rf target/pub
+    lein cljsbuild once ${BUILD_ID}
+    zip -r target/${BUILD_ZIP}.zip node_modules
+    zip -j target/${BUILD_ZIP}.zip target/${BUILD_TARGET}.js
 }
 
 lein clean
 rm -rf target
 mkdir target
-mv .lein-env .lein-env.dev
-cp .lein-env.prod .lein-env
 
-for CLJS_BUILD in ${CLJS_BUILDS}; do
-    build ${CLJS_BUILD}
+build "auth" "auth" "auth"
+for CLJS_BUILD in ${PUB_BUILDS}; do
+    build "pub-${CLJS_BUILD}" "pub.${CLJS_BUILD}" "pub/${CLJS_BUILD}"
 done
-
-mv .lein-env.dev .lein-env

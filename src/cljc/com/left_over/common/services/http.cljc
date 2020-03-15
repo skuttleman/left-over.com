@@ -9,7 +9,8 @@
     [com.ben-allred.vow.core :as v #?@(:cljs [:include-macros true])]
     [com.left-over.common.utils.edn :as edn]
     [com.left-over.common.utils.json :as json]
-    [com.left-over.common.utils.logging :as log #?@(:cljs [:include-macros true])]))
+    [com.left-over.common.utils.logging :as log #?@(:cljs [:include-macros true])]
+    [com.left-over.common.utils.maps :as maps]))
 
 (def status->kw
   {200 ::ok
@@ -115,7 +116,7 @@
                    (log/error "failed http: "
                               (select-keys request #{:headers :url :method :query-params :body})
                               (pr-str ex))
-                   (async/put! ch (assoc (ex-data ex) :cookies (cookies/get-cookies cs))))))
+                   (async/>! ch (assoc (ex-data ex) :cookies (cookies/get-cookies cs))))))
              ch)
      :cljs (let [token (when (:token? request)
                          (some-> js/localStorage (.getItem "auth-token")))]
@@ -131,12 +132,13 @@
 (defn ^:private prep [request content-type]
   (-> request
       (update :headers (partial into {} (map (juxt (comp name key) val))))
-      (cond->
-        (:body request) (update :body (fn [body]
-                                        (case content-type
-                                          "application/json" (json/stringify body)
-                                          "application/edn" (edn/stringify body)
-                                          body))))))
+      (maps/update-maybe :body (fn [body]
+                                 (if (string? body)
+                                   body
+                                   (case content-type
+                                     "application/json" (json/stringify body)
+                                     "application/edn" (edn/stringify body)
+                                     body))))))
 
 (defn ^:private request* [chan]
   (async/go

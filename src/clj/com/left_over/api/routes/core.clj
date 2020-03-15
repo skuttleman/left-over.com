@@ -1,7 +1,6 @@
 (ns com.left-over.api.routes.core
   (:require
     [com.left-over.api.routes.admin :as admin]
-    [com.left-over.api.routes.auth :as auth]
     [com.left-over.api.services.middleware :as middleware]
     [compojure.core :refer [ANY GET context defroutes]]
     [ring.middleware.cookies :refer [wrap-cookies]]
@@ -13,8 +12,6 @@
     [ring.middleware.reload :refer [wrap-reload]]))
 
 (defroutes app*
-  (context "/auth" _
-    #'auth/routes)
   (context "/api" _
     (context "/admin" _
       #'admin/routes))
