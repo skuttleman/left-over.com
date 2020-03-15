@@ -2,6 +2,7 @@
 
 set -e
 
+ADMIN_BUILDS="locations shows"
 PUB_BUILDS="images videos shows"
 
 function build() {
@@ -23,6 +24,9 @@ rm -rf target
 mkdir target
 
 build "auth" "auth" "auth"
-for CLJS_BUILD in ${PUB_BUILDS}; do
-    build "pub-${CLJS_BUILD}" "pub.${CLJS_BUILD}" "pub/${CLJS_BUILD}"
+for BUILD in ${ADMIN_BUILDS}; do
+    build "admin-${BUILD}" "admin.${BUILD}" "admin/${BUILD}"
+done
+for BUILD in ${PUB_BUILDS}; do
+    build "pub-${BUILD}" "pub.${BUILD}" "pub/${BUILD}"
 done

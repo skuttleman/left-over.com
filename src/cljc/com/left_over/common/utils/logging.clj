@@ -1,5 +1,6 @@
 (ns com.left-over.common.utils.logging
-  (:require [taoensso.timbre :as timbre]))
+  (:require
+    [taoensso.timbre :as timbre]))
 
 (defmacro debug [& args]
   `(timbre/debug ~@args))

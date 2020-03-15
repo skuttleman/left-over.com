@@ -4,8 +4,7 @@
     [com.left-over.common.utils.edn :as edn]
     [com.left-over.common.utils.keywords :as keywords]))
 
-(def ^:private js-env-vars #{:api-base-url
-                             :aws-api-key
+(def ^:private js-env-vars #{:aws-api-key
                              :aws-api-uri
                              :aws-s3-uri})
 

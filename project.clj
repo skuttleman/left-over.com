@@ -3,13 +3,11 @@
   :url "https://www.github.com/skuttleman/left-over.com"
   :license {:name "Eclipse Public License"
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
-  :main com.left-over.api.server
-  :aot [com.left-over.api.server com.left-over.api.services.db.migrations]
+  :aot [com.left-over.api.services.db.migrations]
   :min-lein-version "2.9.1"
   :dependencies [[bidi "2.1.3" :exclusions [[ring/ring-core]]]
                  [camel-snake-kebab "0.4.1"]
                  [clj-http "3.9.1"]
-                 [clj-jwt "0.1.1"]
                  [cljs-http "0.1.46"]
                  [clojure.jdbc/clojure.jdbc-c3p0 "0.3.3" :exclusions [[org.clojure/java.jdbc]]]
                  [com.ben-allred/collaj "0.8.0"]
@@ -17,9 +15,7 @@
                  [com.ben-allred/vow "0.3.1"]
                  [com.cognitect.aws/api "0.8.391"]
                  [com.cognitect.aws/endpoints "1.1.11.664"]
-                 [com.cognitect.aws/s3 "762.2.558.0"]
                  [com.taoensso/timbre "4.10.0"]
-                 [compojure "1.6.0"]
                  [honeysql "0.9.2"]
                  [kibu/pushy "0.3.8"]
                  [lambdaisland/uri "1.2.1"]
@@ -29,13 +25,9 @@
                  [org.clojure/clojurescript "1.10.597"]
                  [org.clojure/core.async "1.0.567"]
                  [org.clojure/core.match "0.3.0"]
-                 [org.immutant/immutant "2.1.10" :exclusions [[ring/ring-core]]]
                  [org.postgresql/postgresql "9.4-1206-jdbc41" :exclusions [[org.clojure/java.jdbc]]]
                  [ragtime "0.7.2"]
                  [reagent "0.8.1"]
-                 [ring-cors "0.1.13"]
-                 [ring/ring-core "1.3.2"]
-                 [ring/ring-devel "1.6.3" :exclusions [[ring/ring-core]]]
                  [seancorfield/next.jdbc "1.0.5"]
                  [tick "0.4.23-alpha"]]
   :plugins [[lein-figwheel "0.5.19"]
@@ -108,11 +100,33 @@
                                :target        :nodejs
                                :optimizations :simple
                                :pretty-print  true}}
+               {:id           "admin-locations"
+                :source-paths ["src/api" "src/cljc"]
+                :compiler     {:install-deps  true
+                               :npm-deps      {:jwt-simple "0.5.6"
+                                               :pg         "7.18.2"}
+                               :main          com.left-over.api.handlers.admin.locations
+                               :output-to     "target/admin/locations.js"
+                               :output-dir    "target/js/compiled/admin/locations"
+                               :target        :nodejs
+                               :optimizations :simple
+                               :pretty-print  true}}
+               {:id           "admin-shows"
+                :source-paths ["src/api" "src/cljc"]
+                :compiler     {:install-deps  true
+                               :npm-deps      {:jwt-simple "0.5.6"
+                                               :pg         "7.18.2"}
+                               :main          com.left-over.api.handlers.admin.shows
+                               :output-to     "target/admin/shows.js"
+                               :output-dir    "target/js/compiled/admin/shows"
+                               :target        :nodejs
+                               :optimizations :simple
+                               :pretty-print  true}}
                {:id           "auth"
                 :source-paths ["src/api" "src/cljc"]
                 :compiler     {:install-deps  true
-                               :npm-deps      {:pg             "7.18.2"
-                                               :jwt-simple     "0.5.6"
+                               :npm-deps      {:jwt-simple     "0.5.6"
+                                               :pg             "7.18.2"
                                                :xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.auth
                                :output-to     "target/auth.js"
@@ -121,11 +135,10 @@
                                :optimizations :simple
                                :pretty-print  true}}]}
   :aliases {"migrations" ["run" "-m" "com.left-over.api.services.db.migrations/-main"]}
-  :cooper {"cljs"      ["lein" "with-profile" "dev-ui" "figwheel" "dev-ui"]
-           "sass"      ["lein" "sass" "auto"]
-           "server"    ["lein" "run"]
-           "api-proxy" ["lein" "with-profile" "dev-api" "figwheel" "dev-api"]
-           "api-repl"  ["bin/sleepnode.sh" "target/js/compiled/server.js"]}
+  :cooper {"api"      ["lein" "with-profile" "dev-api" "figwheel" "dev-api"]
+           "api-repl" ["bin/sleepnode.sh" "target/js/compiled/server.js"]
+           "cljs"     ["lein" "with-profile" "dev-ui" "figwheel" "dev-ui"]
+           "sass"     ["lein" "sass" "auto"]}
   :sass {:src              "src/scss"
          :output-directory "dist/css/"}
   :profiles {:dev     {:dependencies [[binaryage/devtools "0.9.10"]

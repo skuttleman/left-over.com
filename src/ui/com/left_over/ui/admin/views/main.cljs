@@ -14,7 +14,7 @@
    [:div.row.full.space-between
     [:a.link {:href (nav/path-for :ui.admin/new-show)} "Create a show"]
     [auth/logout]]
-   [shows/show-list :admin (sort-by :date-time shows)]])
+   [shows/show-list :admin (sort-by :date-time shows) "You have no shows." "Why not create one?"]])
 
 (defn root [_state]
   (store/dispatch admin.actions/fetch-shows)

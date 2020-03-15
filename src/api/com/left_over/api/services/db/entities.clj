@@ -3,25 +3,39 @@
     [com.ben-allred.vow.core :as v]
     [com.left-over.common.services.db.entities :as ent]
     [com.left-over.common.services.db.repositories.core :as repos]
-    [com.left-over.common.utils.keywords :as keywords]))
+    [com.left-over.common.utils.keywords :as keywords]
+    [clojure.string :as string]))
+
+(declare locations shows users)
 
 (def ^:private query
-  "SELECT column_name
+  "SELECT table_name, column_name
    FROM information_schema.columns
    WHERE table_schema='public'
-     AND table_name='%s'")
+     AND table_name IN (%s)")
 
-(defn ^:private load-fields [table]
+(defn ^:private load-fields [tables]
   (v/deref! (repos/transact (fn [db]
-                              (-> (repos/exec-raw! db [(format query table)])
-                                  (v/then-> (->> (into #{} (map (comp keywords/keyword :columns/column_name)))
-                                                 (assoc {:table (keyword table)} :fields))))))))
+                              (-> tables
+                                  (->> (map #(str "'" % "'"))
+                                       (string/join ",")
+                                       (format query)
+                                       vector
+                                       (repos/exec-raw! db))
+                                  (v/then-> (->> (map (juxt :columns/table_name :columns/column_name))
+                                                 (reduce (fn [entities [table column]]
+                                                           (update entities
+                                                                   (keywords/keyword table)
+                                                                   (fnil conj #{})
+                                                                   (keywords/keyword column)))
+                                                         {}))))))))
 
-(def locations (load-fields "locations"))
+(let [entities (load-fields ["locations" "shows" "users"])]
+  (def locations {:table :locations :fields (:locations entities)})
+  (def shows {:table :shows :fields (:shows entities)})
+  (def users {:table :users :fields (:users entities)}))
 (defmacro loaded-locations [] locations)
-(def shows (load-fields "shows"))
 (defmacro loaded-shows [] shows)
-(def users (load-fields "users"))
 (defmacro loaded-users [] users)
 
 (def ^{:arglists (:arglists (meta #'ent/with-alias))} with-alias ent/with-alias)

@@ -6,7 +6,8 @@
     [com.left-over.common.services.db.repositories.core :as repos]
     [com.left-over.common.services.db.repositories.locations :as repo.locations]
     [com.left-over.common.services.db.repositories.shows :as repo.shows]
-    [com.left-over.common.utils.colls :as colls])
+    [com.left-over.common.utils.colls :as colls]
+    [com.left-over.common.utils.logging :as log])
   #?(:clj (:import
             (java.util Date))))
 
@@ -43,6 +44,5 @@
                           (models/modify entities/locations ::repo.locations/model))
           (not location-id) (-> (entities/insert-into [location'])
                                 (models/insert-many entities/locations ::repo.locations/model)))
-
         (repos/exec! db)
         (v/then-> first :id (->> (find-by-id db))))))

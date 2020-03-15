@@ -52,6 +52,7 @@
                       (-> (env/get :oauth-token-info-uri)
                           (http/get {:query-params {:access_token token}
                                      :json?        true})
+                          (v/peek #(log/info "Fetched User PROFILE from " (env/get :oauth-token-info-uri) ": " %))
                           (v/then-> :email (->> (users/find-by-email conn))))))))
 
 (defn ^:private redirect-to [url]
@@ -59,14 +60,15 @@
              {:status  302
               :headers {:Location url}}))
 
-(defmulti ^:private handler* :path)
+(defmulti ^:private handler* :resource)
 
 (defmethod ^:private handler* "/auth/callback"
   [{:keys [queryStringParameters] :as event}]
   (let [redirect-uri (:redirect-uri (edn/parse (:state queryStringParameters)))]
     (-> (if redirect-uri
           (fetch-access-token oauth-config queryStringParameters)
-          (v/reject))
+          (v/reject "missing redirect-uri"))
+        (v/peek #(log/info "Fetched Auth TOKEN from " (env/get :oauth-token-uri) ": " %))
         (v/then :access_token)
         (v/then token->user)
         (v/then-> (some-> jwt/encode))

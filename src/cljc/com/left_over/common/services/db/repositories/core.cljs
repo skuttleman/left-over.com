@@ -9,11 +9,16 @@
     [com.left-over.common.utils.logging :as log]
     [com.left-over.common.utils.strings :as strings]
     [honeysql.core :as sql]
+    honeysql-postgres.format
+    honeysql-postgres.helpers
     pg-types))
 
 (def Client (.-Client (nodejs/require "pg")))
 
 (pg-types/setTypeParser pg-types/builtins.UUID #(some-> % uuid))
+(aset (.-prototype UUID) "toPostgres" (fn []
+                                        (this-as this
+                                          (str this))))
 
 (defn ^:private sql-value* [table column _]
   [table column])

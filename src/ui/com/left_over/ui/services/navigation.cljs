@@ -11,15 +11,6 @@
 (defn ^:private routes [& routes]
   ["" (into [] (concat routes [[true :nav/not-found]]))])
 
-(def ^:private api-routes
-  (routes ["/api"
-           [["/shows" :api/shows]
-            ["/admin"
-             [[["/locations/" :location-id] :api.admin/location]
-              ["/locations" :api.admin/locations]
-              [["/shows/" :show-id] :api.admin/show]
-              ["/shows" :api.admin/shows]]]]]))
-
 (def ^:private ui-routes
   (routes ["/" :ui/main]
           ["/about" :ui/about]
@@ -44,7 +35,12 @@
             ["/shows" :aws/shows]]]
           ["/auth"
            [["/info" :aws/info]
-            ["/login" :aws/login]]]))
+            ["/login" :aws/login]]]
+          ["/admin"
+           [[["/locations/" :location-id] :aws.admin/location]
+            ["/locations" :aws.admin/locations]
+            [["/shows/" :show-id] :aws.admin/show]
+            ["/shows" :aws.admin/shows]]]))
 
 (defn ^:private namify [[k v]]
   [k (if (keyword? v) (name v) (str v))])
@@ -69,12 +65,6 @@
                                       (map (fn [[k v]]
                                              (str (name k) "=" (keywords/safe-name v))))
                                       (string/join "&"))))))
-
-(defn api-for
-  ([page]
-   (api-for page nil))
-  ([page params]
-   (str (env/get :api-base-url) (path-for api-routes page params))))
 
 (defn ui-for
   ([page]

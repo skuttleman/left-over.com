@@ -5,21 +5,24 @@
     [com.left-over.api.services.jwt :as jwt]
     [com.left-over.common.utils.keywords :as keywords]
     [com.left-over.common.utils.logging :as log]
-    [com.left-over.common.utils.maps :as maps]))
+    [com.left-over.common.utils.maps :as maps]
+    [com.left-over.common.utils.json :as json]
+    [com.left-over.common.utils.edn :as edn]))
 
 (nodejs/enable-util-print!)
 (set! (.-XMLHttpRequest js/global) (.-XMLHttpRequest (nodejs/require "xmlhttprequest")))
 (aset js/global "localStorage" nil)
 
-(defn ^:private redirect? [status]
-  (and status (<= 300 status 399)))
+(defn ^:private nobody? [status]
+  (and status (or (= status 204)
+                  (<= 300 status 399))))
 
 (defn ^:private response [default-status event]
   (let [origin (get-in event [:headers :origin])]
     (fn [body]
       (let [{:keys [status headers]} (meta body)]
         {:statusCode (or status default-status)
-         :body       (when-not (redirect? status) (pr-str body))
+         :body       (when-not (nobody? status) (pr-str body))
          :headers    (cond-> {:Access-Control-Allow-Credentials "true"
                               :Content-Type                     "application/edn"}
                        origin (assoc :Access-Control-Allow-Origin origin)
@@ -31,9 +34,16 @@
     (with-meta (:body response) response)
     {:message "error fetching resource"}))
 
-(defn ^:private log [m]
-  (log/info (select-keys m #{:headers :path :queryStringParameters :method :statusCode}))
+(defn ^:private log [m msg]
+  (log/info msg (select-keys m #{:headers :httpMethod :path :pathParameters
+                                 :queryStringParameters :statusCode}))
   m)
+
+(defn ^:private parse [body content-type]
+  (condp re-matches (str content-type)
+    #"application/edn" (edn/parse body)
+    #"application/json" (json/parse body)
+    body))
 
 (defn with-event [handler]
   (fn handle
@@ -42,14 +52,14 @@
     ([event _ctx]
      (let [event* (update (js->clj event :keywordize-keys true)
                           :headers
-                          (partial maps/map-kv (comp keywords/keyword name) identity))]
+                          (partial maps/map-kv (comp keywords/keyword name) identity))
+           event* (maps/update-maybe event* :body parse (get-in event* [:headers :content-type]))]
        (-> event*
-           log
+           (log "REQUEST:")
            handler
            (v/then (response 200 event*))
            (v/catch (comp (response 500 event*) error))
-           (v/then log)
-           (v/then clj->js))))))
+           (v/then-> (log "RESPONSE:") clj->js))))))
 
 (defn with-user [handler]
   (fn [event]
@@ -58,3 +68,9 @@
                  (catch :default _ nil))]
       (handler (cond-> event
                  user (assoc :user user))))))
+
+(defn with-admin-only! [handler]
+  (fn [event]
+    (if (:user event)
+      (handler event)
+      (v/reject (ex-info "" {:response {:status 401 :body {:message "unauthorized"}}})))))
