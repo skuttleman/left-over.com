@@ -1,6 +1,6 @@
 (ns com.left-over.ui.admin.views.auth
   (:require
-    [com.left-over.common.utils.uri :as uri]
+    [com.left-over.shared.utils.uri :as uri]
     [com.left-over.ui.services.navigation :as nav]
     [com.left-over.ui.views.components :as components]))
 

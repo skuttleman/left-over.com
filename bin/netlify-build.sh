@@ -3,4 +3,4 @@
 lein clean
 npm install -g sass
 sass src/scss/main.scss dist/css/main.css
-lein cljsbuild once ui-min
+lein with-profile build cljsbuild once ui-min

@@ -34,11 +34,11 @@
             [lein-sass "0.5.0"]
             [lein-cooper "1.2.2"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]
-  :source-paths ["src/clj" "src/api" "src/cljc"]
+  :source-paths ["src/clj" "src/common" "src/shared"]
   :clean-targets ["target" "dist/js" "dist/css"]
   :cljsbuild {:builds
               [{:id           "dev-ui"
-                :source-paths ["src/ui" "src/cljc"]
+                :source-paths ["src/ui" "src/shared"]
                 :figwheel     {:on-jsload "com.left-over.ui.core/mount!"}
                 :compiler     {:main                 com.left-over.ui.core
                                :asset-path           "/js/compiled/out"
@@ -48,7 +48,7 @@
                                :source-map-timestamp true
                                :preloads             [devtools.preload]}}
                {:id           "dev-api"
-                :source-paths ["src/api" "src/cljc"]
+                :source-paths ["src/api" "src/common" "src/shared"]
                 :figwheel     true
                 :compiler     {:install-deps         true
                                :npm-deps             {:cors           "2.8.5"
@@ -65,13 +65,13 @@
                                :optimizations        :none
                                :source-map-timestamp true}}
                {:id           "ui-min"
-                :source-paths ["src/ui" "src/cljc"]
+                :source-paths ["src/ui" "src/shared"]
                 :compiler     {:output-to     "dist/js/compiled/app.js"
                                :main          com.left-over.ui.core
                                :optimizations :advanced
                                :pretty-print  false}}
                {:id           "pub-images"
-                :source-paths ["src/api" "src/cljc"]
+                :source-paths ["src/api" "src/common" "src/shared"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.pub.images
@@ -81,7 +81,7 @@
                                :optimizations :simple
                                :pretty-print  true}}
                {:id           "pub-videos"
-                :source-paths ["src/api" "src/cljc"]
+                :source-paths ["src/api" "src/common" "src/shared"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.pub.videos
@@ -91,7 +91,7 @@
                                :optimizations :simple
                                :pretty-print  true}}
                {:id           "pub-shows"
-                :source-paths ["src/api" "src/cljc"]
+                :source-paths ["src/api" "src/common" "src/shared"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:pg "7.18.2"}
                                :main          com.left-over.api.handlers.pub.shows
@@ -101,7 +101,7 @@
                                :optimizations :simple
                                :pretty-print  true}}
                {:id           "admin-locations"
-                :source-paths ["src/api" "src/cljc"]
+                :source-paths ["src/api" "src/common" "src/shared"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:jwt-simple "0.5.6"
                                                :pg         "7.18.2"}
@@ -112,7 +112,7 @@
                                :optimizations :simple
                                :pretty-print  true}}
                {:id           "admin-shows"
-                :source-paths ["src/api" "src/cljc"]
+                :source-paths ["src/api" "src/common" "src/shared"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:jwt-simple "0.5.6"
                                                :pg         "7.18.2"}
@@ -123,7 +123,7 @@
                                :optimizations :simple
                                :pretty-print  true}}
                {:id           "auth"
-                :source-paths ["src/api" "src/cljc"]
+                :source-paths ["src/api" "src/common" "src/shared"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:jwt-simple     "0.5.6"
                                                :pg             "7.18.2"
@@ -137,26 +137,21 @@
   :aliases {"migrations" ["run" "-m" "com.left-over.api.services.db.migrations/-main"]}
   :cooper {"api"      ["lein" "with-profile" "dev-api" "figwheel" "dev-api"]
            "api-repl" ["bin/sleepnode.sh" "target/js/compiled/server.js"]
-           "cljs"     ["lein" "with-profile" "dev-ui" "figwheel" "dev-ui"]
-           "sass"     ["lein" "sass" "auto"]}
+           "sass"     ["lein" "sass" "auto"]
+           "ui"       ["lein" "with-profile" "dev-ui" "figwheel" "dev-ui"]}
   :sass {:src              "src/scss"
          :output-directory "dist/css/"}
-  :profiles {:dev     {:dependencies [[binaryage/devtools "0.9.10"]
-                                      [cider/piggieback "0.4.0"]
-                                      [figwheel-sidecar "0.5.19"]
-                                      [ring/ring-core "1.3.2"]]
-                       :source-paths ["src/clj" "src/cljc" "dev"]
-                       :main         com.left-over.api.server/-dev}
-             :dev-ui  {:dependencies [[binaryage/devtools "0.9.10"]
+  :profiles {:dev-ui  {:dependencies [[binaryage/devtools "0.9.10"]
                                       [cider/piggieback "0.4.0"]
                                       [figwheel-sidecar "0.5.19"]]
                        :figwheel     {:css-dirs     ["dist/css"]
                                       :nrepl-port   7888
                                       :ring-handler com.left-over.dev-server/handler}
-                       :source-paths ["src/ui" "src/cljc" "dev"]}
+                       :source-paths ["src/ui" "src/shared" "dev"]}
              :dev-api {:dependencies [[binaryage/devtools "0.9.10"]
                                       [cider/piggieback "0.4.0"]
                                       [figwheel-sidecar "0.5.19"]]
                        :figwheel     {:nrepl-port  7999
                                       :server-port 3559}
-                       :source-paths ["src/api" "src/cljc" "dev"]}})
+                       :source-paths ["src/api" "src/shared" "dev"]}
+             :build   {:source-paths ["src/ui" "src/shared"]}})

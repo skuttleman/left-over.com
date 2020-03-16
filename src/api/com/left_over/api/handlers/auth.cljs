@@ -1,13 +1,13 @@
 (ns com.left-over.api.handlers.auth
   (:require
     [com.ben-allred.vow.core :as v :include-macros true]
-    [com.left-over.common.utils.uri :as uri]
+    [com.left-over.shared.utils.uri :as uri]
     [com.left-over.api.core :as core]
-    [com.left-over.common.services.http :as http]
+    [com.left-over.shared.services.http :as http]
     [clojure.string :as string]
-    [com.left-over.api.services.env :as env]
-    [com.left-over.common.utils.edn :as edn]
-    [com.left-over.common.utils.logging :as log]
+    [com.left-over.common.services.env :as env]
+    [com.left-over.shared.utils.edn :as edn]
+    [com.left-over.shared.utils.logging :as log]
     [com.left-over.common.services.db.repositories.core :as repos]
     [com.left-over.common.services.db.models.users :as users]
     [com.left-over.api.services.jwt :as jwt]))

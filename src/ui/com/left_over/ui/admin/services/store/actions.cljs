@@ -2,8 +2,8 @@
   (:require
     [clojure.core.async :as async]
     [com.ben-allred.vow.core :as v :include-macros true]
-    [com.left-over.common.services.http :as http]
-    [com.left-over.common.utils.dates :as dates]
+    [com.left-over.shared.services.http :as http]
+    [com.left-over.shared.utils.dates :as dates]
     [com.left-over.ui.services.forms.standard :as form.std]
     [com.left-over.ui.services.navigation :as nav]
     [com.left-over.ui.services.store.actions :as actions]))

@@ -7,15 +7,15 @@
     [com.left-over.api.handlers.pub.images :as pub.images]
     [com.left-over.api.handlers.pub.shows :as pub.shows]
     [com.left-over.api.handlers.pub.videos :as pub.videos]
-    [com.left-over.api.services.env :as env]
-    [com.left-over.common.utils.logging :as log :include-macros true]
-    [com.left-over.common.utils.numbers :as numbers]
+    [com.left-over.common.services.env :as env]
+    [com.left-over.shared.utils.logging :as log :include-macros true]
+    [com.left-over.shared.utils.numbers :as numbers]
     cors
     express
     http
     [clojure.string :as string]
-    [com.left-over.common.utils.maps :as maps]
-    [com.left-over.common.utils.keywords :as keywords])
+    [com.left-over.shared.utils.maps :as maps]
+    [com.left-over.shared.utils.keywords :as keywords])
   (:import
     (goog.string StringBuffer)))
 

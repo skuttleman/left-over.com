@@ -2,7 +2,7 @@
   (:require
     [com.ben-allred.formation.core :as f]
     [com.ben-allred.vow.core :as v :include-macros true]
-    [com.left-over.common.utils.logging :as log]
+    [com.left-over.shared.utils.logging :as log]
     [com.left-over.ui.admin.services.store.actions :as admin.actions]
     [com.left-over.ui.admin.views.fields :as fields]
     [com.left-over.ui.services.forms.core :as forms]

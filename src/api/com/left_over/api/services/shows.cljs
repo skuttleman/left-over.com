@@ -2,9 +2,9 @@
   (:require
     [com.left-over.common.services.db.models.shows :as shows]
     [com.left-over.common.services.db.repositories.core :as repos]
-    [com.left-over.api.services.env :as env]
-    [com.left-over.common.utils.memoize :as memo]
-    [com.left-over.common.utils.numbers :as numbers]))
+    [com.left-over.common.services.env :as env]
+    [com.left-over.shared.utils.memoize :as memo]
+    [com.left-over.shared.utils.numbers :as numbers]))
 
 (defn ^:private shows* [_event]
   (repos/transact shows/select-for-website))

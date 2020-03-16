@@ -2,10 +2,10 @@
   (:require
     [clojure.string :as string]
     [com.ben-allred.vow.core :as v :include-macros true]
-    [com.left-over.api.services.env :as env]
-    [com.left-over.common.services.http :as http]
-    [com.left-over.common.utils.memoize :as memo]
-    [com.left-over.common.utils.numbers :as numbers]))
+    [com.left-over.common.services.env :as env]
+    [com.left-over.shared.services.http :as http]
+    [com.left-over.shared.utils.memoize :as memo]
+    [com.left-over.shared.utils.numbers :as numbers]))
 
 (def ^:private dropbox-list-folder "https://api.dropboxapi.com/2/files/list_folder")
 

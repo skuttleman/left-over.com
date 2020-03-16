@@ -3,11 +3,11 @@
     [cljs.nodejs :as nodejs]
     [com.ben-allred.vow.core :as v :include-macros true]
     [com.left-over.api.services.jwt :as jwt]
-    [com.left-over.common.utils.keywords :as keywords]
-    [com.left-over.common.utils.logging :as log]
-    [com.left-over.common.utils.maps :as maps]
-    [com.left-over.common.utils.json :as json]
-    [com.left-over.common.utils.edn :as edn]))
+    [com.left-over.shared.utils.keywords :as keywords]
+    [com.left-over.shared.utils.logging :as log]
+    [com.left-over.shared.utils.maps :as maps]
+    [com.left-over.shared.utils.json :as json]
+    [com.left-over.shared.utils.edn :as edn]))
 
 (nodejs/enable-util-print!)
 (set! (.-XMLHttpRequest js/global) (.-XMLHttpRequest (nodejs/require "xmlhttprequest")))

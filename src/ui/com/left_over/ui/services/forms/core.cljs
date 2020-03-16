@@ -1,6 +1,6 @@
 (ns com.left-over.ui.services.forms.core
   (:require
-    [com.left-over.common.utils.logging :as log]))
+    [com.left-over.shared.utils.logging :as log]))
 
 (defn ^:private derefable? [value]
   (satisfies? IDeref value))

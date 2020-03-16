@@ -4,8 +4,8 @@
     [camel-snake-kebab.core :as csk]
     [clojure.string :as string]
     [com.left-over.common.services.db.repositories.core :as repos]
-    [com.left-over.common.utils.dates :as dates]
-    [com.left-over.common.utils.numbers :as numbers]
+    [com.left-over.shared.utils.dates :as dates]
+    [com.left-over.shared.utils.numbers :as numbers]
     [ragtime.jdbc :as rag-db]
     [ragtime.repl :as rag]))
 

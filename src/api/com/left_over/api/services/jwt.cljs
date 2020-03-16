@@ -1,8 +1,8 @@
 (ns com.left-over.api.services.jwt
   (:require
-    [com.left-over.api.services.env :as env]
-    [com.left-over.common.utils.edn :as edn]
-    [com.left-over.common.utils.numbers :as numbers]
+    [com.left-over.common.services.env :as env]
+    [com.left-over.shared.utils.edn :as edn]
+    [com.left-over.shared.utils.numbers :as numbers]
     jwt-simple))
 
 (defn now []

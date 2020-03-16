@@ -4,7 +4,7 @@
     [com.left-over.api.core :as core]
     [com.left-over.common.services.db.models.locations :as locations]
     [com.left-over.common.services.db.repositories.core :as repos]
-    [com.left-over.common.utils.logging :as log]))
+    [com.left-over.shared.utils.logging :as log]))
 
 (defmulti ^:private handler* (juxt :httpMethod :resource))
 

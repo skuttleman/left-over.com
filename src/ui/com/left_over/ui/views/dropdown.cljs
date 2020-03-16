@@ -1,8 +1,8 @@
 (ns com.left-over.ui.views.dropdown
   (:require
     [clojure.set :as set]
-    [com.left-over.common.utils.logging :as log]
-    [com.left-over.common.utils.maps :as maps]
+    [com.left-over.shared.utils.logging :as log]
+    [com.left-over.shared.utils.maps :as maps]
     [com.left-over.ui.admin.views.fields :as fields]
     [com.left-over.ui.views.components :as components]))
 

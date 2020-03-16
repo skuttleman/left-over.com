@@ -2,7 +2,7 @@
   (:require
     [cljs.core.match :refer-macros [match]]
     [com.ben-allred.collaj.reducers :as cr]
-    [com.left-over.common.utils.maps :as maps]
+    [com.left-over.shared.utils.maps :as maps]
     [com.left-over.ui.services.store.reducers :as reducers]))
 
 (defn auth

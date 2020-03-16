@@ -1,6 +1,6 @@
 (ns com.left-over.ui.views.components
   (:require
-    [com.left-over.common.utils.colls :as colls]))
+    [com.left-over.shared.utils.colls :as colls]))
 
 (def ^:private level->class
   {:error "is-danger"})

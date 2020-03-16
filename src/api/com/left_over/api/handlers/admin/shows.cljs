@@ -3,7 +3,7 @@
     [com.left-over.api.core :as core]
     [com.left-over.common.services.db.models.shows :as shows]
     [com.left-over.common.services.db.repositories.core :as repos]
-    [com.left-over.common.utils.logging :as log]
+    [com.left-over.shared.utils.logging :as log]
     [com.ben-allred.vow.core :as v]))
 
 (defmulti ^:private handler* (juxt :httpMethod :resource))

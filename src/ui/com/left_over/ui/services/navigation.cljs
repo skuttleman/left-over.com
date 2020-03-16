@@ -3,8 +3,8 @@
     [bidi.bidi :as bidi]
     [clojure.string :as string]
     [com.left-over.ui.services.env :as env]
-    [com.left-over.common.utils.keywords :as keywords]
-    [com.left-over.common.utils.maps :as maps]
+    [com.left-over.shared.utils.keywords :as keywords]
+    [com.left-over.shared.utils.maps :as maps]
     [com.left-over.ui.services.store.core :as store]
     [pushy.core :as pushy]))
 
