@@ -3,7 +3,6 @@
   :url "https://www.github.com/skuttleman/left-over.com"
   :license {:name "Eclipse Public License"
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
-  :aot [com.left-over.api.services.db.migrations]
   :min-lein-version "2.9.1"
   :dependencies [[bidi "2.1.3" :exclusions [[ring/ring-core]]]
                  [camel-snake-kebab "0.4.1"]
@@ -13,8 +12,6 @@
                  [com.ben-allred/collaj "0.8.0"]
                  [com.ben-allred/formation "0.6.2"]
                  [com.ben-allred/vow "0.3.1"]
-                 [com.cognitect.aws/api "0.8.391"]
-                 [com.cognitect.aws/endpoints "1.1.11.664"]
                  [com.taoensso/timbre "4.10.0"]
                  [honeysql "0.9.2"]
                  [kibu/pushy "0.3.8"]
@@ -25,7 +22,7 @@
                  [org.clojure/clojurescript "1.10.597"]
                  [org.clojure/core.async "1.0.567"]
                  [org.clojure/core.match "0.3.0"]
-                 [org.postgresql/postgresql "9.4-1206-jdbc41" :exclusions [[org.clojure/java.jdbc]]]
+                 [org.postgresql/postgresql "9.4-1206-jdbc41"]
                  [ragtime "0.7.2"]
                  [reagent "0.8.1"]
                  [seancorfield/next.jdbc "1.0.5"]
@@ -34,7 +31,7 @@
             [lein-sass "0.5.0"]
             [lein-cooper "1.2.2"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]
-  :source-paths ["src/api" "src/clj" "src/common" "src/shared" "src/ui"]
+  :source-paths ["src/api" "src/common" "src/shared" "src/ui"]
   :clean-targets ["target" "dist/js" "dist/css"]
   :cljsbuild {:builds
               [{:id           "dev-ui"
