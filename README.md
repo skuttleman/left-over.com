@@ -17,8 +17,8 @@ Visit [http://localhost:3449](http://localhost:3449) in your browser.
 The front end is automatically deployed to [netlify](https://app.netlify.com/sites/left-over-band/deploys) via githooks.
 
 The back-end is deployed as a series of [AWS lambdas](https://console.aws.amazon.com/lambda/home?region=us-east-1#/functions).
-To build the zip files (to be uploaded manually):
+To build and deploy the zip files:
 
 ```bash
-$ bin/lambda-build.sh
+$ bin/deploy.sh
 ```

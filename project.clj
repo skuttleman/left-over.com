@@ -34,7 +34,7 @@
             [lein-sass "0.5.0"]
             [lein-cooper "1.2.2"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]
-  :source-paths ["src/clj" "src/common" "src/shared"]
+  :source-paths ["src/api" "src/clj" "src/common" "src/shared" "src/ui"]
   :clean-targets ["target" "dist/js" "dist/css"]
   :cljsbuild {:builds
               [{:id           "dev-ui"

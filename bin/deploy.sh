@@ -19,14 +19,35 @@ function build() {
     zip -j target/${BUILD_ZIP}.zip target/${BUILD_TARGET}.js
 }
 
+function deploy() {
+    FUNCTION="${1}"
+    BUILD_ZIP="${2}"
+
+    ERROR=$(aws lambda update-function-code --region us-east-1 --function-name "left-over--${FUNCTION}" --zip-file "fileb://target/${BUILD_ZIP}.zip" 2>&1 >/dev/null)
+
+    if [[ ! -z "$ERROR" ]]; then
+        echo "${ERROR}"
+        exit 1
+    fi
+
+    echo "${FUNCTION} deployed"
+}
+
 lein clean
 rm -rf target
 mkdir target
 
 build "auth" "auth" "auth"
+deploy "auth" "auth"
+
 for BUILD in ${ADMIN_BUILDS}; do
     build "admin-${BUILD}" "admin.${BUILD}" "admin/${BUILD}"
+    deploy "admin-${BUILD}" "admin.${BUILD}"
 done
+
 for BUILD in ${PUB_BUILDS}; do
     build "pub-${BUILD}" "pub.${BUILD}" "pub/${BUILD}"
+    deploy "${BUILD}" "pub.${BUILD}"
 done
+
+echo "all lambdas deployed"
