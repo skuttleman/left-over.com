@@ -12,9 +12,12 @@ function build() {
 
     echo "building ${BUILD_ID}"
     rm -rf node_modules
+    rm -f package.json
+    rm -f package-lock.json
     rm -rf target/js
+    rm -rf target/admin
     rm -rf target/pub
-    lein cljsbuild once ${BUILD_ID}
+    lein with-profile build cljsbuild once ${BUILD_ID}
     zip -r target/${BUILD_ZIP}.zip node_modules
     zip -j target/${BUILD_ZIP}.zip target/${BUILD_TARGET}.js
 }

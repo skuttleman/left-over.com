@@ -68,7 +68,9 @@
                {:id           "pub-images"
                 :source-paths ["src/api" "src/common" "src/shared"]
                 :compiler     {:install-deps  true
-                               :npm-deps      {:xmlhttprequest "1.8.0"}
+                               :npm-deps      {:jwt-simple     "0.5.6"
+                                               :pg             "7.18.2"
+                                               :xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.pub.images
                                :output-to     "target/pub/images.js"
                                :output-dir    "target/js/compiled/pub/images"
@@ -78,7 +80,9 @@
                {:id           "pub-videos"
                 :source-paths ["src/api" "src/common" "src/shared"]
                 :compiler     {:install-deps  true
-                               :npm-deps      {:xmlhttprequest "1.8.0"}
+                               :npm-deps      {:jwt-simple     "0.5.6"
+                                               :pg             "7.18.2"
+                                               :xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.pub.videos
                                :output-to     "target/pub/videos.js"
                                :output-dir    "target/js/compiled/pub/videos"
@@ -88,7 +92,9 @@
                {:id           "pub-shows"
                 :source-paths ["src/api" "src/common" "src/shared"]
                 :compiler     {:install-deps  true
-                               :npm-deps      {:pg "7.18.2"}
+                               :npm-deps      {:jwt-simple     "0.5.6"
+                                               :pg             "7.18.2"
+                                               :xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.pub.shows
                                :output-to     "target/pub/shows.js"
                                :output-dir    "target/js/compiled/pub/shows"
@@ -98,8 +104,9 @@
                {:id           "admin-locations"
                 :source-paths ["src/api" "src/common" "src/shared"]
                 :compiler     {:install-deps  true
-                               :npm-deps      {:jwt-simple "0.5.6"
-                                               :pg         "7.18.2"}
+                               :npm-deps      {:jwt-simple     "0.5.6"
+                                               :pg             "7.18.2"
+                                               :xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.admin.locations
                                :output-to     "target/admin/locations.js"
                                :output-dir    "target/js/compiled/admin/locations"
@@ -109,8 +116,9 @@
                {:id           "admin-shows"
                 :source-paths ["src/api" "src/common" "src/shared"]
                 :compiler     {:install-deps  true
-                               :npm-deps      {:jwt-simple "0.5.6"
-                                               :pg         "7.18.2"}
+                               :npm-deps      {:jwt-simple     "0.5.6"
+                                               :pg             "7.18.2"
+                                               :xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.admin.shows
                                :output-to     "target/admin/shows.js"
                                :output-dir    "target/js/compiled/admin/shows"
@@ -149,5 +157,4 @@
                                       [figwheel-sidecar "0.5.19"]]
                        :figwheel     {:nrepl-port  7999
                                       :server-port 3559}
-                       :source-paths ["src/api" "src/shared" "dev"]}
-             :build   {:source-paths ["src/ui" "src/shared"]}})
+                       :source-paths ["src/api" "src/shared" "dev"]}})
