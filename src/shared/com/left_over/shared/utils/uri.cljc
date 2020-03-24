@@ -3,11 +3,16 @@
     [clojure.string :as string]
     [lambdaisland.uri :as uri*])
   #?(:clj (:import
-            (java.net URLEncoder))))
+            (java.net URLDecoder URLEncoder))))
 
 (defn url-encode [arg]
   #?(:clj  (URLEncoder/encode (str arg) "UTF-8")
      :cljs (js/encodeURIComponent (str arg))))
+
+(defn url-decode [arg]
+  (let [arg (string/replace (str arg) #"\+" " ")]
+    #?(:clj  (URLDecoder/decode arg "UTF-8")
+       :cljs (js/decodeURIComponent arg))))
 
 (defn form-url-encode [arg]
   (string/join \& (map (fn [[k v]]

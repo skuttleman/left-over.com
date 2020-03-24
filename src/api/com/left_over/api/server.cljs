@@ -1,5 +1,10 @@
 (ns com.left-over.api.server
   (:require
+    [bidi.bidi :as bidi]
+    [clojure.set :as set]
+    [clojure.string :as string]
+    [com.ben-allred.espresso.core :as es]
+    [com.ben-allred.espresso.middleware :as esmw]
     [com.ben-allred.vow.core :as v :include-macros true]
     [com.left-over.api.handlers.admin.locations :as admin.locations]
     [com.left-over.api.handlers.admin.shows :as admin.shows]
@@ -10,123 +15,140 @@
     [com.left-over.common.services.env :as env]
     [com.left-over.shared.utils.logging :as log :include-macros true]
     [com.left-over.shared.utils.numbers :as numbers]
-    cors
-    express
-    http
-    [clojure.string :as string]
-    [com.left-over.shared.utils.maps :as maps]
-    [com.left-over.shared.utils.keywords :as keywords])
-  (:import
-    (goog.string StringBuffer)))
+    [com.left-over.shared.utils.uri :as uri]))
 
-(defn ^:private with-resource [segment handler]
-  (fn [req res next]
-    (aset req "resource" (str (.-resource req) segment))
-    (handler req res next)))
+(def ^:private routes
+  ["" {"/public" {"/images" {:get :public.images/get}
+                  "/shows"  {:get :public.shows/get}
+                  "/videos" {:get :public.videos/get}}
+       "/auth"   {"/callback" {:get :auth.callback/get}
+                  "/info"     {:get :auth.info/get}
+                  "/login"    {:get :auth.login/get}}
+       "/admin"  {"/locations" {""                 {:post :admin.locations/post
+                                                    :get  :admin.locations/get}
+                                ["/" :location-id] {:put :admin.location/put}}
+                  "/shows"     {""             {:post :admin.shows/post
+                                                :get  :admin.shows/get}
+                                ["/" :show-id] {:get    :admin.show/get
+                                                :put    :admin.show/put
+                                                :delete :admin.show/delete}}}}])
 
-(defn ^:private -use [ctx segment handler]
-  (.use ctx segment (with-resource segment handler)))
+(defn ^:private handle* [handler request]
+  (-> request
+      (update :method (comp string/upper-case name))
+      (set/rename-keys {:method       :httpMethod
+                        :query-params :queryStringParameters
+                        :route-params :pathParameters})
+      (assoc :resource (bidi/path-for routes (:bidi/route request)
+                                      :show-id "{show-id}"
+                                      :location-id "{location-id}"))
+      clj->js
+      (handler nil)
+      (v/then-> (js->clj :keywordize-keys true)
+                (set/rename-keys {:statusCode :status}))))
 
-(defn ^:private -get [ctx segment handler]
-  (.get ctx segment (with-resource segment handler)))
+(defmulti handler :bidi/route)
 
-(defn ^:private -put [ctx segment handler]
-  (.put ctx segment (with-resource segment handler)))
+(defmethod handler :public.images/get [request]
+  (handle* pub.images/handler request))
 
-(defn ^:private -post [ctx segment handler]
-  (.post ctx segment (with-resource segment handler)))
+(defmethod handler :public.shows/get [request]
+  (handle* pub.shows/handler request))
 
-(defn ^:private -delete [ctx segment handler]
-  (.delete ctx segment (with-resource segment handler)))
+(defmethod handler :public.videos/get [request]
+  (handle* pub.videos/handler request))
 
-(defn ^:private body-parser [req _res next]
-  (let [buffer (StringBuffer.)]
-    (doto req
-      (.setEncoding "utf8")
-      (.on "data" (fn [chunk]
-                    (.append buffer chunk)))
-      (.on "end" (fn []
-                   (aset req "body" (str buffer))
-                   (next)))
-      (.on "error" next))))
+(defmethod handler :auth.callback/get [request]
+  (handle* auth/handler request))
 
-(defn ^:private handler->route [handler]
-  (fn [req res next]
-    (let [resource
-          (string/replace (.-resource req)
-                          #":[a-z_]+"
-                          (fn [s & _]
-                            (str "{" (string/replace (subs s 1) #"_" "-") "}")))
-          params (-> (.-params req)
-                     js->clj
-                     (->> (maps/map-kv keywords/keyword identity))
-                     clj->js)]
-      (v/then (handler #js {:headers               (.-headers req)
-                            :httpMethod            (.-method req)
-                            :body                  (.-body req)
-                            :queryStringParameters (.-query req)
-                            :pathParameters        params
-                            :resource              (cond-> resource
-                                                     (and (not= resource "/")
-                                                          (string/ends-with? resource "/"))
-                                                     (subs 0 (dec (count resource))))
-                            :path                  (.-fullPath req)}
-                       nil)
-              (fn [result]
-                (doto res
-                  (.status (.-statusCode result))
-                  (.set (.-headers result))
-                  (.send (.-body result))))
-              next))))
+(defmethod handler :auth.info/get [request]
+  (handle* auth/handler request))
 
-(def ^:private cors-middleware (cors #js {:origin (fn [_ cb] (cb nil true))}))
+(defmethod handler :auth.login/get [request]
+  (handle* auth/handler request))
 
-(def ^:private pub-route
-  (doto (express/Router)
-    (-get "/images" (handler->route pub.images/handler))
-    (-get "/shows" (handler->route pub.shows/handler))
-    (-get "/videos" (handler->route pub.videos/handler))))
+(defmethod handler :admin.locations/post [request]
+  (handle* admin.locations/handler [request]))
 
-(def ^:private auth-route
-  (doto (express/Router)
-    (-get "/callback" (handler->route auth/handler))
-    (-get "/info" (handler->route auth/handler))
-    (-get "/login" (handler->route auth/handler))))
+(defmethod handler :admin.locations/get [request]
+  (handle* admin.locations/handler request))
 
-(def ^:private admin-locations
-  (doto (express/Router)
-    (-post "/" (handler->route admin.locations/handler))
-    (-get "/" (handler->route admin.locations/handler))
-    (-put "/:location_id" (handler->route admin.locations/handler))))
+(defmethod handler :admin.location/put [request]
+  (handle* admin.locations/handler request))
 
-(def ^:private admin-shows
-  (doto (express/Router)
-    (-get "/" (handler->route admin.shows/handler))
-    (-post "/" (handler->route admin.shows/handler))
-    (-delete "/:show_id" (handler->route admin.shows/handler))
-    (-put "/:show_id" (handler->route admin.shows/handler))
-    (-get "/:show_id" (handler->route admin.shows/handler))))
+(defmethod handler :admin.shows/get [request]
+  (handle* admin.shows/handler request))
 
-(def ^:private admin-route
-  (doto (express/Router)
-    (-use "/locations" admin-locations)
-    (-use "/shows" admin-shows)))
+(defmethod handler :admin.shows/post [request]
+  (handle* admin.shows/handler request))
 
-(def ^:private app
-  (doto (express)
-    (.use (fn [req _res next]
-            (aset req "fullPath" (.-path req))
-            (next)))
-    (.options "*" (fn [req res next]
-                    (.set res "Access-Control-Allow-Credentials" "true")
-                    (cors-middleware req res next)))
-    (.use cors-middleware)
-    (.use body-parser)
-    (-use "/public" pub-route)
-    (-use "/auth" auth-route)
-    (-use "/admin" admin-route)))
+(defmethod handler :admin.show/delete [request]
+  (handle* admin.shows/handler request))
+
+(defmethod handler :admin.show/put [request]
+  (handle* admin.shows/handler request))
+
+(defmethod handler :admin.show/get [request]
+  (handle* admin.shows/handler request))
+
+(defn ^:private with-routing [handler routes]
+  (fn [request]
+    (if-let [{route :handler :keys [route-params]} (bidi/match-route routes
+                                                                     (:path request)
+                                                                     :request-method
+                                                                     (:method request))]
+      (handler (assoc request :bidi/route route :route-params route-params))
+      (handler request))))
+
+(defn ^:private with-query-params
+  ([handler]
+   (with-query-params handler false))
+  ([handler keywordize?]
+   (fn [request]
+     (->> (string/split (:query-string request) #"&") (remove empty?)
+          (reduce (fn [params param]
+                    (let [[k v] (string/split param #"=")
+                          k (cond-> k keywordize? keyword)
+                          v (if (nil? v) true (uri/url-decode v))]
+                      (assoc params k v)))
+                  {})
+          (assoc request :query-params)
+          handler))))
+
+(defn ^:private with-cors [handler]
+  (fn [{:keys [headers] :as request}]
+    (let [origin (get headers "origin")
+          req-headers (get headers "access-control-request-headers")
+          response-headers (cond-> {"Access-Control-Allow-Credentials" "true"
+                                    "Access-Control-Allow-Methods"     "GET,POST,PUT,PATCH,DELETE,HEAD"}
+                             origin (assoc "Access-Control-Allow-Origin" origin)
+                             req-headers (assoc "Access-Control-Allow-Headers" (if (string? req-headers)
+                                                                                 req-headers
+                                                                                 (string/join "," req-headers))) )]
+      (if (= :options (:method request))
+        (v/resolve {:status  204
+                    :headers response-headers})
+        (v/then-> (handler request)
+                  (update :headers merge response-headers))))))
+
+(defn ^:private with-dev-debug [handler]
+  (fn [request]
+    (v/peek (handler request) nil #(log/spy ["ERROR" %]))))
+
+(defn ^:private with-keyword-headers [handler]
+  (fn [request]
+    (-> request
+        (update :headers (partial into {} (map (juxt (comp keyword key) val))))
+        handler)))
 
 (defonce server
-  (let [port (numbers/parse-int (env/get :dev-aws-port "3100"))]
-    (doto (http/createServer app)
-      (.listen port #(log/info "The server is listening on PORT" port)))))
+  (doto (-> handler
+            (with-routing routes)
+            esmw/with-body
+            with-query-params
+            with-keyword-headers
+            with-cors
+            with-dev-debug
+            es/create-server)
+    (.listen (numbers/parse-int (env/get :dev-aws-port "3100"))
+             #(log/info "The server is listening on PORT" (env/get :dev-aws-port "3100")))))

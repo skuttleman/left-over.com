@@ -11,7 +11,7 @@
                  [clojure.jdbc/clojure.jdbc-c3p0 "0.3.3" :exclusions [[org.clojure/java.jdbc]]]
                  [com.ben-allred/collaj "0.8.0"]
                  [com.ben-allred/formation "0.6.2"]
-                 [com.ben-allred/vow "0.3.1"]
+                 [com.ben-allred/vow "0.3.2"]
                  [com.taoensso/timbre "4.10.0"]
                  [honeysql "0.9.2"]
                  [kibu/pushy "0.3.8"]
@@ -48,9 +48,7 @@
                 :source-paths ["src/api" "src/common" "src/shared"]
                 :figwheel     true
                 :compiler     {:install-deps         true
-                               :npm-deps             {:cors           "2.8.5"
-                                                      :express        "4.17.1"
-                                                      :jwt-simple     "0.5.6"
+                               :npm-deps             {:jwt-simple     "0.5.6"
                                                       :pg             "7.18.2"
                                                       :xmlhttprequest "1.8.0"
                                                       :ws             "7.1.2"} ;; required to use figwheel REPL
@@ -147,6 +145,7 @@
                        :source-paths ["src/ui" "src/shared" "dev"]}
              :dev-api {:dependencies [[binaryage/devtools "0.9.10"]
                                       [cider/piggieback "0.4.0"]
+                                      [com.ben-allred/espresso "0.1.0-SNAPSHOT"]
                                       [figwheel-sidecar "0.5.19"]]
                        :figwheel     {:nrepl-port  7999
                                       :server-port 3559}

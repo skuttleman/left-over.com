@@ -28,3 +28,8 @@
   `(let [result# ~x]
      (spy (~tap-f result#))
      result#))
+
+(defmacro tap-spy [x tap-f]
+  `(let [result# ~x]
+     (spy (~tap-f result#))
+     result#))

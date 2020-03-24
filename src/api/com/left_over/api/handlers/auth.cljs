@@ -68,7 +68,7 @@
     (-> (if redirect-uri
           (fetch-access-token oauth-config queryStringParameters)
           (v/reject "missing redirect-uri"))
-        (v/peek #(log/info "Fetched Auth TOKEN from " (env/get :oauth-token-uri) ": " %))
+        (v/peek #(log/info "Fetched Auth TOKEN from" (env/get :oauth-token-uri) ": " %))
         (v/then :access_token)
         (v/then token->user)
         (v/then-> (some-> jwt/encode))
