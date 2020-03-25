@@ -17,7 +17,7 @@ function build() {
     rm -rf target/js
     rm -rf target/admin
     rm -rf target/pub
-    lein with-profile build cljsbuild once ${BUILD_ID}
+    lein cljsbuild once ${BUILD_ID}
     zip -r target/${BUILD_ZIP}.zip node_modules
     zip -j target/${BUILD_ZIP}.zip target/${BUILD_TARGET}.js
 }
