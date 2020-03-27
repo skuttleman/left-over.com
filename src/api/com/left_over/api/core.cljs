@@ -1,13 +1,14 @@
 (ns com.left-over.api.core
   (:require
     [cljs.nodejs :as nodejs]
+    [clojure.string :as string]
     [com.ben-allred.vow.core :as v :include-macros true]
     [com.left-over.api.services.jwt :as jwt]
+    [com.left-over.shared.utils.edn :as edn]
+    [com.left-over.shared.utils.json :as json]
     [com.left-over.shared.utils.keywords :as keywords]
     [com.left-over.shared.utils.logging :as log]
-    [com.left-over.shared.utils.maps :as maps]
-    [com.left-over.shared.utils.json :as json]
-    [com.left-over.shared.utils.edn :as edn]))
+    [com.left-over.shared.utils.maps :as maps]))
 
 (nodejs/enable-util-print!)
 (set! (.-XMLHttpRequest js/global) (.-XMLHttpRequest (nodejs/require "xmlhttprequest")))
@@ -35,8 +36,11 @@
     {:message "error fetching resource"}))
 
 (defn ^:private log [m msg]
-  (log/info msg (select-keys m #{:headers :httpMethod :path :pathParameters
-                                 :queryStringParameters :statusCode}))
+  (log/info msg (-> m
+                    (select-keys #{:headers :httpMethod :path :pathParameters
+                                   :queryStringParameters :statusCode})
+                    (update :headers maps/update-maybe :Location string/replace #"\?.*" "")
+                    (update :headers maps/update-maybe :authorization string/replace #"Bearer .*" "Bearer {TOKEN}")))
   m)
 
 (defn ^:private parse [body content-type]

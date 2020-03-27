@@ -9,6 +9,7 @@
     [com.left-over.shared.utils.logging :as log]
     [com.left-over.shared.utils.strings :as strings]
     [honeysql.core :as sql]
+    [honeysql.format :as sql.fmt]
     honeysql-postgres.format
     honeysql-postgres.helpers
     pg-types))
@@ -31,17 +32,18 @@
 
 (defmethod ->sql-value :default [_ _ value] value)
 
-(defn ^:private sql-log [[statement & args]]
+(defmethod sql.fmt/format-clause :json/merge [[_ k] sql-map]
+  (let [[param] (get (meta sql-map) k)
+        s (if (:set sql-map) ", " "SET ")
+        k' (sql.fmt/to-sql k)]
+    (str s k' " = " k' " || " param)))
+
+(sql.fmt/register-clause! :json/merge 101)
+
+(defn ^:private sql-log [[statement]]
   (async/go
     (when (env/get :dev?)
-      (let [bindings (volatile! args)]
-        (log/info
-          (string/replace statement
-                          #"(\(| )\?"
-                          (fn [[_ prefix]]
-                            (let [result (strings/format "%s'%s'" prefix (first @bindings))]
-                              (vswap! bindings rest)
-                              result))))))))
+      (log/debug statement))))
 
 (defn ^:private query [conn [sql & params]]
   (v/native->prom (.query conn sql (to-array params))))
@@ -56,8 +58,18 @@
        (v/then (partial sequence (comp (map #(js->clj % :keywordize-keys true))
                                        xform))))))
 
+(defn prepare-query [query]
+  (->> query
+       meta
+       vals
+       (reduce (fn [sql+params [param value]]
+                 (-> sql+params
+                     (update 0 string/replace param (str "$" (count sql+params)))
+                     (conj value)))
+               (sql/format query :quoting :ansi :parameterizer :postgresql))))
+
 (defn ^:private exec* [conn query xform]
-  (let [sql (sql/format query :quoting :ansi :parameterizer :postgresql)]
+  (let [sql (prepare-query query)]
     (sql-log sql)
     (exec-raw! conn sql xform)))
 

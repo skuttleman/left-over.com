@@ -14,3 +14,9 @@
 
 (defn find-by-email [db email]
   (v/then (select* db [:= :users.email email]) colls/only!))
+
+(defn merge-token-info [db user-id token-info]
+  (-> token-info
+      (repo.users/merge-token-info [:= :users.id user-id])
+      (repos/exec! db)
+      (v/then colls/only!)))

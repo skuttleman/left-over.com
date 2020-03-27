@@ -8,3 +8,7 @@
       (entities/with-alias :users)
       (cond-> clause (assoc :where clause))))
 
+(defn merge-token-info [token-info clause]
+  (-> entities/users
+      (entities/modify clause)
+      (entities/json-merge :token-info token-info)))

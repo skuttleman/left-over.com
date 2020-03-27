@@ -2,7 +2,8 @@
   (:require
     [com.left-over.common.services.db.preparations :as prep]
     [com.left-over.common.services.db.repositories.core :as repos]
-    [com.left-over.shared.utils.colls :as colls]))
+    [com.left-over.shared.utils.colls :as colls]
+    [com.left-over.shared.utils.logging :as log]))
 
 (defn ^:private with* [k f [pk fk] values]
   (let [pk->results (-> values

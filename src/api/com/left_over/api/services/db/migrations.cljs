@@ -1,12 +1,13 @@
 (ns com.left-over.api.services.db.migrations
+  (:refer-clojure :exclude [load-file])
   (:require
     [camel-snake-kebab.core :as csk]
-    [com.left-over.shared.utils.strings :as strings]
-    fs
     [clojure.string :as string]
-    [com.left-over.common.services.db.repositories.core :as repos]
     [com.ben-allred.vow.core :as v]
-    [com.left-over.shared.utils.logging :as log]))
+    [com.left-over.common.services.db.repositories.core :as repos]
+    [com.left-over.shared.utils.keywords :as keywords]
+    [com.left-over.shared.utils.strings :as strings]
+    fs))
 
 (def ^:private select-migrations-query
   "SELECT *
@@ -26,6 +27,12 @@
 (def ^:private delete-migration
   "DELETE FROM ragtime_migrations
    WHERE id = $1")
+
+(def ^:private select-entities
+  "SELECT table_name, column_name
+   FROM information_schema.columns
+   WHERE table_schema='public'
+     AND table_name != 'ragtime_migrations'")
 
 (defn ^:private date-str []
   (let [now (js/Date.)]
@@ -81,6 +88,22 @@
             (v/resolve)
             migrations)))
 
+(defn ^:private update-entities [_]
+  (v/then-> (repos/transact (fn [conn]
+                              (repos/exec-raw! conn [select-entities])))
+            (->> (map (juxt :table_name :column_name))
+                 (reduce (fn [entities [table column]]
+                           (update entities
+                                   table
+                                   (fnil conj #{})
+                                   (keywords/keyword column)))
+                         {})
+                 (map (fn [[table fields]]
+                        (write-file (strings/format "resources/db/entities/%s.edn" table)
+                                    (pr-str {:table (keywords/keyword table)
+                                             :fields fields}))))
+                 v/all)))
+
 (defn migrate! []
   (-> {:files      (list-migrations "resources/db/migrations")
        :migrations (repos/transact (fn transact [conn]
@@ -89,7 +112,8 @@
       (v/then (fn [{:keys [files migrations]}]
                 (let [ids (into #{} (map :id) migrations)]
                   (drop-while (comp ids :id) files))))
-      (v/then (run-migrations! "resources/db/migrations/%s.up.sql" insert-migration))))
+      (v/then (run-migrations! "resources/db/migrations/%s.up.sql" insert-migration))
+      (v/then update-entities)))
 
 (defn rollback!
   ([]
@@ -97,7 +121,8 @@
   ([n]
    (-> (repos/transact (fn transact [conn]
                          (repos/exec-raw! conn [select-migrations-limit-query n])))
-       (v/then (run-migrations! "resources/db/migrations/%s.down.sql" delete-migration)))))
+       (v/then (run-migrations! "resources/db/migrations/%s.down.sql" delete-migration))
+       (v/then update-entities))))
 
 (defn redo! []
   (v/then (rollback!) (fn [_] (migrate!))))

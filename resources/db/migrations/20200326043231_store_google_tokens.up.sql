@@ -1,0 +1,2 @@
+ALTER TABLE users
+    ADD COLUMN token_info JSONB NOT NULL DEFAULT '{}'::JSONB;

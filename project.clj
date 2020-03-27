@@ -8,7 +8,6 @@
                  [camel-snake-kebab "0.4.1"]
                  [clj-http "3.9.1"]
                  [cljs-http "0.1.46"]
-                 [clojure.jdbc/clojure.jdbc-c3p0 "0.3.3" :exclusions [[org.clojure/java.jdbc]]]
                  [com.ben-allred/collaj "0.8.0"]
                  [com.ben-allred/formation "0.6.2"]
                  [com.ben-allred/vow "0.3.2"]
@@ -22,10 +21,7 @@
                  [org.clojure/clojurescript "1.10.597"]
                  [org.clojure/core.async "1.0.567"]
                  [org.clojure/core.match "0.3.0"]
-                 [org.postgresql/postgresql "9.4-1206-jdbc41"]
-                 [ragtime "0.7.2"]
                  [reagent "0.8.1"]
-                 [seancorfield/next.jdbc "1.0.5"]
                  [tick "0.4.23-alpha"]]
   :plugins [[lein-figwheel "0.5.19"]
             [lein-sass "0.5.0"]
@@ -46,7 +42,7 @@
                                :preloads             [devtools.preload]}}
                {:id           "dev-api"
                 :source-paths ["src/api" "src/common" "src/shared"]
-                :figwheel     true
+                :figwheel     {:on-jsload "com.left-over.api.server/restart!"}
                 :compiler     {:install-deps         true
                                :npm-deps             {:jwt-simple     "0.5.6"
                                                       :pg             "7.18.2"

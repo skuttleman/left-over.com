@@ -1,0 +1,1 @@
+{:table :locations, :fields #{:website :updated-at :name :id :state :created-by :city :created-at}}

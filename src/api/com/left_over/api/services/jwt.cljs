@@ -30,5 +30,6 @@
                    (+ (in-days days-to-expire))
                    (/ 1000)
                    js/Math.floor)}
+        (cond-> (:id payload) (assoc :sub (str (:id payload))))
         clj->js
         (jwt-simple/encode (env/get :jwt-secret)))))

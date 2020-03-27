@@ -17,6 +17,10 @@
     [com.left-over.shared.utils.numbers :as numbers]
     [com.left-over.shared.utils.uri :as uri]))
 
+(defprotocol IServer
+  (start! [this])
+  (stop! [this]))
+
 (def ^:private routes
   ["" {"/public" {"/images" {:get :public.images/get}
                   "/shows"  {:get :public.shows/get}
@@ -117,23 +121,19 @@
 
 (defn ^:private with-cors [handler]
   (fn [{:keys [headers] :as request}]
-    (let [origin (get headers "origin")
-          req-headers (get headers "access-control-request-headers")
+    (let [origin (:origin headers)
+          req-headers (:access-control-request-headers headers)
           response-headers (cond-> {"Access-Control-Allow-Credentials" "true"
                                     "Access-Control-Allow-Methods"     "GET,POST,PUT,PATCH,DELETE,HEAD"}
                              origin (assoc "Access-Control-Allow-Origin" origin)
                              req-headers (assoc "Access-Control-Allow-Headers" (if (string? req-headers)
                                                                                  req-headers
-                                                                                 (string/join "," req-headers))) )]
+                                                                                 (string/join "," req-headers))))]
       (if (= :options (:method request))
         (v/resolve {:status  204
                     :headers response-headers})
         (v/then-> (handler request)
                   (update :headers merge response-headers))))))
-
-(defn ^:private with-dev-debug [handler]
-  (fn [request]
-    (v/peek (handler request) nil #(log/spy ["ERROR" %]))))
 
 (defn ^:private with-keyword-headers [handler]
   (fn [request]
@@ -141,14 +141,32 @@
         (update :headers (partial into {} (map (juxt (comp keyword key) val))))
         handler)))
 
+(defn ^:private with-dev-debug [handler]
+  (fn [request]
+    (v/peek (handler request) nil #(log/spy ["ERROR" %]))))
+
+(def ^:private app (-> handler
+                       (with-routing routes)
+                       esmw/with-body
+                       with-query-params
+                       with-cors
+                       with-keyword-headers
+                       with-dev-debug))
+
+(defrecord ReloadableServer [server]
+  IServer
+  (start! [_]
+    (.listen (reset! server (es/create-server app))
+             (numbers/parse-int (env/get :dev-aws-port "3100"))
+             #(log/info "The server is listening on PORT" (env/get :dev-aws-port "3100"))))
+  (stop! [_]
+    (.close @server)
+    (log/info "The server has stopped.")))
+
 (defonce server
-  (doto (-> handler
-            (with-routing routes)
-            esmw/with-body
-            with-query-params
-            with-keyword-headers
-            with-cors
-            with-dev-debug
-            es/create-server)
-    (.listen (numbers/parse-int (env/get :dev-aws-port "3100"))
-             #(log/info "The server is listening on PORT" (env/get :dev-aws-port "3100")))))
+  (doto (->ReloadableServer (atom nil))
+    (start!)))
+
+(defn ^:export restart! []
+  (stop! server)
+  (start! server))
