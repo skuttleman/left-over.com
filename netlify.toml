@@ -1,4 +1,9 @@
 [[redirects]]
+  from = "/privacy"
+  to = "https://www.freeprivacypolicy.com/privacy/view/875885d5e7d99ef0298801e3ec79167a"
+  status = 303
+
+[[redirects]]
   from = "/admin"
   to = "/admin.html"
   status = 200
