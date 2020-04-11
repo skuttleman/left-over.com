@@ -2,7 +2,7 @@
   (:require
     [clojure.string :as string]
     [com.ben-allred.vow.core :as v :include-macros true]
-    [com.left-over.common.services.env :as env]
+    [com.left-over.api.services.env :as env]
     [com.left-over.shared.services.http :as http]
     [com.left-over.shared.utils.memoize :as memo]
     [com.left-over.shared.utils.numbers :as numbers]))
@@ -56,26 +56,26 @@
               :json?   true}))
 
 (defn ^:private fetch* [mime-filter path]
-  (-> dropbox-list-folder
-      (request {:path                                path
-                :recursive                           false
-                :include_media_info                  false
-                :include_deleted                     false
-                :include_has_explicit_shared_members false
-                :include_mounted_folders             false
-                :include_non_downloadable_files      false})
-      (v/then (fn [{:keys [entries]}]
-                (->> entries
-                     (map (fn [{:keys [path_lower]}]
-                            (-> dropbox-temp-link
-                                (request {:path path_lower})
-                                (v/catch (constantly nil)))))
-                     v/all)))
-      (v/then-> (->> (map #(update % :metadata with-mime-type))
-                     (filter (comp mime-filter :mime-type :metadata))
-                     (map #(-> %
-                               (select-keys #{:link :metadata})
-                               (update :metadata select-keys #{:mime-type :name :size})))))))
+  (v/await [{:keys [entries]} (request dropbox-list-folder
+                                       {:path                                path
+                                        :recursive                           false
+                                        :include_media_info                  false
+                                        :include_deleted                     false
+                                        :include_has_explicit_shared_members false
+                                        :include_mounted_folders             false
+                                        :include_non_downloadable_files      false})
+            results (->> entries
+                         (map (fn [{:keys [path_lower]}]
+                                (v/attempt (-> dropbox-temp-link
+                                               (request {:path path_lower}))
+                                           (catch _ nil))))
+                         v/all)]
+    (->> results
+         (map #(update % :metadata with-mime-type))
+         (filter (comp mime-filter :mime-type :metadata))
+         (map #(-> %
+                   (select-keys #{:link :metadata})
+                   (update :metadata select-keys #{:mime-type :name :size}))))))
 
 (def ^{:arglists '([event])} fetch-images
   (memo/memo (fn [_event] (fetch* image? (env/get :dropbox-images-path)))

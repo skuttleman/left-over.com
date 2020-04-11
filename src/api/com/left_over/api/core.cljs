@@ -52,7 +52,9 @@
 (defn with-event [handler]
   (fn handle
     ([event ctx cb]
-     (v/then (handle event ctx) (partial cb nil) cb))
+     (-> event
+         (handle ctx)
+         (v/then (partial cb nil) cb)))
     ([event _ctx]
      (let [event* (update (js->clj event :keywordize-keys true)
                           :headers

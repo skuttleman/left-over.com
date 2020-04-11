@@ -4,18 +4,13 @@
     [com.left-over.shared.utils.strings :as strings]))
 
 (defn nan? [value]
-  #?(:clj  (and (clojure.core/number? value)
-                (Double/isNaN (double value)))
-     :cljs (js/isNaN value)))
+  (js/isNaN value))
 
 (defn number? [value]
   (and (clojure.core/number? value) (not (nan? value))))
 
 (defn parse-int [value]
-  #?(:clj  (try (Long/parseLong (str value))
-                (catch Throwable _
-                  Double/NaN))
-     :cljs (js/parseInt value)))
+  (js/parseInt value))
 
 (defn parse-int! [value]
   (let [result (parse-int value)]

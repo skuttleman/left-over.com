@@ -12,7 +12,7 @@
     [com.left-over.api.handlers.pub.images :as pub.images]
     [com.left-over.api.handlers.pub.shows :as pub.shows]
     [com.left-over.api.handlers.pub.videos :as pub.videos]
-    [com.left-over.common.services.env :as env]
+    [com.left-over.api.services.env :as env]
     [com.left-over.shared.utils.logging :as log :include-macros true]
     [com.left-over.shared.utils.numbers :as numbers]
     [com.left-over.shared.utils.uri :as uri]))
@@ -31,11 +31,13 @@
        "/admin"  {"/locations" {""                 {:post :admin.locations/post
                                                     :get  :admin.locations/get}
                                 ["/" :location-id] {:put :admin.location/put}}
-                  "/shows"     {""             {:post :admin.shows/post
-                                                :get  :admin.shows/get}
-                                ["/" :show-id] {:get    :admin.show/get
-                                                :put    :admin.show/put
-                                                :delete :admin.show/delete}}}}])
+                  "/shows"     {""             {:post   :admin.shows/post
+                                                :get    :admin.shows/get
+                                                :delete :admin.shows/delete}
+                                ["/" :show-id] {:get :admin.show/get
+                                                :put :admin.show/put}}
+                  "/calendar"  {"/merge" {:post :admin.calendar.merge/post
+                                          :get  :admin.calendar.merge/get}}}}])
 
 (defn ^:private handle* [handler request]
   (-> request
@@ -51,49 +53,29 @@
       (v/then-> (js->clj :keywordize-keys true)
                 (set/rename-keys {:statusCode :status}))))
 
-(defmulti handler :bidi/route)
+(defn handler [request]
+  (-> request
+      :bidi/route
+      (case
+        (:admin.calendar.merge/get :admin.calendar.merge/post :admin.show/get
+         :admin.show/put :admin.shows/delete :admin.shows/get :admin.shows/post)
+        admin.shows/handler
 
-(defmethod handler :public.images/get [request]
-  (handle* pub.images/handler request))
+        (:admin.locations/get :admin.locations/post :admin.location/put)
+        admin.locations/handler
 
-(defmethod handler :public.shows/get [request]
-  (handle* pub.shows/handler request))
+        (:auth.callback/get :auth.info/get :auth.login/get)
+        auth/handler
 
-(defmethod handler :public.videos/get [request]
-  (handle* pub.videos/handler request))
+        :public.images/get
+        pub.images/handler
 
-(defmethod handler :auth.callback/get [request]
-  (handle* auth/handler request))
+        :public.shows/get
+        pub.shows/handler
 
-(defmethod handler :auth.info/get [request]
-  (handle* auth/handler request))
-
-(defmethod handler :auth.login/get [request]
-  (handle* auth/handler request))
-
-(defmethod handler :admin.locations/post [request]
-  (handle* admin.locations/handler [request]))
-
-(defmethod handler :admin.locations/get [request]
-  (handle* admin.locations/handler request))
-
-(defmethod handler :admin.location/put [request]
-  (handle* admin.locations/handler request))
-
-(defmethod handler :admin.shows/get [request]
-  (handle* admin.shows/handler request))
-
-(defmethod handler :admin.shows/post [request]
-  (handle* admin.shows/handler request))
-
-(defmethod handler :admin.show/delete [request]
-  (handle* admin.shows/handler request))
-
-(defmethod handler :admin.show/put [request]
-  (handle* admin.shows/handler request))
-
-(defmethod handler :admin.show/get [request]
-  (handle* admin.shows/handler request))
+        :public.videos/get
+        pub.videos/handler)
+      (handle* request)))
 
 (defn ^:private with-routing [handler routes]
   (fn [request]
@@ -132,8 +114,9 @@
       (if (= :options (:method request))
         (v/resolve {:status  204
                     :headers response-headers})
-        (v/then-> (handler request)
-                  (update :headers merge response-headers))))))
+        (-> request
+            handler
+            (v/then-> (update :headers merge response-headers)))))))
 
 (defn ^:private with-keyword-headers [handler]
   (fn [request]
@@ -143,7 +126,9 @@
 
 (defn ^:private with-dev-debug [handler]
   (fn [request]
-    (v/peek (handler request) nil #(log/spy ["ERROR" %]))))
+    (-> request
+        handler
+        (v/peek nil #(log/spy ["ERROR" %])))))
 
 (def ^:private app (-> handler
                        (with-routing routes)

@@ -52,6 +52,15 @@
      :show/failure [:error result]
      state)))
 
+(defn ^:private calendar
+  ([] [:init])
+  ([state [type result]]
+   (case type
+     (:router/navigate :calendar/request) [:init]
+     :calendar/success [:success result]
+     :calendar/failure [:error result]
+     state)))
+
 (defn modal
   ([] {:state :unmounted})
   ([state [type content title actions]]
@@ -70,6 +79,7 @@
      state)))
 
 (def reducer (cr/combine {:auth      auth
+                          :calendar  calendar
                           :forms     forms
                           :locations locations
                           :modal     modal

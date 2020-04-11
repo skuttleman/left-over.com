@@ -4,7 +4,8 @@
     [camel-snake-kebab.core :as csk]
     [clojure.string :as string]
     [com.ben-allred.vow.core :as v]
-    [com.left-over.common.services.db.repositories.core :as repos]
+    [com.left-over.api.services.db.repositories.core :as repos]
+    [com.left-over.shared.utils.dates :as dates]
     [com.left-over.shared.utils.keywords :as keywords]
     [com.left-over.shared.utils.strings :as strings]
     fs))
@@ -35,15 +36,7 @@
      AND table_name != 'ragtime_migrations'")
 
 (defn ^:private date-str []
-  (let [now (js/Date.)]
-    (strings/format
-      "%04d%02d%02d%02d%02d%02d"
-      (.getFullYear now)
-      (inc (.getMonth now))
-      (.getDate now)
-      (.getHours now)
-      (.getMinutes now)
-      (.getSeconds now))))
+  (dates/format (dates/now) :datetime/fs dates/utc))
 
 (defn ^:private promise-cb [resolve reject]
   (fn [error result]
@@ -68,29 +61,25 @@
                                        :up   up
                                        :id   (first (string/split down #"\."))})))))
 
-(defn ^:private run-migrations! [fmt alter-migrations]
-  (fn [migrations]
-    (reduce (fn [p {migration-id :id}]
-              (-> p
-                  (v/then (fn [_]
-                            (-> fmt
-                                (strings/format migration-id)
-                                load-file)))
-                  (v/then (fn [sql]
-                            (repos/transact (fn [conn]
-                                              (println "running:" (strings/format fmt migration-id))
-                                              (->> (string/split sql #";")
-                                                   (remove string/blank?)
-                                                   (map (comp vector string/trim))
-                                                   (cons [alter-migrations migration-id])
-                                                   (map (partial repos/exec-raw! conn))
-                                                   v/all)))))))
-            (v/resolve)
-            migrations)))
+(defn ^:private run-migrations! [fmt alter-migrations migrations]
+  (reduce (fn [p {migration-id :id}]
+            (v/and p
+                   (v/await [sql (-> fmt
+                                     (strings/format migration-id)
+                                     load-file)]
+                     (repos/transact (fn [conn]
+                                       (println "running:" (strings/format fmt migration-id))
+                                       (->> (string/split sql #";")
+                                            (remove string/blank?)
+                                            (map (comp vector string/trim))
+                                            (cons [alter-migrations migration-id])
+                                            (map (partial repos/exec-raw! conn))
+                                            v/all))))))
+          (v/resolve)
+          migrations))
 
-(defn ^:private update-entities [_]
-  (v/then-> (repos/transact (fn [conn]
-                              (repos/exec-raw! conn [select-entities])))
+(defn ^:private update-entities! []
+  (v/then-> (repos/transact repos/exec-raw! [select-entities])
             (->> (map (juxt :table_name :column_name))
                  (reduce (fn [entities [table column]]
                            (update entities
@@ -100,47 +89,50 @@
                          {})
                  (map (fn [[table fields]]
                         (write-file (strings/format "resources/db/entities/%s.edn" table)
-                                    (pr-str {:table (keywords/keyword table)
+                                    (pr-str {:table  (keywords/keyword table)
                                              :fields fields}))))
                  v/all)))
 
 (defn migrate! []
-  (-> {:files      (list-migrations "resources/db/migrations")
-       :migrations (repos/transact (fn transact [conn]
-                                     (repos/exec-raw! conn [select-migrations-query])))}
-      v/all
-      (v/then (fn [{:keys [files migrations]}]
-                (let [ids (into #{} (map :id) migrations)]
-                  (drop-while (comp ids :id) files))))
-      (v/then (run-migrations! "resources/db/migrations/%s.up.sql" insert-migration))
-      (v/then update-entities)))
+  (v/await [[files migrations] (v/all [(list-migrations "resources/db/migrations")
+                                       (repos/transact repos/exec-raw! [select-migrations-query])])
+            ids (into #{} (map :id) migrations)
+            migrations (drop-while (comp ids :id) files)]
+    (run-migrations! "resources/db/migrations/%s.up.sql" insert-migration migrations)
+    (update-entities!)))
 
 (defn rollback!
   ([]
    (rollback! 1))
   ([n]
-   (-> (repos/transact (fn transact [conn]
-                         (repos/exec-raw! conn [select-migrations-limit-query n])))
-       (v/then (run-migrations! "resources/db/migrations/%s.down.sql" delete-migration))
-       (v/then update-entities))))
+   (v/await [migrations (repos/transact repos/exec-raw! [select-migrations-limit-query n])]
+     (run-migrations! "resources/db/migrations/%s.down.sql" delete-migration migrations)
+     (update-entities!))))
 
 (defn redo! []
-  (v/then (rollback!) (fn [_] (migrate!))))
+  (v/and (rollback!)
+         (migrate!)))
 
 (defn speedbump! []
-  (v/then (migrate!) (fn [_] (redo!))))
+  (v/and (migrate!)
+         (redo!)))
 
 (defn create! [& name-parts]
   (let [migration-name (string/join "_" (cons (date-str) (map csk/->snake_case_string name-parts)))]
-    (-> [(write-file (strings/format "resources/db/migrations/%s.up.sql" migration-name) "")
-         (write-file (strings/format "resources/db/migrations/%s.down.sql" migration-name) "")]
-        v/all
-        (v/then (fn [_]
-                  (println "created migration: " migration-name))))))
+    (v/and (v/all [(write-file (strings/format "resources/db/migrations/%s.up.sql" migration-name) "")
+                   (write-file (strings/format "resources/db/migrations/%s.down.sql" migration-name) "")])
+           (println "created migration: " migration-name))))
+
+(defn ^:private print-result [promise]
+  (v/peek promise
+          (fn [[status :as value]]
+            (println (case status
+                       :success [:success]
+                       value)))))
 
 (comment
-  (create! "migration")
-  (migrate!)
-  (speedbump!)
-  (rollback!)
-  (redo!))
+  (print-result (create! "a new migration"))
+  (print-result (migrate!))
+  (print-result (speedbump!))
+  (print-result (rollback!))
+  (print-result (redo!)))

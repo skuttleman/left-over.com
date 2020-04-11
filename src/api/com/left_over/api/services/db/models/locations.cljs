@@ -1,14 +1,13 @@
-(ns com.left-over.common.services.db.models.locations
+(ns com.left-over.api.services.db.models.locations
   (:require
-    [com.ben-allred.vow.core :as v #?@(:cljs [:include-macros true])]
-    [com.left-over.common.services.db.entities :as entities]
-    [com.left-over.common.services.db.models.core :as models]
-    [com.left-over.common.services.db.repositories.core :as repos]
-    [com.left-over.common.services.db.repositories.locations :as repo.locations]
-    [com.left-over.common.services.db.repositories.shows :as repo.shows]
-    [com.left-over.shared.utils.colls :as colls])
-  #?(:clj (:import
-            (java.util Date))))
+    [com.ben-allred.vow.core :as v :include-macros true]
+    [com.left-over.api.services.db.entities :as entities]
+    [com.left-over.api.services.db.models.core :as models]
+    [com.left-over.api.services.db.repositories.core :as repos]
+    [com.left-over.api.services.db.repositories.locations :as repo.locations]
+    [com.left-over.api.services.db.repositories.shows :as repo.shows]
+    [com.left-over.shared.utils.colls :as colls]
+    [com.left-over.shared.utils.dates :as dates]))
 
 (defn ^:private select* [db clause]
   (-> clause
@@ -31,7 +30,7 @@
   (v/then (select* db [:= :locations.id location-id]) colls/only!))
 
 (defn save [db user {location-id :id :as location}]
-  (let [date #?(:clj (Date.) :cljs (js/Date.) :default nil)
+  (let [date (dates/now)
         location' (-> location
                       (dissoc :id)
                       (assoc :updated-at date)

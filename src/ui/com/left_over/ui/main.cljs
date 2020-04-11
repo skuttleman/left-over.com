@@ -11,6 +11,9 @@
     [com.left-over.ui.views.videos :as videos]
     [reagent.core :as r]))
 
+(enable-console-print!)
+(aset js/window "Buffer" #js {:isBuffer (constantly false)})
+
 (defn not-found [_]
   [:div
    [:p "page not found"]
@@ -30,8 +33,7 @@
    :ui/shows      shows/root
    :ui/photos     photos/root
    :ui/videos     videos/root
-   :ui/contact    contact/root
-   :nav/not-found not-found})
+   :ui/contact    contact/root})
 
 (defn ^:private app []
   (let [state (store/get-state)

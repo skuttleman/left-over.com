@@ -8,10 +8,18 @@
           {}
           key-map))
 
+(defn default [m k else]
+  (update m k #(or % else)))
+
 (defn update-maybe [m k f & f-args]
   (if (contains? m k)
     (apply update m k f f-args)
     m))
+
+(defn update-in-maybe [m [k & ks] f & f-args]
+  (if (seq ks)
+    (apply update-maybe m k update-in-maybe ks f f-args)
+    (apply update-maybe m k f f-args)))
 
 (defn assoc-maybe [m & kvs]
   (loop [m m [k v :as kvs] kvs]

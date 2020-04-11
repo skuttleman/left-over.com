@@ -1,1 +1,1 @@
-{:table :shows, :fields #{:updated-at :deleted :timezone :date-time :name :created-by :hidden :id :location-id :website :created-at}}
+{:table :shows, :fields #{:updated-at :deleted :event-id :temp-data :timezone :date-time :name :confirmed :created-by :hidden :id :location-id :website :created-at}}

@@ -8,6 +8,8 @@
     [com.left-over.ui.services.store.core :as store]
     [pushy.core :as pushy]))
 
+(def ^:const ^:private uuid-re
+  #"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
 (defn ^:private routes [routes]
   ["" (assoc routes true :nav/not-found)])
 
@@ -18,10 +20,11 @@
            "/photos"  :ui/photos
            "/videos"  :ui/videos
            "/contact" :ui/contact
-           "/admin"   {""                         :ui.admin/main
-                       "/login"                   :ui.admin/login
-                       "/shows/create"            :ui.admin/new-show
-                       ["/shows/" [#"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" :show-id]] :ui.admin/show}}))
+           "/admin"   {""                             :ui.admin/main
+                       "/login"                       :ui.admin/login
+                       "/shows/create"                :ui.admin/new-show
+                       "/calendar"                    :ui.admin/calendar
+                       ["/shows/" [uuid-re :show-id]] :ui.admin/show}}))
 
 (def ^:private s3-routes
   (routes {"/images"
@@ -36,7 +39,8 @@
            "/admin"  {"/shows"                     :aws.admin/shows
                       "/locations"                 :aws.admin/locations
                       ["/shows/" :show-id]         :aws.admin/show
-                      ["/locations/" :location-id] :aws.admin/location}}))
+                      ["/locations/" :location-id] :aws.admin/location
+                      "/calendar"                  {"/merge" :aws.admin/calendar.merge}}}))
 
 (defn ^:private namify [[k v]]
   [k (if (keyword? v) (name v) (str v))])

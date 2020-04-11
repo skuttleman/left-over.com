@@ -1,13 +1,13 @@
 (ns com.left-over.ui.admin.views.fields
   (:require
     [clojure.set :as set]
+    [com.left-over.shared.utils.colls :as colls]
     [com.left-over.shared.utils.logging :as log]
     [com.left-over.shared.utils.maps :as maps]
     [com.left-over.shared.utils.strings :as strings]
     [com.left-over.ui.services.forms.core :as forms]
     [com.left-over.ui.views.components :as components]
-    [reagent.core :as r]
-    [com.left-over.shared.utils.colls :as colls]))
+    [reagent.core :as r]))
 
 (defonce ^:private listeners (atom {}))
 

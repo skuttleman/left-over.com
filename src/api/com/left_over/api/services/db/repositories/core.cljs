@@ -1,10 +1,10 @@
-(ns com.left-over.common.services.db.repositories.core
+(ns com.left-over.api.services.db.repositories.core
   (:require
     [cljs.nodejs :as nodejs]
     [clojure.core.async :as async]
     [clojure.string :as string]
     [com.ben-allred.vow.core :as v :include-macros true]
-    [com.left-over.common.services.env :as env]
+    [com.left-over.api.services.env :as env]
     [com.left-over.shared.utils.colls :as colls]
     [com.left-over.shared.utils.logging :as log]
     [com.left-over.shared.utils.strings :as strings]
@@ -48,15 +48,20 @@
 (defn ^:private query [conn [sql & params]]
   (v/native->prom (.query conn sql (to-array params))))
 
+(defn ^:private end-with [client sql]
+  (fn [_]
+    (-> client
+        (query [sql])
+        (v/and (.end client)))))
+
 (defn exec-raw!
   ([conn sql+params]
    (exec-raw! conn sql+params identity))
   ([conn sql+params xform]
-   (-> conn
-       (query sql+params)
-       (v/then #(.-rows %))
-       (v/then (partial sequence (comp (map #(js->clj % :keywordize-keys true))
-                                       xform))))))
+   (v/await [results (query conn sql+params)]
+     (sequence (comp (map #(js->clj % :keywordize-keys true))
+                     xform)
+               (.-rows results)))))
 
 (defn prepare-query [query]
   (->> query
@@ -87,7 +92,7 @@
                 xform-after (comp xform-after))]
     (exec* conn query' xform)))
 
-(defn transact [f]
+(defn ^:private transact* [f]
   (let [client (Client. (-> {:host     (env/get :db-host)
                              :port     (env/get :db-port)
                              :database (env/get :db-name)
@@ -100,8 +105,15 @@
     (-> client
         .connect
         v/native->prom
-        (v/then (fn [_] (query client ["BEGIN"])))
-        (v/then (fn [_] (f client)))
-        (v/peek (fn [_] (query client ["COMMIT"]))
-                (fn [_] (query client ["ROLLBACK"])))
-        (v/peek (fn [_] (.end client))))))
+        (v/and (query client ["BEGIN"])
+               (f client))
+        (v/peek (end-with client "COMMIT")
+                (end-with client "ROLLBACK")))))
+
+(defn transact
+  ([f]
+   (transact* f))
+  ([f arg]
+   (transact* #(f % arg)))
+  ([f arg & more]
+   (transact* #(apply f % arg more))))

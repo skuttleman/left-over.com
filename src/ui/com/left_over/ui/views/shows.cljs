@@ -10,17 +10,7 @@
 
 (defn ^:private delete-show [show-id]
   (fn [_]
-    (store/dispatch (admin.actions/show-modal "Are you sure you want to delete this show?"
-                                              "Delete Show"
-                                              [:button.button.is-danger
-                                               {:on-click (fn [_]
-                                                            (-> show-id
-                                                                admin.actions/delete-show
-                                                                store/dispatch
-                                                                (admin.actions/act-or-toast admin.actions/fetch-shows)
-                                                                store/dispatch))}
-                                               "Delete"]
-                                              [:button.button "Cancel"]))))
+    (store/dispatch (admin.actions/delete-show show-id))))
 
 (defn show-list [type shows & missing-msgs]
   (if (seq shows)
@@ -50,7 +40,7 @@
             " @ "
             (dates/format dt :time/view)])
          (when (= :admin type)
-           [:p.row.space-between
+           [:p.row.spaced
             [:a {:href (nav/path-for :ui.admin/show {:route-params {:show-id show-id}})} "Edit"]
             [:button.button.is-link.is-danger
              {:on-click (delete-show show-id)}
@@ -61,7 +51,7 @@
   (let [[past future] (->> shows
                            (sort-by :date-time)
                            (split-with (comp pos?
-                                             (partial compare (dates/->inst (dates/now)))
+                                             (partial compare (dates/now))
                                              :date-time)))]
     [:<>
      [:div

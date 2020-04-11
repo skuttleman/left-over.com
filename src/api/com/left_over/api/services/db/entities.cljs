@@ -1,4 +1,4 @@
-(ns com.left-over.common.services.db.entities
+(ns com.left-over.api.services.db.entities
   (:require
     [clojure.set :as set]
     [com.left-over.shared.utils.edn :as edn]
@@ -89,8 +89,8 @@
   ([query entity alias on aliases]
    (join* query :join entity alias on aliases)))
 
-(def locations (edn/parse (str (fs/readFileSync "resources/db/entities/locations.edn"))))
+(def locations (edn/parse (fs/readFileSync "resources/db/entities/locations.edn")))
 
-(def shows (edn/parse (str (fs/readFileSync "resources/db/entities/shows.edn"))))
+(def shows (edn/parse (fs/readFileSync "resources/db/entities/shows.edn")))
 
-(def users (edn/parse (str (fs/readFileSync "resources/db/entities/users.edn"))))
+(def users (edn/parse (fs/readFileSync "resources/db/entities/users.edn")))

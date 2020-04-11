@@ -1,18 +1,16 @@
 (ns com.left-over.shared.utils.uri
   (:require
     [clojure.string :as string]
-    [lambdaisland.uri :as uri*])
-  #?(:clj (:import
-            (java.net URLDecoder URLEncoder))))
+    [lambdaisland.uri :as uri*]))
 
 (defn url-encode [arg]
-  #?(:clj  (URLEncoder/encode (str arg) "UTF-8")
-     :cljs (js/encodeURIComponent (str arg))))
+  (js/encodeURIComponent (str arg)))
 
 (defn url-decode [arg]
-  (let [arg (string/replace (str arg) #"\+" " ")]
-    #?(:clj  (URLDecoder/decode arg "UTF-8")
-       :cljs (js/decodeURIComponent arg))))
+  (-> arg
+      str
+      (string/replace #"\+" " ")
+      (js/decodeURIComponent)))
 
 (defn form-url-encode [arg]
   (string/join \& (map (fn [[k v]]

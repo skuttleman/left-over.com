@@ -1,15 +1,14 @@
 (ns com.left-over.shared.services.http
   (:refer-clojure :exclude [get])
   (:require
-    #?(:clj [clj-http.cookies :as cookies])
-    [#?(:clj clj-http.client :cljs cljs-http.client) :as client]
-    [#?(:clj clj-http.core :cljs cljs-http.core) :as http*]
+    [cljs-http.client :as client]
+    [cljs-http.core :as http*]
     [clojure.core.async :as async]
     [clojure.set :as set]
-    [com.ben-allred.vow.core :as v #?@(:cljs [:include-macros true])]
+    [com.ben-allred.vow.core :as v :include-macros true]
     [com.left-over.shared.utils.edn :as edn]
     [com.left-over.shared.utils.json :as json]
-    [com.left-over.shared.utils.logging :as log #?@(:cljs [:include-macros true])]
+    [com.left-over.shared.utils.logging :as log :include-macros true]
     [com.left-over.shared.utils.maps :as maps]))
 
 (def status->kw
@@ -88,46 +87,20 @@
       client/wrap-content-type
       client/wrap-form-params
       client/wrap-method
-      #?@(:clj  [client/wrap-request-timing
-                 client/wrap-decompression
-                 client/wrap-input-coercion
-                 client/wrap-user-info
-                 client/wrap-additional-header-parsing
-                 client/wrap-output-coercion
-                 client/wrap-exceptions
-                 client/wrap-nested-params
-                 client/wrap-accept-encoding
-                 client/wrap-flatten-nested-params
-                 client/wrap-unknown-host]
-          :cljs [client/wrap-multipart-params
-                 client/wrap-channel-from-request-map])))
+      client/wrap-multipart-params
+      client/wrap-channel-from-request-map))
 
 (defn ^:private client [request]
-  #?(:clj  (let [cs (cookies/cookie-store)
-                 ch (async/chan)]
-             (async/go
-               (try
-                 (-> request
-                     (merge {:cookie-store cs})
-                     client*
-                     (assoc :cookies (cookies/get-cookies cs))
-                     (->> (async/>! ch)))
-                 (catch Throwable ex
-                   (log/error "failed http: "
-                              (select-keys request #{:headers :url :method :query-params :body})
-                              (pr-str ex))
-                   (async/>! ch (assoc (ex-data ex) :cookies (cookies/get-cookies cs))))))
-             ch)
-     :cljs (let [token (when (:token? request)
-                         (some-> js/localStorage (.getItem "auth-token")))]
-             (-> request
-                 (cond->
-                   token
-                   (assoc-in [:headers "authorization"] (str "Bearer " token))
+  (let [token (when (:token? request)
+                (some-> js/localStorage (.getItem "auth-token")))]
+    (-> request
+        (cond->
+          token
+          (assoc-in [:headers "authorization"] (str "Bearer " token))
 
-                   (not token)
-                   (assoc :with-credentials? false))
-                 client*))))
+          (not token)
+          (assoc :with-credentials? false))
+        client*)))
 
 (defn ^:private prep [request content-type]
   (-> request

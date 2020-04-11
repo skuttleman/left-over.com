@@ -14,6 +14,9 @@
     [com.left-over.ui.views.navbar :as navbar]
     [reagent.core :as r]))
 
+(enable-console-print!)
+(aset js/window "Buffer" #js {:isBuffer (constantly false)})
+
 (defn not-found [_]
   [:div
    [:p "page not found"]
@@ -22,9 +25,9 @@
 (def ^:private handler->component
   {:ui.admin/main     admin.main/root
    :ui.admin/login    auth/login
-   :nav/not-found     not-found
    :ui.admin/new-show admin.shows/root
-   :ui.admin/show     admin.shows/root})
+   :ui.admin/show     admin.shows/root
+   :ui.admin/calendar admin.main/calendar})
 
 (defn app* [{{:keys [query-params handler] :as page} :page}]
   (when-let [toast-msg-id (get query-params "toast-msg-id")]

@@ -51,7 +51,7 @@
                             :as   attrs}
                            search-input]
   (let [selected (seq (map options-by-id value))]
-    [:div.dropdown.row.space-between
+    [:div.dropdown.row.spaced
      {:class [(when open? "is-active")]
       :ref   ref}
      [:div.dropdown-trigger

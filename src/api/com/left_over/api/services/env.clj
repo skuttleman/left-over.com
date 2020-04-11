@@ -1,4 +1,4 @@
-(ns com.left-over.common.services.env
+(ns com.left-over.api.services.env
   (:refer-clojure :exclude [get])
   (:require
     [clojure.java.io :as io]
@@ -11,7 +11,7 @@
           (map (juxt (comp keywords/keyword key) val))
           (concat (System/getenv)
                   (when (.exists f)
-                    (edn/parse (slurp f)))))))
+                    (edn/parse f))))))
 
 (defmacro build-env []
   get)

@@ -68,15 +68,7 @@
 
 (defn ^:private save-location [location-id show-form]
   (fn [location]
-    (-> (if location-id
-          (admin.actions/update-location location-id location)
-          (admin.actions/create-location location))
-        store/dispatch
-        (admin.actions/act-or-toast (admin.actions/all admin.actions/fetch-locations
-                                                       admin.actions/hide-modal
-                                                       [:search/set nil]))
-        store/dispatch
-        (v/then (comp (partial swap! show-form assoc :location-id) :id)))))
+    (store/dispatch (admin.actions/save-location location-id show-form location))))
 
 (defn ^:private cancel-form [_]
   (store/dispatch admin.actions/hide-modal))

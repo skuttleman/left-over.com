@@ -1,7 +1,7 @@
-(ns com.left-over.common.services.db.models.core
+(ns com.left-over.api.services.db.models.core
   (:require
-    [com.left-over.common.services.db.preparations :as prep]
-    [com.left-over.common.services.db.repositories.core :as repos]
+    [com.left-over.api.services.db.preparations :as prep]
+    [com.left-over.api.services.db.repositories.core :as repos]
     [com.left-over.shared.utils.colls :as colls]
     [com.left-over.shared.utils.logging :as log]))
 
@@ -19,8 +19,12 @@
            (let [groups (group-by (comp namespace first) item)
                  others (dissoc groups nil root-key')
                  init (into {} (concat (get groups nil) (get groups root-key')))]
-             (->> others
-                  (reduce (fn [m [k v]] (assoc m k (into {} v))) init)))))))
+             (reduce (fn [m [k v]]
+                       (if-let [v' (seq (filter (comp some? second) v))]
+                         (assoc m k (into {} v'))
+                         m))
+                     init
+                     others))))))
 
 (defn select
   ([query model]

@@ -11,7 +11,7 @@ CREATE TABLE users (
 
 ALTER TABLE users ADD CONSTRAINT users_valid_email CHECK (email ~ '^[a-z\-\+_0-9\.]+@[a-z\-\+_0-9]+\.[a-z\-\+_0-9\.]+$');
 
-CREATE UNIQUE INDEX users_email on users (email);
+CREATE UNIQUE INDEX users_email ON users (email);
 
 CREATE TABLE locations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

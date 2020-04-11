@@ -117,20 +117,44 @@ input[type=checkbox].large {
 .row {
     display: flex;
     flex-direction: row;
+    flex-grow: 1;
 
     &.full {
         justify-content: space-between;
-        align-items: space-between;
+        align-content: space-between;
     }
 
-    &.space-between > * {
+    &.spaced > * {
         display: flex;
-        flex-direction: column;
-        justify-content: center;
 
+        &:not(.row) {
+            justify-content: center;
+            flex-direction: column;
+        }
         &:not(:last-child) {
             margin-right: 10px;
         }
+    }
+}
+
+.column {
+    &.no-grow {
+        flex-grow: 0;
+    }
+    &.spaced > * {
+        &:not(:last-child) {
+            margin-bottom: 10px;
+        }
+    }
+}
+
+.link-divider {
+    align-self: center;
+    border-left: 1px solid $light-grey;
+    height: 50%;
+
+    @media(max-width: 600px) {
+        height: 75%;
     }
 }
 

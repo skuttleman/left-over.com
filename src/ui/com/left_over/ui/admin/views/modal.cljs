@@ -13,7 +13,7 @@
         [attrs args] (if (map? attrs?)
                        [attrs? (rest args)]
                        [{} args])]
-    (into [tag (update attrs :on-click #(if % (comp % hide-modal) hide-modal))]
+    (into [tag (update attrs :on-click #(cond->> hide-modal % (comp %)))]
           args)))
 
 (defn ^:private focus-first [[action :as actions]]

@@ -2,5 +2,8 @@
 
 lein clean
 npm install -g sass
+mkdir -p dist/css
+touch dist/css/main.css
 sass src/scss/main.scss dist/css/main.css
-lein with-profile build cljsbuild once ui-min
+lein cljsbuild once ui-main
+lein cljsbuild once ui-admin

@@ -13,3 +13,6 @@
   (when (seq more)
     (throw (ex-info "collection has more than one item" {})))
   item)
+
+(defn organize [pred coll]
+  [(filter pred coll) (remove pred coll)])

@@ -15,4 +15,4 @@
                 (filter (comp js-env-vars first)))
           (concat (System/getenv)
                   (when (.exists f)
-                    (edn/parse (slurp f)))))))
+                    (edn/parse f))))))

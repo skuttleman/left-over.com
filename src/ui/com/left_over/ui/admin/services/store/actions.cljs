@@ -20,6 +20,12 @@
 (def fetch-shows
   (actions/fetch* (nav/aws-for :aws.admin/shows) :shows {:token? true}))
 
+(defn merge-calendar! [_]
+  (http/post (nav/aws-for :aws.admin/calendar.merge) {:token? true}))
+
+(def fetch-unconfirmed
+  (actions/fetch* (nav/aws-for :aws.admin/calendar.merge) :calendar {:token? true}))
+
 (defn fetch-show [show-id]
   (actions/fetch* (nav/aws-for :aws.admin/show {:route-params {:show-id show-id}}) :show {:token? true}))
 
@@ -31,9 +37,9 @@
   (fn [_]
     (http/put (nav/aws-for :aws.admin/show {:route-params {:show-id show-id}}) {:body show :token? true})))
 
-(defn delete-show [show-id]
+(defn delete-shows [show-ids]
   (fn [_]
-    (http/delete (nav/aws-for :aws.admin/show {:route-params {:show-id show-id}}) {:token? true})))
+    (http/delete (nav/aws-for :aws.admin/shows) {:body {:show-ids show-ids} :token? true})))
 
 (defn create-location [location]
   (fn [_]
@@ -105,3 +111,58 @@
   (fn [[dispatch]]
     (dispatch [:modal/hide])
     (js/setTimeout #(dispatch [:modal/unmount]) 333)))
+
+(defn save-location [location-id show-form location]
+  (fn [[dispatch]]
+    (-> (if location-id
+          (update-location location-id location)
+          (create-location location))
+        dispatch
+        (act-or-toast (all fetch-locations
+                                                       hide-modal
+                                                       [:search/set nil]))
+        dispatch
+        (v/then (comp (partial swap! show-form assoc :location-id) :id)))))
+
+(defn remove-shows [show-ids]
+  (fn [[dispatch]]
+    (let [[msg title] (if (= 1 (count show-ids))
+                        ["Are you sure you want to remove this event?" "Remove Event"]
+                        ["Are you sure you want to remove these events?" "Remove Events"])]
+      (dispatch (show-modal msg
+                            title
+                            [:button.button.is-danger
+                             {:on-click (fn [_]
+                                          (-> show-ids
+                                              delete-shows
+                                              dispatch
+                                              (act-or-toast fetch-unconfirmed)
+                                              dispatch))}
+                             "Remove"]
+                            [:button.button "Cancel"])))))
+
+(defn save-show [{show-id :id :as show}]
+  (fn [[dispatch]]
+    (let [show' (assoc show :confirmed? true)]
+      (-> (if show-id
+            (update-show show-id show')
+            (create-show show'))
+          dispatch
+          (act-or-toast (navigate (if (or (not show-id) (:confirmed? show))
+                                    :ui.admin/main
+                                    :ui.admin/calendar)))
+          dispatch))))
+
+(defn delete-show [show-id]
+  (fn [[dispatch]]
+    (dispatch (show-modal "Are you sure you want to delete this show?"
+                          "Delete Show"
+                          [:button.button.is-danger
+                           {:on-click (fn [_]
+                                        (-> [show-id]
+                                            delete-shows
+                                            dispatch
+                                            (act-or-toast fetch-shows)
+                                            dispatch))}
+                           "Delete"]
+                          [:button.button "Cancel"]))))

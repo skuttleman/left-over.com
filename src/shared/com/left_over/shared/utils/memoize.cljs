@@ -1,18 +1,13 @@
 (ns com.left-over.shared.utils.memoize
   (:require
-    [com.ben-allred.vow.core :as v #?@(:cljs [:include-macros true])])
-  #?(:clj (:import
-            (java.util Date))))
-
-(defn ^:private now-ms []
-  (.getTime #?(:clj  (Date.)
-               :cljs (js/Date.))))
+    [com.ben-allred.vow.core :as v :include-macros true]
+    [com.left-over.shared.utils.dates :as dates]))
 
 (defn memo [f ttl max-ttl]
   (let [cache (atom {:fetched-at 0})]
     (fn [arg]
       (let [{:keys [data fetched-at]} @cache
-            now (now-ms)
+            now (dates/inst->ms (dates/now))
             promise (when (or (empty? data) (> (- now fetched-at) ttl))
                       (swap! cache assoc :fetched-at now)
                       (v/peek (f arg)
