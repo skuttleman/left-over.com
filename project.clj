@@ -71,7 +71,6 @@
                 :source-paths ["src/api" "src/shared"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:jwt-simple     "0.5.6"
-                                               :js-joda        "1.11.0"
                                                :pg             "7.18.2"
                                                :xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.pub.images
@@ -84,7 +83,6 @@
                 :source-paths ["src/api" "src/shared"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:jwt-simple     "0.5.6"
-                                               :js-joda        "1.11.0"
                                                :pg             "7.18.2"
                                                :xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.pub.videos
@@ -97,7 +95,6 @@
                 :source-paths ["src/api" "src/shared"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:jwt-simple     "0.5.6"
-                                               :js-joda        "1.11.0"
                                                :pg             "7.18.2"
                                                :xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.pub.shows
@@ -110,7 +107,6 @@
                 :source-paths ["src/api" "src/shared"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:jwt-simple     "0.5.6"
-                                               :js-joda        "1.11.0"
                                                :pg             "7.18.2"
                                                :xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.admin.locations
@@ -123,7 +119,6 @@
                 :source-paths ["src/api" "src/shared"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:jwt-simple     "0.5.6"
-                                               :js-joda        "1.11.0"
                                                :pg             "7.18.2"
                                                :xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.admin.shows
@@ -136,7 +131,6 @@
                 :source-paths ["src/api" "src/shared"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:jwt-simple     "0.5.6"
-                                               :js-joda        "1.11.0"
                                                :pg             "7.18.2"
                                                :xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.auth
@@ -146,10 +140,10 @@
                                :optimizations :simple
                                :pretty-print  true}}]}
   :aliases {"migrations" ["run" "-m" "com.left-over.api.services.db.migrations/-main"]}
-  :cooper {"api"      ["lein" "with-profile" "dev-api" "figwheel" "dev-api"]
-           "api-repl" ["bin/sleepnode.sh" "target/js/compiled/server.js"]
-           "sass"     ["lein" "sass" "auto"]
-           "ui"       ["lein" "with-profile" "dev-ui" "figwheel" "dev-ui"]}
+  :cooper {"api"  ["lein" "with-profile" "dev-api" "figwheel" "dev-api"]
+           "api " ["bin/sleepnode.sh" "target/js/compiled/server.js"]
+           "sass" ["lein" "sass" "auto"]
+           "ui"   ["lein" "with-profile" "dev-ui" "figwheel" "dev-ui"]}
   :sass {:src              "src/scss"
          :output-directory "dist/css/"}
   :profiles {:dev-ui  {:dependencies [[binaryage/devtools "0.9.10"]
