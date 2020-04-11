@@ -28,24 +28,22 @@
              :justify-content :center}})
 
 (def ^:private components
-  {:ui/main       main/root
-   :ui/about      about/root
-   :ui/shows      shows/root
-   :ui/photos     photos/root
-   :ui/videos     videos/root
-   :ui/contact    contact/root})
+  {:ui/main    main/root
+   :ui/about   about/root
+   :ui/shows   shows/root
+   :ui/photos  photos/root
+   :ui/videos  videos/root
+   :ui/contact contact/root})
 
 (defn ^:private app []
   (let [state (store/get-state)
         handler (get-in state [:page :handler])
         component (components handler not-found)]
-    [:div.columns {:style {:max-width "100vw"
-                           :margin    0}}
+    [:div.columns {:style {:max-width  "100vw"
+                           :margin     0}}
      [:div.column.is-variable.is-0-mobile {:style {:padding "0"}}]
      [:div.column.is-variable {:style {:padding 0}}
-      [:div {:style {:height         "100%"
-                     :display        :flex
-                     :flex-direction :column}}
+      [:div.main
        [:div
         [navbar/logo false]]
        (when (not= :ui/main handler)
@@ -53,7 +51,11 @@
           [navbar/nav-bar state]])
        [:div {:style (handler->style handler)}
         [:div {:style {:margin "16px"}}
-         [component state]]]]]
+         [component state]]]]
+      [:div.has-text-centered
+       {:style {:color :gray}}
+       "View our "
+       [:a {:href "/privacy" :target "_blank"} "privacy policy"]]]
      [:div.column.is-variable.is-0-mobile {:style {:padding "0"}}]]))
 
 (defn ^:export mount! []

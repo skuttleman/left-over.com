@@ -161,3 +161,13 @@ input[type=checkbox].large {
 .location-selector {
     max-width: 180px;
 }
+
+.main {
+    min-height: calc(100vh - 24px);
+    display: flex;
+    flex-direction: column;
+
+    @media(max-width: 600px) {
+        min-height: calc(100vh - 108px);
+    }
+}

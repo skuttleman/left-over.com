@@ -10,5 +10,6 @@
   (let [file (io/file (str "dist" uri))]
     (cond
       (.isFile file) {:status 200 :body file}
+      (= uri "/privacy") {:status 200 :body (io/input-stream (io/resource "privacy.html"))}
       (string/starts-with? uri "/admin") {:status 200 :body (dev-serve "dist/admin.html")}
       :else {:status 200 :body (dev-serve "dist/index.html")})))
