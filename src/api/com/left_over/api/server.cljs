@@ -128,7 +128,7 @@
   (fn [request]
     (-> request
         handler
-        (v/peek nil #(log/spy ["ERROR" %])))))
+        (v/peek nil #(log/error %)))))
 
 (def ^:private app (-> handler
                        (with-routing routes)

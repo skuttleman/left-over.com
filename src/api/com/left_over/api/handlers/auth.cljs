@@ -25,7 +25,8 @@
                                              (v/peek #(log/info "Fetched User PROFILE from "
                                                                 (env/get :oauth-token-info-uri)
                                                                 ": "
-                                                                (pop %))))
+                                                                ;; TODO: (pop %) after setting up John
+                                                                %)))
                                 user (users/find-by-email conn (:email response))]
                         (users/merge-token-info conn (:id user) token-info)
                         (select-keys user #{:email :first-name :last-name :id}))))
@@ -46,7 +47,8 @@
                                  (v/reject "missing redirect-uri"))
                                (v/peek #(log/info "Fetched Auth TOKEN from" (env/get :oauth-token-uri) ": " (pop %)))
                                (v/then-> token->user (some-> jwt/encode)))
-                           (catch _ nil))]
+                           (catch error nil
+                             (log/error "ERROR authenticating" error)))]
     (cond
       jwt (redirect-to (str redirect-uri "?token=" jwt))
       redirect-uri (redirect-to (str redirect-uri "?token-msg-id=auth/failed"))

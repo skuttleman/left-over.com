@@ -11,8 +11,7 @@
     [cljc.java-time.zoned-date-time :as zdt]
     [clojure.string :as string]
     [java.time :refer [ZonedDateTime]]
-    [tick.format :as tf]
-    tick.locale-en-us))
+    [java.time.format :refer [DateTimeFormatter]]))
 
 (def utc zo/utc)
 
@@ -60,7 +59,7 @@
    (let [inst' (zdt/with-zone-same-instant (->zdt inst) tz)]
      (-> fmt
          (formats fmt)
-         tf/formatter
+         (->> (.ofPattern DateTimeFormatter))
          (dtf/format inst')))))
 
 (defn stringify [inst]
