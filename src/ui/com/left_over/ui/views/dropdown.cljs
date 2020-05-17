@@ -64,9 +64,9 @@
              open? (update :class conj "is-focused")))]]
      (when on-edit
        [:<>
-        [:button.button.is-link {:tab-index -1 :type :button :on-click #(on-edit nil)} "Create"]
+        [:button.button.is-link.dropdown-create {:tab-index -1 :type :button :on-click #(on-edit nil)} "Create"]
         (when (= 1 (count value))
-          [:button.button.is-link {:tab-index -1 :type :button :on-click #(on-edit (first selected))} "Edit"])])
+          [:button.button.is-link.dropdown-edit {:tab-index -1 :type :button :on-click #(on-edit (first selected))} "Edit"])])
      (when open?
        [:div.dropdown-menu
         [:div.dropdown-content

@@ -9,7 +9,7 @@
                              :aws-s3-uri})
 
 (defmacro build-env []
-  (let [f (io/file ".lein-env")]
+  (let [f (io/file (or (System/getenv "ENV_FILE") ""))]
     (into {}
           (comp (map (juxt (comp keywords/keyword key) val))
                 (filter (comp js-env-vars first)))

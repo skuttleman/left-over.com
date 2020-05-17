@@ -1,15 +1,15 @@
 (ns com.left-over.api.services.db.repositories.core
   (:require
-    [cljs.nodejs :as nodejs]
     [clojure.core.async :as async]
+    [cljs.nodejs :as nodejs]
     [clojure.string :as string]
     [com.ben-allred.vow.core :as v :include-macros true]
     [com.left-over.api.services.env :as env]
+    [com.left-over.shared.services.protocols :as p]
     [com.left-over.shared.utils.colls :as colls]
     [com.left-over.shared.utils.logging :as log]
-    [com.left-over.shared.utils.strings :as strings]
-    [honeysql.core :as sql]
-    [honeysql.format :as sql.fmt]
+    [honeysql.core :as hsql]
+    [honeysql.format :as hsql.fmt]
     honeysql-postgres.format
     honeysql-postgres.helpers
     pg-types))
@@ -17,6 +17,7 @@
 (def Client (.-Client (nodejs/require "pg")))
 
 (pg-types/setTypeParser pg-types/builtins.UUID #(some-> % uuid))
+
 (aset (.-prototype UUID) "toPostgres" (fn []
                                         (this-as this
                                           (str this))))
@@ -32,49 +33,53 @@
 
 (defmethod ->sql-value :default [_ _ value] value)
 
-(defmethod sql.fmt/format-clause :json/merge [[_ k] sql-map]
+(defmethod hsql.fmt/format-clause :json/merge [[_ k] sql-map]
   (let [[param] (get (meta sql-map) k)
         s (if (:set sql-map) ", " "SET ")
-        k' (sql.fmt/to-sql k)]
+        k' (hsql.fmt/to-sql k)]
     (str s k' " = " k' " || " param)))
 
-(sql.fmt/register-clause! :json/merge 101)
+(hsql.fmt/register-clause! :json/merge 101)
 
 (defn ^:private sql-log [[statement]]
   (async/go
     (when (env/get :dev?)
       (log/debug statement))))
 
-(defn ^:private query [conn [sql & params]]
-  (v/native->prom (.query conn sql (to-array params))))
+(extend-protocol p/IDbConnection
+  Client
+  (query [this sql params]
+    (-> this
+        (.query sql (to-array params))
+        v/native->prom
+        (v/then-> .-rows)))
+  (prepare [_ query]
+    (->> query
+         meta
+         vals
+         (reduce (fn [sql+params [param value]]
+                   (-> sql+params
+                       (update 0 string/replace param (str "$" (count sql+params)))
+                       (conj value)))
+                 (hsql/format query :quoting :ansi :parameterizer :postgresql)))))
 
 (defn ^:private end-with [client sql]
   (fn [_]
     (-> client
-        (query [sql])
+        (p/query sql [])
         (v/and (.end client)))))
 
 (defn exec-raw!
   ([conn sql+params]
    (exec-raw! conn sql+params identity))
-  ([conn sql+params xform]
-   (v/await [results (query conn sql+params)]
+  ([conn [sql & params] xform]
+   (v/await [results (p/query conn sql params)]
      (sequence (comp (map #(js->clj % :keywordize-keys true))
                      xform)
-               (.-rows results)))))
-
-(defn prepare-query [query]
-  (->> query
-       meta
-       vals
-       (reduce (fn [sql+params [param value]]
-                 (-> sql+params
-                     (update 0 string/replace param (str "$" (count sql+params)))
-                     (conj value)))
-               (sql/format query :quoting :ansi :parameterizer :postgresql))))
+               results))))
 
 (defn ^:private exec* [conn query xform]
-  (let [sql (prepare-query query)]
+  (let [sql (p/prepare conn query)]
     (sql-log sql)
     (exec-raw! conn sql xform)))
 
@@ -105,7 +110,7 @@
     (-> client
         .connect
         v/native->prom
-        (v/and (query client ["BEGIN"])
+        (v/and (p/query client "BEGIN" [])
                (f client))
         (v/peek (end-with client "COMMIT")
                 (end-with client "ROLLBACK")))))

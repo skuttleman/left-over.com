@@ -16,20 +16,21 @@
   (fn [_]
     (store/dispatch (admin.actions/remove-shows show-ids))))
 
-(defn ^:private confirm-list [shows]
+(defn ^:private confirm-list [shows show?]
   [:ul.column.spaced
+   {:class [(if show? "show-events" "not-show-events")]}
    (for [{show-id :id :keys [temp-data]} shows]
      ^{:key show-id}
      [:li.card
       [:div.row.full.spaced
        [:div.column
         [:strong (:summary temp-data "Unknown")]
-        (when-let [dt (or (get-in temp-data [:start :dateTime])
-                          (get-in temp-data [:start :date]))]
-          [:em (dates/format dt :date/view)])]
+        (when-let [dt (or (some-> (get-in temp-data [:start :dateTime]) (dates/format :datetime/view))
+                          (some-> (get-in temp-data [:start :date]) (dates/format :date/view)))]
+          [:em dt])]
        [:div.column.no-grow
         {:style {:align-items :center}}
-        [:a {:href (nav/path-for :ui.admin/show {:route-params {:show-id show-id}})} "Convert"]
+        [:a.link {:href (nav/path-for :ui.admin/show {:route-params {:show-id show-id}})} "Convert"]
         [:button.button.is-danger
          {:on-click (remove-shows [show-id])}
          "Remove"]]]])])
@@ -50,7 +51,7 @@
         (if (seq shows)
           [:<>
            [:p "These events look like shows. Please convert or remove them."]
-           [confirm-list shows]]
+           [confirm-list shows true]]
           [:p "No events that look like shows"])
         (when (seq non-shows)
           [:<>
@@ -60,7 +61,7 @@
             {:on-click (remove-shows (map :id non-shows))}
             [:span "Remove all"]
             [components/icon :arrow-down]]
-           [confirm-list non-shows]])]
+           [confirm-list non-shows false]])]
        [:<>
         [:p "You have no unmerged shows."]
         [:p "Check back later."]])]))

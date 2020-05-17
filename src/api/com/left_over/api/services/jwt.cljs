@@ -7,7 +7,7 @@
     jwt-simple))
 
 (defn in-days [x]
-  (* 1000 60 60 24 x))
+  (* 60 60 24 x))
 
 (defn decode [token]
   (try
@@ -19,15 +19,13 @@
 
 (defn encode [payload]
   (let [days-to-expire (numbers/parse-int (env/get :jwt-expiration "30"))
-        now (dates/inst->ms (dates/now))]
-    (-> {:iat  (-> now
-                   (/ 1000)
-                   js/Math.floor)
+        iat (-> (dates/now)
+                dates/inst->ms
+                (/ 1000)
+                js/Math.floor)]
+    (-> {:iat  iat
          :data (edn/stringify payload)
-         :exp  (-> now
-                   (+ (in-days days-to-expire))
-                   (/ 1000)
-                   js/Math.floor)}
+         :exp  (+ iat (in-days days-to-expire))}
         (cond-> (:id payload) (assoc :sub (str (:id payload))))
         clj->js
         (jwt-simple/encode (env/get :jwt-secret)))))

@@ -14,8 +14,7 @@
                                         ["request" "success" "failure"])]
      (fn [[dispatch]]
        (dispatch [request])
-       (-> url
-           (http/get req)
+       (-> (http/with-client http/get url req)
            (v/then (partial conj [success])
                    (partial conj [failure]))
            (v/then dispatch))))))

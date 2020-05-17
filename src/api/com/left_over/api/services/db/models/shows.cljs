@@ -5,6 +5,7 @@
     [com.left-over.api.services.db.models.core :as models]
     [com.left-over.api.services.db.repositories.core :as repos]
     [com.left-over.api.services.db.repositories.shows :as repo.shows]
+    [com.left-over.api.services.db.repositories.sql :as sql]
     [com.left-over.shared.utils.colls :as colls]
     [com.left-over.shared.utils.dates :as dates]
     [com.left-over.shared.utils.maps :as maps]))
@@ -21,49 +22,54 @@
       (assoc :order-by [[:shows.date-time :desc]])
       (models/select ::repo.shows/model (models/under :shows))))
 
-(defn select-for-admin [db]
+(defn select-for-admin [conn]
   (-> [:and
        [:= :shows.deleted false]
        [:= :shows.confirmed true]]
       select*
-      (repos/exec! db)))
+      (repos/exec! conn)))
 
-(defn select-for-website [db]
+(defn select-for-website [conn]
   (-> [:and
        [:= :shows.deleted false]
        [:= :shows.confirmed true]
        [:= :shows.hidden false]]
       select*
       (assoc-in [0 :limit] 100)
-      (repos/exec! db)))
+      (repos/exec! conn)))
 
-(defn find-by-id [db show-id]
+(defn find-by-id [conn show-id]
   (-> [:and
        [:= :shows.id show-id]
        [:= :shows.deleted false]]
       select*
-      (repos/exec! db)
+      (repos/exec! conn)
       (v/then colls/only!)))
 
-(defn select-new-event-ids [db event-ids]
+(defn select-new-event-ids [conn event-ids]
   (-> {:select [[:shows.event-id "shows/event-id"]]
        :from   [:shows]
        :where  [:in :shows.event-id event-ids]}
       (cons [nil (map :event-id)])
-      (repos/exec! db)
+      (repos/exec! conn)
       (v/then-> set (remove event-ids))))
 
-(defn select-unmerged [db]
+(defn select-unmerged [conn]
   (-> [:and
        [:= :shows.deleted false]
        [:= :shows.confirmed false]]
       select*
-      (repos/exec! db)
-      (v/then-> (->> (sort-by (comp (some-fn #(some-> % :dateTime dates/stringify) :date)
-                                    :start
-                                    :temp-data))))))
+      (assoc-in [0 :order-by] [[(sql/coalesce (sql/cast (sql/json-get-in :shows.temp-data
+                                                                         [:start :dateTime])
+                                                        :timestamp)
+                                              (sql/cast (sql/json-get-in :shows.temp-data
+                                                                         [:start :date])
+                                                        :timestamp)
+                                              :shows.created-at)
+                                :asc]])
+      (repos/exec! conn)))
 
-(defn save [db user {show-id :id :as show}]
+(defn save [conn user {show-id :id :as show}]
   (let [show' (-> show
                   (dissoc :id)
                   (assoc :updated-at (dates/now))
@@ -78,33 +84,34 @@
                       (models/modify entities/shows ::repo.shows/model))
           (not show-id) (-> (entities/insert-into [show'])
                             (models/insert-many entities/shows ::repo.shows/model)))
-        (repos/exec! db)
-        (v/then-> first :id (->> (find-by-id db))))))
+        (repos/exec! conn)
+        (v/then-> first :id (->> (find-by-id conn))))))
 
-(defn delete [db show-ids]
+(defn delete [conn show-ids]
   (-> entities/shows
       (entities/modify {:deleted?   true
                         :updated-at (dates/now)}
                        [:in :shows.id show-ids])
       (models/modify entities/shows ::repo.shows/model)
-      (repos/exec! db)))
+      (repos/exec! conn)))
 
-(defn save-temp-data [db user shows]
-  (-> shows
-      (->> (map (fn [{event-id :id :as show}]
-                  {:event-id   event-id
-                   :created-by (:id user)
-                   :updated-at (dates/now)
-                   :temp-data  (clj->js (dissoc show :id))
-                   :hidden?    true}))
-           (entities/insert-into entities/shows))
-      (models/insert-many entities/shows ::repo.shows/model)
-      (repos/exec! db)))
+(defn save-temp-data [conn user events]
+  (let [updated (dates/now)]
+    (-> events
+        (->> (map (fn [{event-id :id :as event}]
+                    {:event-id   event-id
+                     :created-by (:id user)
+                     :updated-at updated
+                     :temp-data  (clj->js (dissoc event :id))
+                     :hidden?    true}))
+             (entities/insert-into entities/shows))
+        (models/insert-many entities/shows ::repo.shows/model)
+        (repos/exec! conn))))
 
-(defn refresh-events [conn user shows]
-  (v/await [[new-shows old-shows] (some-> shows
-                                          seq
-                                          (->> (map :id) (select-new-event-ids conn))
-                                          (v/then-> set (comp :id) (colls/organize shows)))]
-    (v/all [(v/vow (some->> new-shows seq (save-temp-data conn user)))
-            (v/resolve old-shows)])))
+(defn refresh-events [conn user events]
+  (v/await [[new-events old-events] (some-> events
+                                            seq
+                                            (->> (map :id) (select-new-event-ids conn))
+                                            (v/then-> set (comp :id) (colls/organize events)))]
+    (v/all [(v/vow (some->> new-events seq (save-temp-data conn user)))
+            (v/resolve old-events)])))

@@ -5,6 +5,7 @@
     [cljs-http.core :as http*]
     [clojure.core.async :as async]
     [clojure.set :as set]
+    [com.left-over.shared.services.protocols :as p]
     [com.ben-allred.vow.core :as v :include-macros true]
     [com.left-over.shared.utils.edn :as edn]
     [com.left-over.shared.utils.json :as json]
@@ -77,7 +78,7 @@
 (def ^{:arglists '([response])} error?
   (some-fn client-error? server-error?))
 
-(def ^:private client*
+(def ^:private http-client
   (-> http*/request
       client/wrap-query-params
       client/wrap-basic-auth
@@ -90,7 +91,7 @@
       client/wrap-multipart-params
       client/wrap-channel-from-request-map))
 
-(defn ^:private client [request]
+(defn ^:private client* [request]
   (let [token (when (:token? request)
                 (some-> js/localStorage (.getItem "auth-token")))]
     (-> request
@@ -100,7 +101,7 @@
 
           (not token)
           (assoc :with-credentials? false))
-        client*)))
+        http-client)))
 
 (defn ^:private prep [request content-type]
   (-> request
@@ -142,37 +143,47 @@
       (v/ch->prom (comp #{:success} first))
       (v/then second (comp v/reject second))))
 
-(defn ^:private go [method url {:keys [response? json?] :as request}]
-  (let [content-type (if json? "application/json" "application/edn")
-        headers (merge (cond-> {:accept content-type}
-                         (:body request) (assoc :content-type content-type))
-                       (:headers request))]
-    (-> request
-        (assoc :method method :url url :headers headers)
-        (prep (:content-type headers))
-        client
-        request*
-        from-ch
-        (v/catch (comp v/reject (response* response?)))
-        (v/then-> (response* response?)))))
+(defn with-client [f & args]
+  (let [client (reify p/IHttpClient
+                 (go [_ method url request]
+                   (let [{:keys [response? json?]} request
+                         content-type (if json? "application/json" "application/edn")
+                         headers (merge (cond-> {:accept content-type}
+                                          (:body request) (assoc :content-type content-type))
+                                        (:headers request))]
+                     (try
+                       (-> request
+                           (assoc :method method :url url :headers headers)
+                           (prep (:content-type headers))
+                           client*
+                           request*
+                           from-ch
+                           (v/catch (comp v/reject (response* response?)))
+                           (v/then-> (response* response?)))
+                       (catch :default err
+                         (v/reject err))))))]
+    (apply f client args)))
+
+(defn ->client []
+  (with-client identity))
 
 (defn get
-  ([url]
-   (get url nil))
-  ([url request]
-   (go :get url request)))
+  ([client url]
+   (get client url nil))
+  ([client url request]
+   (p/go client :get url request)))
 
-(defn post [url request]
-  (go :post url request))
+(defn post [client url request]
+  (p/go client :post url request))
 
-(defn patch [url request]
-  (go :patch url request))
+(defn patch [client url request]
+  (p/go client :patch url request))
 
-(defn put [url request]
-  (go :put url request))
+(defn put [client url request]
+  (p/go client :put url request))
 
 (defn delete
-  ([url]
-   (delete url nil))
-  ([url request]
-   (go :delete url request)))
+  ([client url]
+   (delete client url nil))
+  ([client url request]
+   (p/go client :delete url request)))

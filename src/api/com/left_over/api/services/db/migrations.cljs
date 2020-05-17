@@ -8,7 +8,7 @@
     [com.left-over.shared.utils.dates :as dates]
     [com.left-over.shared.utils.keywords :as keywords]
     [com.left-over.shared.utils.strings :as strings]
-    fs))
+    [com.left-over.api.services.fs :as fs]))
 
 (def ^:private select-migrations-query
   "SELECT *
@@ -38,23 +38,8 @@
 (defn ^:private date-str []
   (dates/format (dates/now) :datetime/fs dates/utc))
 
-(defn ^:private promise-cb [resolve reject]
-  (fn [error result]
-    (if error
-      (reject error)
-      (resolve result))))
-
-(defn ^:private load-file [file-name]
-  (v/create (fn [resolve reject]
-              (fs/readFile file-name (promise-cb resolve reject)))))
-
-(defn ^:private write-file [file-name content]
-  (v/create (fn [resolve reject]
-              (fs/writeFile file-name content (promise-cb resolve reject)))))
-
 (defn ^:private list-migrations [dir]
-  (v/then-> (v/create (fn [resolve reject]
-                        (fs/readdir dir (promise-cb resolve reject))))
+  (v/then-> (fs/read-dir dir)
             (->> sort
                  (partition-all 2)
                  (map (fn [[down up]] {:down down
@@ -66,7 +51,7 @@
             (v/and p
                    (v/await [sql (-> fmt
                                      (strings/format migration-id)
-                                     load-file)]
+                                     fs/read-file)]
                      (repos/transact (fn [conn]
                                        (println "running:" (strings/format fmt migration-id))
                                        (->> (string/split sql #";")
@@ -88,26 +73,33 @@
                                    (keywords/keyword column)))
                          {})
                  (map (fn [[table fields]]
-                        (write-file (strings/format "resources/db/entities/%s.edn" table)
-                                    (pr-str {:table  (keywords/keyword table)
-                                             :fields fields}))))
+                        (fs/write-file (strings/format "resources/db/entities/%s.edn" table)
+                                       (pr-str {:table  (keywords/keyword table)
+                                                :fields fields}))))
                  v/all)))
 
-(defn migrate! []
-  (v/await [[files migrations] (v/all [(list-migrations "resources/db/migrations")
-                                       (repos/transact repos/exec-raw! [select-migrations-query])])
-            ids (into #{} (map :id) migrations)
-            migrations (drop-while (comp ids :id) files)]
-    (run-migrations! "resources/db/migrations/%s.up.sql" insert-migration migrations)
-    (update-entities!)))
+(defn migrate!
+  ([]
+   (migrate! true))
+  ([update?]
+   (v/await [[files migrations] (v/all [(list-migrations "resources/db/migrations")
+                                        (repos/transact repos/exec-raw! [select-migrations-query])])
+             ids (into #{} (map :id) migrations)
+             migrations (drop-while (comp ids :id) files)]
+     (run-migrations! "resources/db/migrations/%s.up.sql" insert-migration migrations)
+     (when update?
+       (update-entities!)))))
 
 (defn rollback!
   ([]
    (rollback! 1))
   ([n]
+   (rollback! n true))
+  ([n update?]
    (v/await [migrations (repos/transact repos/exec-raw! [select-migrations-limit-query n])]
      (run-migrations! "resources/db/migrations/%s.down.sql" delete-migration migrations)
-     (update-entities!))))
+     (when update?
+       (update-entities!)))))
 
 (defn redo! []
   (v/and (rollback!)
@@ -119,8 +111,8 @@
 
 (defn create! [& name-parts]
   (let [migration-name (string/join "_" (cons (date-str) (map csk/->snake_case_string name-parts)))]
-    (v/and (v/all [(write-file (strings/format "resources/db/migrations/%s.up.sql" migration-name) "")
-                   (write-file (strings/format "resources/db/migrations/%s.down.sql" migration-name) "")])
+    (v/and (v/all [(fs/write-file (strings/format "resources/db/migrations/%s.up.sql" migration-name) "")
+                   (fs/write-file (strings/format "resources/db/migrations/%s.down.sql" migration-name) "")])
            (println "created migration: " migration-name))))
 
 (defn ^:private print-result [promise]

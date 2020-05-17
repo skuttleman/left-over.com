@@ -61,9 +61,9 @@
    ["WY" "Wyoming"]])
 
 (def validator
-  (f/validator {:name  (f/required "Must have a name")
-                :city  (f/required "Must have a city")
-                :state [(f/required "Must have a state")
+  (f/validator {:name  (f/required "You must have a name for the location")
+                :city  (f/required "You must have a city for the location")
+                :state [(f/required "You must have a state for the location")
                         (f/pred (set (map first states)) "Must be a valid state")]}))
 
 (defn ^:private save-location [location-id show-form]

@@ -5,14 +5,6 @@
     [com.left-over.shared.utils.colls :as colls]
     [com.left-over.shared.utils.logging :as log]))
 
-(defn ^:private with* [k f [pk fk] values]
-  (let [pk->results (-> values
-                        seq
-                        (some->> (map #(get % pk)) f)
-                        (->> (group-by fk)))]
-    (fn [value]
-      (assoc value k (pk->results (get value pk) [])))))
-
 (defn under [root-key]
   (let [root-key' (name root-key)]
     (map (fn [item]
@@ -44,6 +36,3 @@
     (update query :set (comp (prep/prepare repos/->sql-value (:table entity))
                              #(select-keys % fields)
                              (partial repos/->db model)))))
-
-(defn with [k f [pk fk] values]
-  (map (with* k f [pk fk] values) values))

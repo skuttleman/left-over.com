@@ -1,0 +1,7 @@
+{
+  "metadata": {
+    "name": "{{file-name}}",
+    "size": 12345
+  },
+  "link": "http://example.com/{{file-name}}"
+}

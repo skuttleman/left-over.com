@@ -1,0 +1,17 @@
+{
+  "items": [
+    {
+      "id":  "default-event",
+      "summary": "rehearsal"
+    }
+    {{#items}}
+      ,{
+        "id": "{{id}}",
+        "start": {"date": "{{start-date}}"},
+        "end": {"date": "{{end-date}}"},
+        "summary": "{{summary}}",
+        "description": "lorem ipsum {{summary}}"
+      }
+    {{/items}}
+  ]
+}

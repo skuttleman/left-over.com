@@ -45,7 +45,7 @@
          to-view (get-in model->view path)
          to-model (get-in view->model path)]
      (-> attrs
-         (assoc :attempted? attempted? :visited? visited?)
+         (assoc :attempted? attempted? :visited? visited? :name (reduce #(str %1 ":" %2) (map name path)))
          (update :disabled #(or % (not (ready? form))))
          (update :on-blur (fn [on-blur]
                             (fn [e]

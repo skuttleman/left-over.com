@@ -18,7 +18,7 @@
     [com.left-over.shared.utils.uri :as uri]))
 
 (defprotocol IServer
-  (start! [this])
+  (start! [this] [this port])
   (stop! [this]))
 
 (def ^:private routes
@@ -138,20 +138,39 @@
                        with-keyword-headers
                        with-dev-debug))
 
+(defrecord WebServer [server name default-port]
+  IServer
+  (start! [this]
+    (start! this default-port))
+  (start! [_ port]
+    (v/create (fn [resolve _]
+                (.listen server
+                         port
+                         #(do (log/info "The server [" name "] is listening on PORT" port)
+                              (resolve nil))))))
+  (stop! [_]
+    (v/first [(v/sleep 10000)
+              (v/create (fn [resolve _]
+                          (.close server #(do (log/info "The server has stopped.")
+                                              (resolve nil)))))])))
+
 (defrecord ReloadableServer [server]
   IServer
-  (start! [_]
-    (.listen (reset! server (es/create-server app))
-             (numbers/parse-int (env/get :dev-aws-port "3100"))
-             #(log/info "The server is listening on PORT" (env/get :dev-aws-port "3100"))))
+  (start! [this]
+    (start! this (numbers/parse-int (env/get :dev-aws-port "3100"))))
+  (start! [_ port]
+    (if @server
+      (v/resolve)
+      (start! (reset! server (->WebServer (es/create-server app) "ReloadableServer" port)))))
   (stop! [_]
-    (.close @server)
-    (log/info "The server has stopped.")))
+    (v/then-> (stop! @server) (->> (reset! server)))))
 
 (defonce server
-  (doto (->ReloadableServer (atom nil))
-    (start!)))
+  (let [server* (->ReloadableServer (atom nil))]
+    (when (not= "test" (env/get :environment))
+      (start! server*))
+    server*))
 
 (defn ^:export restart! []
-  (stop! server)
-  (start! server))
+  (v/and (stop! server)
+         (start! server)))

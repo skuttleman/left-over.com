@@ -30,3 +30,12 @@
 
 (defn map-kv [key-fn val-fn m]
   (into {} (map (fn [[k v]] [(key-fn k) (val-fn v)])) m))
+
+(defn supermap? [m1 m2]
+  (and (>= (count m1) (count m2))
+       (every? (fn [[k v]]
+                 (= [k v] (find m1 k)))
+               m2)))
+
+(defn submap? [m1 m2]
+  (supermap? m2 m1))

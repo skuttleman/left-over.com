@@ -1,7 +1,8 @@
 (ns com.left-over.shared.utils.uri
   (:require
     [clojure.string :as string]
-    [lambdaisland.uri :as uri*]))
+    [lambdaisland.uri :as uri*]
+    [com.left-over.shared.utils.maps :as maps]))
 
 (defn url-encode [arg]
   (js/encodeURIComponent (str arg)))
@@ -21,8 +22,18 @@
                                 (url-encode v))))
                        arg)))
 
-(def ^{:arglists '([uri])} parse
-  uri*/parse)
+(defn split-query [query-string]
+  (when (seq query-string)
+    (into {}
+          (map (fn [pair]
+                 (let [[k v] (string/split pair #"=")]
+                   [(keyword k) (if (nil? v) true (url-decode v))])))
+          (string/split query-string #"&"))))
+
+(defn parse [uri]
+  (-> uri
+      uri*/parse
+      (maps/update-maybe :query split-query)))
 
 (defn stringify [uri]
   (-> uri

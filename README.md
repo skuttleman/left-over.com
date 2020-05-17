@@ -10,6 +10,12 @@ Run the app locally.
 $ lein do clean, cooper
 ```
 
+Run the tests
+
+```bash
+$ bin/tests.sh
+```
+
 Visit [http://localhost:3449](http://localhost:3449) in your browser.
 
 ## Deployment

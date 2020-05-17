@@ -7,19 +7,19 @@
     [com.left-over.shared.utils.colls :as colls]
     [com.left-over.shared.utils.dates :as dates]))
 
-(defn ^:private select* [db clause]
+(defn ^:private select* [conn clause]
   (-> clause
       repo.users/select-by
       (models/select ::repo.users/model (models/under :users))
-      (repos/exec! db)))
+      (repos/exec! conn)))
 
-(defn find-by-email [db email]
-  (v/then (select* db [:= :users.email email]) colls/only!))
+(defn find-by-email [conn email]
+  (v/then (select* conn [:= :users.email email]) colls/only!))
 
-(defn find-by-id [db user-id]
-  (v/then (select* db [:= :users.id user-id]) colls/only!))
+(defn find-by-id [conn user-id]
+  (v/then (select* conn [:= :users.id user-id]) colls/only!))
 
-(defn merge-token-info [db user-id {:keys [expires_in] :as token-info}]
+(defn merge-token-info [conn user-id {:keys [expires_in] :as token-info}]
   (-> token-info
       (cond->
         expires_in (assoc :expires_at (-> (dates/now)
@@ -27,5 +27,5 @@
                                           dates/stringify)))
       (repo.users/merge-token-info [:= :users.id user-id])
       (update :set assoc :updated-at (dates/now))
-      (repos/exec! db)
+      (repos/exec! conn)
       (v/then colls/only!)))

@@ -9,7 +9,7 @@
     [com.left-over.ui.services.store.actions :as actions]))
 
 (def ^:private toast-msgs
-  {:auth/failed [:error (constantly [:div "Your login attempt failed. Please check your email and password and try again."])]})
+  {:auth/failed [:error (constantly [:div "Your login attempt failed. Please try again. If the problem persists, contact support."])]})
 
 (def fetch-auth-info
   (actions/fetch* (nav/aws-for :aws/info) :auth.info {:token? true}))
@@ -20,8 +20,11 @@
 (def fetch-shows
   (actions/fetch* (nav/aws-for :aws.admin/shows) :shows {:token? true}))
 
-(defn merge-calendar! [_]
-  (http/post (nav/aws-for :aws.admin/calendar.merge) {:token? true}))
+(defn merge-calendar!
+  ([event]
+   (http/with-client merge-calendar! event))
+  ([client _]
+   (http/post client (nav/aws-for :aws.admin/calendar.merge) {:token? true})))
 
 (def fetch-unconfirmed
   (actions/fetch* (nav/aws-for :aws.admin/calendar.merge) :calendar {:token? true}))
@@ -30,24 +33,39 @@
   (actions/fetch* (nav/aws-for :aws.admin/show {:route-params {:show-id show-id}}) :show {:token? true}))
 
 (defn create-show [show]
-  (fn [_]
-    (http/post (nav/aws-for :aws.admin/shows) {:body show :token? true})))
+  (fn -create-show
+    ([event]
+     (http/with-client -create-show event))
+    ([client _]
+     (http/post client (nav/aws-for :aws.admin/shows) {:body show :token? true}))))
 
 (defn update-show [show-id show]
-  (fn [_]
-    (http/put (nav/aws-for :aws.admin/show {:route-params {:show-id show-id}}) {:body show :token? true})))
+  (fn -update-show
+    ([event]
+     (http/with-client -update-show event))
+    ([client _]
+     (http/put client (nav/aws-for :aws.admin/show {:route-params {:show-id show-id}}) {:body show :token? true}))))
 
 (defn delete-shows [show-ids]
-  (fn [_]
-    (http/delete (nav/aws-for :aws.admin/shows) {:body {:show-ids show-ids} :token? true})))
+  (fn -delete-shows
+    ([event]
+     (http/with-client -delete-shows event))
+    ([client _]
+     (http/delete client (nav/aws-for :aws.admin/shows) {:body {:show-ids show-ids} :token? true}))))
 
 (defn create-location [location]
-  (fn [_]
-    (http/post (nav/aws-for :aws.admin/locations) {:body location :token? true})))
+  (fn -create-location
+    ([event]
+     (http/with-client -create-location event))
+    ([client _]
+     (http/post client (nav/aws-for :aws.admin/locations) {:body location :token? true}))))
 
 (defn update-location [location-id location]
-  (fn [_]
-    (http/put (nav/aws-for :aws.admin/location {:route-params {:location-id location-id}}) {:body location :token? true})))
+  (fn -update-location
+    ([event]
+     (http/with-client -update-location event))
+    ([client _]
+     (http/put client (nav/aws-for :aws.admin/location {:route-params {:location-id location-id}}) {:body location :token? true}))))
 
 (defn create-form
   ([model]
@@ -119,8 +137,8 @@
           (create-location location))
         dispatch
         (act-or-toast (all fetch-locations
-                                                       hide-modal
-                                                       [:search/set nil]))
+                           hide-modal
+                           [:search/set nil]))
         dispatch
         (v/then (comp (partial swap! show-form assoc :location-id) :id)))))
 

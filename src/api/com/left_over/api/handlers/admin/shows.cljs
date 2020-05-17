@@ -5,6 +5,7 @@
     [com.left-over.api.services.db.models.shows :as shows]
     [com.left-over.api.services.db.repositories.core :as repos]
     [com.left-over.api.services.google :as google]
+    [com.left-over.shared.services.http :as http]
     [com.left-over.shared.utils.logging :as log]))
 
 (defmulti ^:private handler* (juxt :httpMethod :resource))
@@ -26,21 +27,25 @@
 
 (defmethod ^:private handler* ["DELETE" "/admin/shows"]
   [{:keys [body]}]
-  (v/then (repos/transact shows/delete (:show-ids body))
-          (constantly ^{:status 204} {})))
+  (v/and (repos/transact shows/delete (:show-ids body))
+         ^{:status 204} {}))
 
 (defmethod ^:private handler* ["POST" "/admin/shows"]
   [{:keys [body user]}]
-  (v/then (repos/transact shows/save user (dissoc body :id))
-          #(with-meta % {:status 201})))
+  (v/then-> (repos/transact shows/save user (dissoc body :id))
+            (with-meta {:status 201})))
 
 (defmethod ^:private handler* ["POST" "/admin/calendar/merge"]
   [{:keys [user]}]
-  (v/and (-> (google/fetch-calendar-events (:id user))
-             (v/then-> (->> (repos/transact shows/refresh-events user)))
-             (v/peek nil (fn [err]
-                           (log/error "Failed to refresh calendar events" err))))
-         ^{:status 204} []))
+  (repos/transact (fn [conn]
+                    (let [client (http/->client)
+                          oauth (google/->oauth client)]
+                      (v/and (-> conn
+                                 (google/fetch-calendar-events client oauth (:id user))
+                                 (v/then-> (->> (shows/refresh-events conn user)))
+                                 (v/peek nil (fn [err]
+                                               (log/error "Failed to refresh calendar events" err))))
+                             ^{:status 204} [])))))
 
 (defmethod ^:private handler* ["GET" "/admin/calendar/merge"]
   [_]

@@ -17,7 +17,7 @@
     [reagent.core :as r]))
 
 (def validator
-  (f/validator {:date-time   (f/required "Must select a date/time for the show")
+  (f/validator {:date-time   (f/required "You must select a date/time for the show")
                 :name        (f/required "You must have a name for the show")
                 :location-id (f/required "You must select a location")}))
 

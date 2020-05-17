@@ -19,7 +19,7 @@
   ([state action]
    (match action
      [:forms/init internal-id external-id form-state form] (-> state
-                                                               (assoc-in [external-id] form)
+                                                               (assoc external-id form)
                                                                (assoc-in [:forms/state internal-id] form-state))
      [:forms/swap! internal-id f & f-args] (apply update-in state [:forms/state internal-id] f f-args)
      :else state)))

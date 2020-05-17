@@ -129,7 +129,7 @@
 (def ^{:arglists '([attrs options])} select
   (with-auto-focus
     (with-id
-      (fn [{:keys [disabled on-change value] :as attrs} options]
+      (fn [{:keys [disabled name on-change value] :as attrs} options]
         (let [option-values (set (map first options))
               value (if (contains? option-values value)
                       value
@@ -141,7 +141,8 @@
                  :disabled  disabled
                  :on-change (comp on-change
                                   (into {} (map (juxt str identity) option-values))
-                                  target-value)}
+                                  target-value)
+                 :name      name}
                 (merge (select-keys attrs #{:class :id :on-blur :ref})))
             (for [[option label attrs] (cond->> options
                                                 (= ::empty value) (cons [::empty
@@ -156,39 +157,42 @@
   (with-auto-focus
     (with-id
       (with-trim-blur
-        (fn [{:keys [disabled on-change value] :as attrs}]
+        (fn [{:keys [disabled name on-change value] :as attrs}]
           [form-field
            attrs
            [:textarea.textarea
             (-> {:value     value
                  :disabled  disabled
-                 :on-change (comp on-change target-value)}
+                 :on-change (comp on-change target-value)
+                 :name      name}
                 (merge (select-keys attrs common-keys)))]])))))
 
 (def ^{:arglists '([attrs])} input
   (with-auto-focus
     (with-id
       (with-trim-blur
-        (fn [{:keys [disabled on-change type] :as attrs}]
+        (fn [{:keys [disabled name on-change type] :as attrs}]
           [form-field
            attrs
            [:input.input
             (-> {:type      (or type :text)
                  :disabled  disabled
-                 :on-change (comp on-change target-value)}
+                 :on-change (comp on-change target-value)
+                 :name      name}
                 (merge (select-keys attrs common-keys)))]])))))
 
 (def ^{:arglists '([attrs])} checkbox
   (with-auto-focus
     (with-id
-      (fn [{:keys [disabled on-change value] :as attrs}]
+      (fn [{:keys [disabled name on-change value] :as attrs}]
         [form-field
          attrs
          [:input.checkbox
           (-> {:checked   (boolean value)
                :type      :checkbox
                :disabled  disabled
-               :on-change #(on-change (not value))}
+               :on-change #(on-change (not value))
+               :name      name}
               (merge (select-keys attrs common-keys)))]]))))
 
 (def ^{:arglists '([attrs])} button

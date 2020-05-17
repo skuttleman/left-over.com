@@ -1,5 +1,11 @@
 DROP INDEX shows_event_id;
 
+DELETE FROM shows
+WHERE location_id IS NULL
+    OR name IS NULL
+    OR timezone IS NULL
+    OR date_time IS NULL;
+
 ALTER TABLE shows
     DROP CONSTRAINT shows_location_id_or_unconfirmed,
     DROP CONSTRAINT shows_name_or_unconfirmed,

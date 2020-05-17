@@ -5,11 +5,8 @@
     [com.left-over.api.services.env :as env]
     [com.left-over.shared.services.http :as http]
     [com.left-over.shared.utils.memoize :as memo]
-    [com.left-over.shared.utils.numbers :as numbers]))
-
-(def ^:private dropbox-list-folder "https://api.dropboxapi.com/2/files/list_folder")
-
-(def ^:private dropbox-temp-link "https://api.dropboxapi.com/2/files/get_temporary_link")
+    [com.left-over.shared.utils.numbers :as numbers]
+    [com.left-over.shared.utils.logging :as log]))
 
 (def ^:private mime-types
   {"avi"  "video/x-msvideo"
@@ -42,21 +39,22 @@
                                      peek
                                      mime-types)))
 
-(defn ^:private image? [mime-type]
+(defn image? [mime-type]
   (some-> mime-type (string/starts-with? "image/")))
 
-(defn ^:private video? [mime-type]
+(defn video? [mime-type]
   (some-> mime-type (string/starts-with? "video/")))
 
-
-(defn ^:private request [url body]
-  (http/post url
+(defn ^:private request [client url body]
+  (http/post client
+             url
              {:headers {:authorization (str "Bearer " (env/get :dropbox-access-token))}
               :body    body
               :json?   true}))
 
-(defn ^:private fetch* [mime-filter path]
-  (v/await [{:keys [entries]} (request dropbox-list-folder
+(defn fetch* [client mime-filter path]
+  (v/await [{:keys [entries]} (request client
+                                       (env/get :dropbox-list-folder)
                                        {:path                                path
                                         :recursive                           false
                                         :include_media_info                  false
@@ -66,9 +64,10 @@
                                         :include_non_downloadable_files      false})
             results (->> entries
                          (map (fn [{:keys [path_lower]}]
-                                (v/attempt (-> dropbox-temp-link
-                                               (request {:path path_lower}))
-                                           (catch _ nil))))
+                                (v/or (request client
+                                               (env/get :dropbox-temp-link)
+                                               {:path path_lower})
+                                      nil)))
                          v/all)]
     (->> results
          (map #(update % :metadata with-mime-type))
@@ -78,11 +77,11 @@
                    (update :metadata select-keys #{:mime-type :name :size}))))))
 
 (def ^{:arglists '([event])} fetch-images
-  (memo/memo (fn [_event] (fetch* image? (env/get :dropbox-images-path)))
+  (memo/memo (fn [_event] (http/with-client fetch* image? (env/get :dropbox-images-path)))
              (js/parseInt (env/get :dropbox-cache-ttl))
              (js/parseInt (env/get :dropbox-max-cache-ttl))))
 
 (def ^{:arglists '([event])} fetch-videos
-  (memo/memo (fn [_event] (fetch* video? (env/get :dropbox-videos-path)))
+  (memo/memo (fn [_event] (http/with-client fetch* video? (env/get :dropbox-videos-path)))
              (numbers/parse-int (env/get :dropbox-cache-ttl))
              (numbers/parse-int (env/get :dropbox-max-cache-ttl))))

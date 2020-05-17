@@ -21,15 +21,18 @@
                  [org.clojure/core.match "0.3.0"]
                  [reagent "0.8.1"]
                  [tick "0.4.23-alpha"]]
-  :plugins [[lein-figwheel "0.5.19"]
-            [lein-sass "0.5.0"]
+  :plugins [[lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]
             [lein-cooper "1.2.2"]
-            [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]
-  :source-paths ["src/api" "src/shared" "src/ui"]
+            [lein-doo "0.1.10"]
+            [lein-figwheel "0.5.19"]
+            [lein-sass "0.5.0"]]
+  :source-paths ["src/shared"]
+  :test-paths ["test/cljs"]
   :clean-targets ["target" "dist/js" "dist/css" "node_modules" "package.json" "package-lock.json"]
+  :figwheel {:load-all-builds false}
   :cljsbuild {:builds
               [{:id           "dev-ui"
-                :source-paths ["src/ui" "src/shared"]
+                :source-paths ["src/ui"]
                 :figwheel     {:on-jsload "com.left-over.ui.core/mount!"}
                 :compiler     {:main                 com.left-over.ui.core
                                :asset-path           "/js/compiled/out"
@@ -39,11 +42,11 @@
                                :source-map-timestamp true
                                :preloads             [devtools.preload]}}
                {:id           "dev-api"
-                :source-paths ["src/api" "src/shared"]
+                :source-paths ["src/api"]
                 :figwheel     {:on-jsload "com.left-over.api.server/restart!"}
                 :compiler     {:install-deps         true
                                :npm-deps             {:jwt-simple     "0.5.6"
-                                                      :pg             "7.18.2"
+                                                      :pg             "8.1.0"
                                                       :xmlhttprequest "1.8.0"
                                                       :ws             "7.1.2"} ;; required to use figwheel REPL
                                :main                 com.left-over.api.server
@@ -54,24 +57,24 @@
                                :optimizations        :none
                                :source-map-timestamp true}}
                {:id           "ui-main"
-                :source-paths ["src/ui" "src/shared"]
+                :source-paths ["src/ui"]
                 :compiler     {:output-to     "dist/js/compiled/main.js"
                                :output-dir    "dist/js/compiled/main"
                                :main          com.left-over.ui.main
                                :optimizations :advanced
                                :pretty-print  false}}
                {:id           "ui-admin"
-                :source-paths ["src/ui" "src/shared"]
+                :source-paths ["src/ui"]
                 :compiler     {:output-to     "dist/js/compiled/admin.js"
                                :output-dir    "dist/js/compiled/admin"
                                :main          com.left-over.ui.admin
                                :optimizations :advanced
                                :pretty-print  false}}
                {:id           "pub-images"
-                :source-paths ["src/api" "src/shared"]
+                :source-paths ["src/api"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:jwt-simple     "0.5.6"
-                                               :pg             "7.18.2"
+                                               :pg             "8.1.0"
                                                :xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.pub.images
                                :output-to     "target/pub/images.js"
@@ -80,10 +83,10 @@
                                :optimizations :simple
                                :pretty-print  true}}
                {:id           "pub-videos"
-                :source-paths ["src/api" "src/shared"]
+                :source-paths ["src/api"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:jwt-simple     "0.5.6"
-                                               :pg             "7.18.2"
+                                               :pg             "8.1.0"
                                                :xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.pub.videos
                                :output-to     "target/pub/videos.js"
@@ -92,10 +95,10 @@
                                :optimizations :simple
                                :pretty-print  true}}
                {:id           "pub-shows"
-                :source-paths ["src/api" "src/shared"]
+                :source-paths ["src/api"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:jwt-simple     "0.5.6"
-                                               :pg             "7.18.2"
+                                               :pg             "8.1.0"
                                                :xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.pub.shows
                                :output-to     "target/pub/shows.js"
@@ -104,10 +107,10 @@
                                :optimizations :simple
                                :pretty-print  true}}
                {:id           "admin-locations"
-                :source-paths ["src/api" "src/shared"]
+                :source-paths ["src/api"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:jwt-simple     "0.5.6"
-                                               :pg             "7.18.2"
+                                               :pg             "8.1.0"
                                                :xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.admin.locations
                                :output-to     "target/admin/locations.js"
@@ -116,10 +119,10 @@
                                :optimizations :simple
                                :pretty-print  true}}
                {:id           "admin-shows"
-                :source-paths ["src/api" "src/shared"]
+                :source-paths ["src/api"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:jwt-simple     "0.5.6"
-                                               :pg             "7.18.2"
+                                               :pg             "8.1.0"
                                                :xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.admin.shows
                                :output-to     "target/admin/shows.js"
@@ -128,35 +131,55 @@
                                :optimizations :simple
                                :pretty-print  true}}
                {:id           "auth"
-                :source-paths ["src/api" "src/shared"]
+                :source-paths ["src/api"]
                 :compiler     {:install-deps  true
                                :npm-deps      {:jwt-simple     "0.5.6"
-                                               :pg             "7.18.2"
+                                               :pg             "8.1.0"
                                                :xmlhttprequest "1.8.0"}
                                :main          com.left-over.api.handlers.auth
                                :output-to     "target/auth.js"
                                :output-dir    "target/js/compiled/auth"
                                :target        :nodejs
                                :optimizations :simple
-                               :pretty-print  true}}]}
+                               :pretty-print  true}}
+               {:id           "test"
+                :source-paths ["src/api" "src/ui" "test/cljs"]
+                :compiler     {:install-deps  true
+                               :npm-deps      {:jwt-simple         "0.5.6"
+                                               :pg                 "8.1.0"
+                                               :xmlhttprequest     "1.8.0"
+                                               :selenium-webdriver "4.0.0-alpha.7"}
+                               :output-dir    "target/js/compiled/tests"
+                               :output-to     "target/js/tests.js"
+                               :target        :nodejs
+                               :main          com.left-over.test.runner
+                               :optimizations :none}}]}
+  :doo {:build "test"
+        :alias {:default [:node]}}
   :aliases {"migrations" ["run" "-m" "com.left-over.api.services.db.migrations/-main"]}
-  :cooper {"api"  ["lein" "with-profile" "dev-api" "figwheel" "dev-api"]
+  :cooper {"api"  ["bin/with-profile.sh" "api" "figwheel" "dev-api"]
            "api " ["bin/sleepnode.sh" "target/js/compiled/server.js"]
-           "sass" ["lein" "sass" "auto"]
-           "ui"   ["lein" "with-profile" "dev-ui" "figwheel" "dev-ui"]}
+           "ui"   ["bin/with-profile.sh" "ui" "figwheel" "dev-ui"]
+           "sass" ["lein" "sass" "auto"]}
   :sass {:src              "src/scss"
          :output-directory "dist/css/"}
-  :profiles {:dev-ui  {:dependencies [[binaryage/devtools "0.9.10"]
-                                      [cider/piggieback "0.4.0"]
-                                      [figwheel-sidecar "0.5.19"]]
-                       :figwheel     {:css-dirs     ["dist/css"]
-                                      :nrepl-port   7888
-                                      :ring-handler com.left-over.dev-server/handler}
-                       :source-paths ["src/ui" "src/shared" "dev"]}
-             :dev-api {:dependencies [[binaryage/devtools "0.9.10"]
-                                      [cider/piggieback "0.4.0"]
-                                      [com.ben-allred/espresso "0.2.0"]
-                                      [figwheel-sidecar "0.5.19"]]
-                       :figwheel     {:nrepl-port  7999
-                                      :server-port 3559}
-                       :source-paths ["src/api" "src/shared" "dev"]}})
+  :profiles {:ui   {:dependencies [[binaryage/devtools "0.9.10"]
+                                   [cider/piggieback "0.4.0"]
+                                   [figwheel-sidecar "0.5.19"]]
+                    :figwheel     {:css-dirs     ["dist/css"]
+                                   :nrepl-port   7888
+                                   :ring-handler com.left-over.dev-server/handler}
+                    :source-paths ["src/ui" "dev"]}
+             :api  {:dependencies [[binaryage/devtools "0.9.10"]
+                                   [cider/piggieback "0.4.0"]
+                                   [com.ben-allred/espresso "0.2.0"]
+                                   [figwheel-sidecar "0.5.19"]]
+                    :figwheel     {:nrepl-port  7999
+                                   :server-port 3559}
+                    :source-paths ["src/api" "dev"]}
+             :test {:dependencies [[binaryage/devtools "0.9.10"]
+                                   [cider/piggieback "0.4.0"]
+                                   [cljstache "2.0.5"]
+                                   [com.ben-allred/espresso "0.2.0"]
+                                   [figwheel-sidecar "0.5.19"]]
+                    :source-paths ["src/api" "src/ui" "dev"]}})
