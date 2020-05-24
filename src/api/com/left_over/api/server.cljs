@@ -128,7 +128,7 @@
   (fn [request]
     (-> request
         handler
-        (v/peek nil #(log/error %)))))
+        (v/peek nil #(log/error % (some-> % .-stack))))))
 
 (def ^:private app (-> handler
                        (with-routing routes)

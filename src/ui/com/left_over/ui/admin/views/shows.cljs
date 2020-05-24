@@ -2,13 +2,13 @@
   (:require
     [com.ben-allred.formation.core :as f]
     [com.ben-allred.vow.core :as v :include-macros true]
-    [com.left-over.shared.utils.dates :as dates]
     [com.left-over.shared.utils.logging :as log]
     [com.left-over.shared.utils.maps :as maps]
     [com.left-over.ui.admin.services.store.actions :as admin.actions]
     [com.left-over.ui.admin.views.auth :as auth]
     [com.left-over.ui.admin.views.fields :as fields]
     [com.left-over.ui.admin.views.locations :as locations]
+    [com.left-over.ui.moment :as mo]
     [com.left-over.ui.services.forms.core :as forms]
     [com.left-over.ui.services.navigation :as nav]
     [com.left-over.ui.services.store.core :as store]
@@ -22,11 +22,11 @@
                 :location-id (f/required "You must select a location")}))
 
 (def model->view
-  {:date-time #(some-> % (dates/format :datetime/local))
+  {:date-time #(some-> % (mo/format :datetime/local))
    :hidden?   not})
 
 (def view->model
-  {:date-time #(some-> % dates/parse)
+  {:date-time #(some-> % mo/parse)
    :hidden?   not})
 
 (defn location-item [item]
@@ -101,7 +101,7 @@
                           (maps/default :name summary)
                           (update :date-time #(or %
                                                   (some-> start :dateTime)
-                                                  (some-> start :date dates/parse)))
+                                                  (some-> start :date mo/parse)))
                           (select-keys #{:confirmed? :hidden? :location-id :name :date-time :website :id})
                           (admin.actions/create-form validator)
                           store/dispatch)))

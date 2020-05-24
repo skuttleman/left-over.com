@@ -1,8 +1,8 @@
 (ns com.left-over.ui.views.shows
   (:require
-    [com.left-over.shared.utils.dates :as dates]
     [com.left-over.shared.utils.logging :as log]
     [com.left-over.ui.admin.services.store.actions :as admin.actions]
+    [com.left-over.ui.moment :as mo]
     [com.left-over.ui.services.navigation :as nav]
     [com.left-over.ui.services.store.actions :as actions]
     [com.left-over.ui.services.store.core :as store]
@@ -35,10 +35,10 @@
               (:name location) " - " (:city location) ", " (:state location)]]
          (when-let [dt (:date-time show)]
            [:time
-            {:dateTime (dates/format dt :date/system)}
-            (dates/relative dt)
+            {:dateTime (mo/format dt :date/system)}
+            (mo/relative dt)
             " @ "
-            (dates/format dt :time/view)])
+            (mo/format dt :time/view)])
          (when (= :admin type)
            [:p.row.spaced
             [:a {:href (nav/path-for :ui.admin/show {:route-params {:show-id show-id}})} "Edit"]
@@ -51,7 +51,7 @@
   (let [[past future] (->> shows
                            (sort-by :date-time)
                            (split-with (comp pos?
-                                             (partial compare (dates/now))
+                                             (partial compare (mo/now))
                                              :date-time)))]
     [:<>
      [:div

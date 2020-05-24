@@ -2,11 +2,11 @@
   (:require
     [com.ben-allred.vow.core :as v]
     [com.left-over.shared.utils.colls :as colls]
-    [com.left-over.shared.utils.dates :as dates]
     [com.left-over.shared.utils.logging :as log]
     [com.left-over.shared.utils.maps :as maps]
     [com.left-over.ui.admin.services.store.actions :as admin.actions]
     [com.left-over.ui.admin.views.auth :as auth]
+    [com.left-over.ui.moment :as mo]
     [com.left-over.ui.services.navigation :as nav]
     [com.left-over.ui.services.store.core :as store]
     [com.left-over.ui.views.components :as components]
@@ -25,8 +25,8 @@
       [:div.row.full.spaced
        [:div.column
         [:strong (:summary temp-data "Unknown")]
-        (when-let [dt (or (some-> (get-in temp-data [:start :dateTime]) (dates/format :datetime/view))
-                          (some-> (get-in temp-data [:start :date]) (dates/format :date/view)))]
+        (when-let [dt (or (some-> (get-in temp-data [:start :dateTime]) (mo/format :datetime/view))
+                          (some-> (get-in temp-data [:start :date]) (mo/format :date/view)))]
           [:em dt])]
        [:div.column.no-grow
         {:style {:align-items :center}}
@@ -37,7 +37,7 @@
 
 (defn ^:private calendar* [{:keys [calendar]}]
   (let [[shows non-shows] (->> calendar
-                               (map #(maps/update-in-maybe % [:temp-data :start :date] dates/parse))
+                               (map #(maps/update-in-maybe % [:temp-data :start :date] mo/parse))
                                (colls/organize (comp :show? :temp-data)))]
     [:div
      [:div.row.full.spaced

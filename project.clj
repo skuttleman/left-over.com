@@ -7,6 +7,9 @@
   :dependencies [[bidi "2.1.3" :exclusions [[ring/ring-core]]]
                  [camel-snake-kebab "0.4.1"]
                  [cljs-http "0.1.46"]
+                 [cljsjs/moment "2.24.0-0"]
+                 [cljsjs/moment-timezone "0.5.11-1"]
+                 [com.andrewmcveigh/cljs-time "0.5.2"]
                  [com.ben-allred/collaj "0.8.0"]
                  [com.ben-allred/formation "0.6.2"]
                  [com.ben-allred/vow "0.6.1"]
@@ -19,8 +22,7 @@
                  [org.clojure/clojurescript "1.10.597"]
                  [org.clojure/core.async "1.1.587"]
                  [org.clojure/core.match "0.3.0"]
-                 [reagent "0.8.1"]
-                 [tick "0.4.23-alpha"]]
+                 [reagent "0.8.1"]]
   :plugins [[lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]
             [lein-cooper "1.2.2"]
             [lein-doo "0.1.10"]
@@ -32,9 +34,14 @@
   :figwheel {:load-all-builds false}
   :cljsbuild {:builds
               [{:id           "dev-ui"
-                :source-paths ["src/ui"]
+                :source-paths ["src/ui" "src/shared"]
                 :figwheel     {:on-jsload "com.left-over.ui.core/mount!"}
-                :compiler     {:main                 com.left-over.ui.core
+                :compiler     {:install-deps         true
+                               :npm-deps             {:jwt-simple     "0.5.6"
+                                                      :pg             "8.1.0"
+                                                      :xmlhttprequest "1.8.0"
+                                                      :ws             "7.1.2"} ;; required to use figwheel REPL
+                               :main                 com.left-over.ui.core
                                :asset-path           "/js/compiled/out"
                                :output-to            "dist/js/compiled/app.js"
                                :output-dir           "dist/js/compiled/out"
@@ -42,7 +49,7 @@
                                :source-map-timestamp true
                                :preloads             [devtools.preload]}}
                {:id           "dev-api"
-                :source-paths ["src/api"]
+                :source-paths ["src/api" "src/shared"]
                 :figwheel     {:on-jsload "com.left-over.api.server/restart!"}
                 :compiler     {:install-deps         true
                                :npm-deps             {:jwt-simple     "0.5.6"
