@@ -63,7 +63,12 @@
 
 (defn url [driver]
   (-> driver
-      (.getCurrentUrl)
+      .getCurrentUrl
+      v/native->prom))
+
+(defn click [element]
+  (-> element
+      .click
       v/native->prom))
 
 (defn wait

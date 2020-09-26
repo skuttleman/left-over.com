@@ -1,6 +1,6 @@
 (ns com.left-over.integration.tests.public
   (:require
-    [clojure.test :refer [are is testing]]
+    [clojure.test :refer [are is]]
     [com.ben-allred.vow.core :as v :include-macros true]
     [com.left-over.api.server :as server]
     [com.left-over.api.services.db.models.locations :as locations]
@@ -10,7 +10,8 @@
     [com.left-over.integration.services.simulator :as sim]
     [com.left-over.integration.services.webserver :as web]
     [com.left-over.shared.services.http :as http]
-    [com.left-over.shared.utils.dates :as dates]))
+    [com.left-over.shared.utils.dates :as dates]
+    [com.left-over.test.macros :refer-macros [testing]]))
 
 (defn about-test [{:keys [driver]}]
   (testing "when visiting the about page"

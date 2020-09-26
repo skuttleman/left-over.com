@@ -1,7 +1,8 @@
 (ns com.left-over.integration.tests.core
   (:require
     [clojure.core.async :as async]
-    [clojure.test :refer [async deftest is testing]]
+    [clojure.string :as string]
+    [clojure.test :refer [async deftest is]]
     [com.ben-allred.vow.core :as v :include-macros true]
     [com.left-over.api.server :as server]
     [com.left-over.api.services.db.migrations :as migrations]
@@ -11,7 +12,9 @@
     [com.left-over.integration.services.simulator :as sim]
     [com.left-over.integration.services.webserver :as web]
     [com.left-over.integration.tests.admin :as admin]
-    [com.left-over.integration.tests.public :as public]))
+    [com.left-over.integration.tests.public :as public]
+    [com.left-over.shared.utils.logging :as log]
+    [com.left-over.test.macros :refer-macros [testing]]))
 
 (def ^:private count-migrations
   "SELECT count(id)
@@ -54,7 +57,14 @@
                           (v/peek (fn [_]
                                     (sel/quit (:driver ctx)))))))
             (v/catch (fn [err]
+                       (some->> err
+                                :testing-contexts
+                                reverse
+                                (string/join " ")
+                                (println "\n"))
+                       (some-> err :report-counters (println "\n"))
                        (is (nil? (or (some-> err .-stack)
+                                     (:err err)
                                      err
                                      "An unexpected error occurred")))))
             (v/peek (fn [_]
