@@ -167,6 +167,7 @@
 
 (defonce server
   (let [server* (->ReloadableServer (atom nil))]
+    (log/info "Environment loaded with" (env/get :env-file))
     (when (not= "test" (env/get :environment))
       (start! server*))
     server*))

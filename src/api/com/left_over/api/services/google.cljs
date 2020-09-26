@@ -32,7 +32,7 @@
 
 (defn ^:private expired? [token-info]
   (try
-    (<= (:expires_at token-info) (dates/plus (dates/now) 1 :seconds))
+    (<= (:expires_at token-info) (dates/inst->ms (dates/plus (dates/now) 1 :seconds)))
     (catch :default _
       false)))
 

@@ -36,8 +36,7 @@
      AND table_name != 'ragtime_migrations'")
 
 (defn ^:private date-str []
-  (subs (string/replace-all (dates/stringify (dates/now)) #"[^\d]" "") 0 14))
-
+  (subs (string/replace (dates/stringify (dates/now)) #"[^\d]" "") 0 14))
 
 (defn ^:private list-migrations [dir]
   (v/then-> (fs/read-dir dir)

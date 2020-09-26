@@ -39,9 +39,9 @@
   (let [state (store/get-state)
         handler (get-in state [:page :handler])
         component (components handler not-found)]
-    [:div.columns {:style {:max-width  "100vw"
-                           :margin     0}}
-     [:div.column.is-variable.is-0-mobile {:style {:padding "0"}}]
+    [:div.columns {:style {:max-width "100vw"
+                           :margin    0}}
+     [:div.column.is-variable.is-0-mobile {:style {:padding 0}}]
      [:div.column.is-variable {:style {:padding 0}}
       [:div.main
        [:div
@@ -56,7 +56,7 @@
        {:style {:color :gray}}
        "View our "
        [:a {:href "/privacy" :target "_blank"} "privacy policy"]]]
-     [:div.column.is-variable.is-0-mobile {:style {:padding "0"}}]]))
+     [:div.column.is-variable.is-0-mobile {:style {:padding 0}}]]))
 
 (defn ^:export mount! []
   (r/render-component [app] (.getElementById js/document "app")))

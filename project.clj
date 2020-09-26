@@ -167,7 +167,7 @@
   :cooper {"api"  ["bin/with-profile.sh" "api" "figwheel" "dev-api"]
            "api " ["bin/sleepnode.sh" "target/js/compiled/server.js"]
            "ui"   ["bin/with-profile.sh" "ui" "figwheel" "dev-ui"]
-           "sass" ["lein" "sass" "auto"]}
+           "sass" ["bin/sass.sh"]}
   :sass {:src              "src/scss"
          :output-directory "dist/css/"}
   :profiles {:ui   {:dependencies [[binaryage/devtools "0.9.10"]

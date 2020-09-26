@@ -42,7 +42,7 @@
   (tt/after? (tc/to-date-time inst-1)
              (tc/to-date-time inst-2)))
 
-(defn before? [date-1 date-2]
+(defn before? [inst-1 inst-2]
   (tt/before? (tc/to-date-time inst-1)
               (tc/to-date-time inst-2)))
 

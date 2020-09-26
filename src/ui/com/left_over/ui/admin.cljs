@@ -38,7 +38,7 @@
       [:<>
        [:div.columns {:style {:max-width "100vw"
                               :margin    0}}
-        [:div.column.is-variable.is-0-mobile {:style {:padding "0"}}]
+        [:div.column.is-variable.is-0-mobile {:style {:padding 0}}]
         [:div.column.is-variable {:style {:padding 0}}
          [:div.main
           [:div
@@ -50,7 +50,7 @@
           {:style {:color :gray}}
           "View our "
           [:a {:href "/privacy" :target "_blank"} "privacy policy"]]]
-        [:div.column.is-variable.is-0-mobile {:style {:padding "0"}}]]
+        [:div.column.is-variable.is-0-mobile {:style {:padding 0}}]]
        [toast/toasts (:toasts state)]
        [modal/modal (:modal state)]])))
 
