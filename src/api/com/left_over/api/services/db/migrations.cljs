@@ -127,4 +127,6 @@
   (print-result (migrate!))
   (print-result (speedbump!))
   (print-result (rollback!))
-  (print-result (redo!)))
+  (print-result (redo!))
+
+  (print-result (update-entities!)))

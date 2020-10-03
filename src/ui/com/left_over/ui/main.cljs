@@ -1,10 +1,12 @@
 (ns com.left-over.ui.main
   (:require
+    [com.left-over.shared.utils.logging :as log]
     [com.left-over.ui.services.navigation :as nav]
     [com.left-over.ui.services.store.core :as store]
     [com.left-over.ui.views.about :as about]
     [com.left-over.ui.views.contact :as contact]
     [com.left-over.ui.views.main :as main]
+    [com.left-over.ui.views.music :as music]
     [com.left-over.ui.views.navbar :as navbar]
     [com.left-over.ui.views.photos :as photos]
     [com.left-over.ui.views.shows :as shows]
@@ -32,6 +34,7 @@
    :ui/about   about/root
    :ui/shows   shows/root
    :ui/photos  photos/root
+   :ui/music   music/root
    :ui/videos  videos/root
    :ui/contact contact/root})
 

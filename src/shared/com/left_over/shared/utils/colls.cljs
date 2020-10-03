@@ -16,3 +16,11 @@
 
 (defn organize [pred coll]
   [(filter pred coll) (remove pred coll)])
+
+(defn collect-related [grouper leader? joiner coll]
+  (->> coll
+       (group-by grouper)
+       (keep (fn [[group coll]]
+               (let [{[leader] true followers false} (group-by (comp boolean leader?) coll)]
+                 (when leader
+                   (joiner leader group followers)))))))

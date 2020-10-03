@@ -11,6 +11,7 @@
     [com.left-over.api.handlers.auth :as auth]
     [com.left-over.api.handlers.pub.images :as pub.images]
     [com.left-over.api.handlers.pub.shows :as pub.shows]
+    [com.left-over.api.handlers.pub.songs :as pub.songs]
     [com.left-over.api.handlers.pub.videos :as pub.videos]
     [com.left-over.api.services.env :as env]
     [com.left-over.shared.utils.logging :as log :include-macros true]
@@ -24,6 +25,7 @@
 (def ^:private routes
   ["" {"/public" {"/images" {:get :public.images/get}
                   "/shows"  {:get :public.shows/get}
+                  "/songs"  {:get :public.songs/get}
                   "/videos" {:get :public.videos/get}}
        "/auth"   {"/callback" {:get :auth.callback/get}
                   "/info"     {:get :auth.info/get}
@@ -72,6 +74,9 @@
 
         :public.shows/get
         pub.shows/handler
+
+        :public.songs/get
+        pub.songs/handler
 
         :public.videos/get
         pub.videos/handler)

@@ -8,6 +8,11 @@
           {}
           key-map))
 
+(defn select-by [f coll]
+  (into {}
+        (map (juxt f identity))
+        coll))
+
 (defn default [m k else]
   (update m k #(or % else)))
 

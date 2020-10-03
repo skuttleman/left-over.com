@@ -23,14 +23,15 @@
       {:href (nav/path-for pg)}
       [components/icon icon]
       [:pre {:style {:padding 0 :font-size "1rem" :background-color :transparent}} "  "]
-      [:span {:class [(when-not active? "is-hidden-mobile")]} page-str]]]))
+      [:span.is-hidden-mobile page-str]]]))
 
 (defn nav-bar [state]
   [:nav.tabs.main-navigation
    [:ul
     (for [[pg icon] [[:ui/about :info-circle]
-                     [:ui/shows :music]
+                     [:ui/shows :calendar]
                      [:ui/photos :images]
+                     [:ui/music :music]
                      [:ui/videos :video]
                      [:ui/contact :link]]]
       ^{:key pg} [nav-item state pg icon])]

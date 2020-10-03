@@ -1,0 +1,37 @@
+.audio-player {
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+
+    .info {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    audio {
+        height: 40px;
+    }
+
+    .wave-form {
+        background-size: cover;
+        overflow: hidden;
+        border: 2px solid $grey;
+
+        .percentage {
+            background-size: cover;
+            pointer-events: none;
+        }
+    }
+}
+
+.media-link {
+    .icon-container {
+        width: 30px;
+        display: inline-block;
+    }
+}

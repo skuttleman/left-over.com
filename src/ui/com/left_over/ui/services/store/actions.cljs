@@ -27,3 +27,12 @@
 
 (def fetch-shows
   (fetch* (nav/aws-for :aws/shows) :shows {:headers {:x-api-key (env/get :aws-api-key)}}))
+
+(def fetch-songs
+  (fetch* (nav/aws-for :aws/songs) :songs {:headers {:x-api-key (env/get :aws-api-key)}}))
+
+(defn select-song [song]
+  [:song/select song])
+
+(defn update-percentage [percentage]
+  [:song/update-percentage (if (js/isNaN percentage) 0 percentage)])

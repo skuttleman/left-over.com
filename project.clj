@@ -113,6 +113,18 @@
                                :target        :nodejs
                                :optimizations :simple
                                :pretty-print  true}}
+               {:id           "pub-songs"
+                :source-paths ["src/api"]
+                :compiler     {:install-deps  true
+                               :npm-deps      {:jwt-simple     "0.5.6"
+                                               :pg             "8.1.0"
+                                               :xmlhttprequest "1.8.0"}
+                               :main          com.left-over.api.handlers.pub.songs
+                               :output-to     "target/pub/songs.js"
+                               :output-dir    "target/js/compiled/pub/songs"
+                               :target        :nodejs
+                               :optimizations :simple
+                               :pretty-print  true}}
                {:id           "admin-locations"
                 :source-paths ["src/api"]
                 :compiler     {:install-deps  true
@@ -163,7 +175,6 @@
                                :optimizations :none}}]}
   :doo {:build "test"
         :alias {:default [:node]}}
-  :aliases {"migrations" ["run" "-m" "com.left-over.api.services.db.migrations/-main"]}
   :cooper {"api"  ["bin/with-profile.sh" "api" "figwheel" "dev-api"]
            "api " ["bin/sleepnode.sh" "target/js/compiled/server.js"]
            "ui"   ["bin/with-profile.sh" "ui" "figwheel" "dev-ui"]

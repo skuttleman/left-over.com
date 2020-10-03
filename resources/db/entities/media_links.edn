@@ -1,0 +1,1 @@
+{:table :media-links, :fields #{:id :album-id :created-at :updated-at :icon :url :name}}

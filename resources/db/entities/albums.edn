@@ -1,0 +1,1 @@
+{:table :albums, :fields #{:id :created-at :updated-at :image-url :title}}

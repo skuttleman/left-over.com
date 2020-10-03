@@ -10,37 +10,40 @@
 
 (def ^:const ^:private uuid-re
   #"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
+
 (defn ^:private routes [routes]
-  ["" (assoc routes true :nav/not-found)])
+  ["" (conj routes [true :nav/not-found])])
 
 (def ^:private ui-routes
-  (routes {"/"        :ui/main
-           "/about"   :ui/about
-           "/shows"   :ui/shows
-           "/photos"  :ui/photos
-           "/videos"  :ui/videos
-           "/contact" :ui/contact
-           "/admin"   {""                             :ui.admin/main
-                       "/login"                       :ui.admin/login
-                       "/shows/create"                :ui.admin/new-show
-                       "/calendar"                    :ui.admin/calendar
-                       ["/shows/" [uuid-re :show-id]] :ui.admin/show}}))
+  (routes [["/" :ui/main]
+           ["/about" :ui/about]
+           ["/shows" :ui/shows]
+           ["/photos" :ui/photos]
+           ["/music" :ui/music]
+           ["/videos" :ui/videos]
+           ["/contact" :ui/contact]
+           ["/admin" [["" :ui.admin/main]
+                      ["/login" :ui.admin/login]
+                      ["/shows/create" :ui.admin/new-show]
+                      ["/calendar" :ui.admin/calendar]
+                      [["/shows/" [uuid-re :show-id]] :ui.admin/show]]]]))
 
 (def ^:private s3-routes
-  (routes {"/images"
-           {["/" :image] :s3/image}}))
+  (routes [["/images"
+            [[["/" :image] :s3/image]]]]))
 
 (def ^:private aws-routes
-  (routes {"/public" {"/images" :aws/images
-                      "/videos" :aws/videos
-                      "/shows"  :aws/shows}
-           "/auth"   {"/info"  :aws/info
-                      "/login" :aws/login}
-           "/admin"  {"/shows"                     :aws.admin/shows
-                      "/locations"                 :aws.admin/locations
-                      ["/shows/" :show-id]         :aws.admin/show
-                      ["/locations/" :location-id] :aws.admin/location
-                      "/calendar"                  {"/merge" :aws.admin/calendar.merge}}}))
+  (routes [["/public" [["/images" :aws/images]
+                       ["/videos" :aws/videos]
+                       ["/shows" :aws/shows]
+                       ["/songs" :aws/songs]]]
+           ["/auth" [["/info" :aws/info]
+                     ["/login" :aws/login]]]
+           ["/admin" [["/shows" :aws.admin/shows]
+                      ["/locations" :aws.admin/locations]
+                      [["/shows/" :show-id] :aws.admin/show]
+                      [["/locations/" :location-id] :aws.admin/location]
+                      ["/calendar" {"/merge" :aws.admin/calendar.merge}]]]]))
 
 (defn ^:private namify [[k v]]
   [k (if (keyword? v) (name v) (str v))])

@@ -3,7 +3,7 @@
 set -e
 
 ADMIN_BUILDS="locations shows"
-PUB_BUILDS="images videos shows"
+PUB_BUILDS="images videos shows songs"
 
 function build() {
     BUILD_ID="${1}"

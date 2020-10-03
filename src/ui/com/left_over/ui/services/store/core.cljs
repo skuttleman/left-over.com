@@ -2,8 +2,9 @@
   (:require
     [com.ben-allred.collaj.core :as collaj]
     [com.ben-allred.collaj.enhancers :as collaj.enhancers]
-    [com.left-over.ui.services.env :as env]
     [com.left-over.ui.admin.services.store.reducers :as admin.reducers]
+    [com.left-over.ui.services.env :as env]
+    [com.left-over.ui.services.store.middleware :as mw]
     [com.left-over.ui.services.store.reducers :as reducers]
     [reagent.core :as r]))
 
@@ -11,7 +12,8 @@
                                                      (if (env/get :admin?)
                                                        admin.reducers/reducer
                                                        reducers/reducer)
-                                                     collaj.enhancers/with-fn-dispatch))
+                                                     collaj.enhancers/with-fn-dispatch
+                                                     (collaj/apply-middleware mw/remove-empty-albums)))
 
 (def get-state (:get-state store))
 

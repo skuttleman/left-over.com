@@ -89,8 +89,14 @@
   ([query entity alias on aliases]
    (join* query :join entity alias on aliases)))
 
+(def albums (edn/parse (fs/readFileSync "resources/db/entities/albums.edn")))
+
 (def locations (edn/parse (fs/readFileSync "resources/db/entities/locations.edn")))
 
+(def media-links (edn/parse (fs/readFileSync "resources/db/entities/media_links.edn")))
+
 (def shows (edn/parse (fs/readFileSync "resources/db/entities/shows.edn")))
+
+(def songs (edn/parse (fs/readFileSync "resources/db/entities/songs.edn")))
 
 (def users (edn/parse (fs/readFileSync "resources/db/entities/users.edn")))

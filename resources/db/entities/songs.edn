@@ -1,0 +1,1 @@
+{:table :songs, :fields #{:waveform-2-url :updated-at :mime-type :song-url :title :tracknum :id :visible :album-id :created-at :waveform-1-url}}
